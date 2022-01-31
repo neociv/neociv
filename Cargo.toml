@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "packages/neociv-bin",
+    "packages/neociv-civil",
+    "packages/neociv-state"
+]
