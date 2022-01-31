@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg version="1.0" viewBox="0 0 770 180" color-interpolation-filters="sRGB" preserveAspectRatio="xMidYMid meet" width="770" height="180"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:svg="http://www.w3.org/2000/svg">
+    <g fill="#ffd966">
+        <path opacity="0.8" d="M 95,40 H 0 L 40,0 h 15 z" />
+        <path opacity="0.8" d="m 55,0 v 140 l 40,40 V 40 Z M 0,40 V 180 H 40 V 0 Z M 110,180 V 0 h 40 v 140 z" />
+        <path opacity="0.8" d="m 55,140 h 95 l -40,40 H 95 Z" />
+    </g>
+    <g transform="translate(150)">
+        <g fill="#ffd966">
+            <path opacity="0.8" d="m 40,180 h 80 V 140 H 0 Z M 120,0 H 40 L 0,40 h 120 z" />
+            <path opacity="0.8" d="m 0,40 v 100 l 40,40 V 0 Z" />
+            <path opacity="0.8" d="m 0,70 h 100 v 40 H 0 Z" />
+        </g>
+    </g>
+    <g transform="translate(270)">
+        <g fill="#ffd966">
+            <path opacity="0.8" d="M 140,40 H 0 L 40,0 h 60 z" />
+            <path opacity="0.8" d="m 100,0 v 180 l 40,-40 V 40 Z M 0,40 v 100 l 40,40 V 0 Z" />
+            <path opacity="0.8" d="m 0,140 h 140 l -40,40 H 40 Z" />
+        </g>
+    </g>gg
+    <g transform="translate(410)">
+        <g fill="#ffd966">
+            <path opacity="0.8" d="M 130,65 V 40 L 90,0 v 65 z" />
+            <path opacity="0.8" d="M 90,0 H 40 L 0,40 h 130 z" />
+            <path opacity="0.8" d="m 0,40 v 100 l 40,40 V 0 Z" />
+            <path opacity="0.8" d="M 0,140 H 130 L 90,180 H 40 Z" />
+            <path opacity="0.8" d="m 90,115 v 65 l 40,-40 v -25 z" />
+        </g>
+    </g>
+    <g transform="translate(540)">
+        <g fill="#ffd966">
+            <path opacity="0.8" d="M 20,0 H 60 V 180 H 20 Z" />
+            <path opacity="0.8" d="M 0,0 H 80 V 40 H 0 Z m 0,140 h 80 v 40 H 0 Z" />
+        </g>
+    </g>
+    <g transform="translate(620)">
+        <g fill="#ffd966">
+            <path opacity="0.8" d="m 110,0 v 171.73 l 40,-48.38 V 0 Z" />
+            <path opacity="0.8" d="M 150,66.71 46.71,180 h 56.58 L 150,123.29 Z" />
+            <path opacity="0.8" d="m 0,66.71 v 56.57 L 46.71,180 h 56.58 z" />
+            <path opacity="0.8" d="M 40,0 V 171.73 L 0,123.35 V 0 Z" />
+        </g>
+    </g>
+</svg>
