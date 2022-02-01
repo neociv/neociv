@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
     "packages/neociv-bin",
+    "packages/neociv-game",
     "packages/neociv-civil",
     "packages/neociv-state"
 ]

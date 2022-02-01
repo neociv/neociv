@@ -1,5 +1,5 @@
 [package]
-name = "neociv-bin"
+name = "neociv-game"
 version = "0.0.1"
 edition = "2021"
 
@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 bevy = "0.6"
-neociv-game = { path = "../neociv-game" }
+neociv-state = { path = "../neociv-state" }
+neociv-civil = { path = "../neociv-civil" }
