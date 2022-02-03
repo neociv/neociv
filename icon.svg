@@ -1,0 +1,35 @@
+<svg version="1.0" color-interpolation-filters="sRGB" width="410" height="360"
+    xmlns="http://www.w3.org/2000/svg">
+    <g fill="#ffd966">
+        <path opacity=".8" d="M95 40H0L40 0h15z"/>
+        <path opacity=".8" d="M55 0v140l40 40V40zM0 40v140h40V0zm110 140V0h40v140z"/>
+        <path opacity=".8" d="M55 140h95l-40 40H95z"/>
+    </g>
+    <g fill="#ffd966">
+        <path opacity=".8" d="M190 180h80v-40H150zM270 0h-80l-40 40h120z"/>
+        <path opacity=".8" d="M150 40v100l40 40V0z"/>
+        <path opacity=".8" d="M150 70h100v40H150z"/>
+    </g>
+    <g fill="#ffd966">
+        <path opacity=".8" d="M410 40H270l40-40h60z"/>
+        <path opacity=".8" d="M370 0v180l40-40V40zM270 40v100l40 40V0z"/>
+        <path opacity=".8" d="M270 140h140l-40 40h-60z"/>
+    </g>
+    <g fill="#ffd966">
+        <path opacity=".8" d="M130 245v-25l-40-40v65z"/>
+        <path opacity=".8" d="M90 180H40L0 220h130z"/>
+        <path opacity=".8" d="M0 220v100l40 40V180z"/>
+        <path opacity=".8" d="M0 320h130l-40 40H40z"/>
+        <path opacity=".8" d="M90 295v65l40-40v-25z"/>
+    </g>
+    <g fill="#ffd966">
+        <path opacity=".8" d="M180 180h40v180h-40z"/>
+        <path opacity=".8" d="M160 180h80v40h-80zm0 140h80v40l-80 40z"/>
+    </g>
+    <g fill="#ffd966">
+        <path opacity=".8" d="M370 180v171.73l40-48.38V180z"/>
+        <path opacity=".8" d="M410 246.71 306.71 360h56.58L410 303.29z"/>
+        <path opacity=".8" d="M260 246.71v56.57L306.71 360h56.58z"/>
+        <path opacity=".8" d="M300 180v171.73l-40-48.38V180z"/>
+    </g>
+</svg>
