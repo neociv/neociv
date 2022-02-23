@@ -1,3 +1,4 @@
+pub mod alignments;
 pub mod civ;
 pub mod cell;
 pub mod state;

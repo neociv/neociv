@@ -6,6 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = "0.6"
+bevy = { version = "0.6.1", features = ["bevy_render"] }
 neociv-state = { path = "../neociv-state" }
 neociv-civil = { path = "../neociv-civil" }

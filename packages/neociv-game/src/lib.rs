@@ -1,10 +1,9 @@
 use bevy::prelude::{App,Plugin};
-use bevy::core::CorePlugin;
-use bevy::input::InputPlugin;
+
+pub mod grid;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum GameState {
-    Init,
     Menu,
     Loading,
     Playing,
@@ -17,11 +16,8 @@ pub struct NeocivGamePlugin;
 impl Plugin for NeocivGamePlugin {
     fn build(&self, app: &mut App) {
         app
-            // Setup Bevy
-            .add_plugin(CorePlugin::default()).add_plugin(InputPlugin::default())
-            // Init
-            .add_state(GameState::Init)
-            // Main Menu
-            .add_state(GameState::Menu);
+            .add_startup_system(grid::camera::setup_grid_camera)
+            .add_startup_system(grid::map::setup_grid_map)
+            .add_startup_system(grid::light::setup_grid_lights);
     }
 }
