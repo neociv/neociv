@@ -1,10 +1,10 @@
-use bevy::prelude::{App, ClearColor, Color, WindowDescriptor, Msaa, DefaultPlugins};
+use bevy::prelude::{App, ClearColor, Color, DefaultPlugins, Msaa, WindowDescriptor};
 
 use neociv_game::NeocivGamePlugin;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum AppState {
-    Init
+    Init,
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -17,7 +17,10 @@ fn main() {
     app.add_state(AppState::Init);
 
     app.insert_resource(Msaa { samples: 4 })
-        .insert_resource(WindowDescriptor { vsync: false, ..Default::default() })
+        .insert_resource(WindowDescriptor {
+            vsync: false,
+            ..Default::default()
+        })
         .insert_resource(ClearColor(Color::hex("000000").unwrap()))
         .add_plugins(DefaultPlugins)
         .add_plugin(NeocivGamePlugin);

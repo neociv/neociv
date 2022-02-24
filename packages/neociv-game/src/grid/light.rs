@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-pub fn setup_grid_lights (mut commands: Commands) {
+pub fn setup_grid_lights(mut commands: Commands) {
     commands.spawn_bundle(PointLightBundle {
         point_light: PointLight {
             intensity: 1500.0,

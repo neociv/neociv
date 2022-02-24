@@ -1,5 +1,5 @@
+use crate::civ::{Civ, CivId};
 use crate::state::NeocivState;
-use crate::civ::{Civ,CivId};
 
 #[derive(Debug)]
 pub enum StateError {
@@ -18,7 +18,7 @@ pub fn init() -> NeocivState {
 }
 
 /// Add a Civ to the state.
-pub fn add_civ(state: NeocivState, civ: Civ ) -> StateResult {
+pub fn add_civ(state: NeocivState, civ: Civ) -> StateResult {
     if state.civs.iter().any(|i| i.id == civ.id) {
         return Err(StateError::DuplicateCivId);
     } else if civ.id.len() == 0 {
@@ -36,7 +36,7 @@ pub fn remove_civ(state: NeocivState, civ_id: CivId) -> StateResult {
         return Err(StateError::InvalidCivId);
     } else if !state.civs.iter().any(|i| i.id == civ_id) {
         return Err(StateError::UnknownCivId);
-    } else  {
+    } else {
         let mut new_state = state.clone();
         // TODO: Remove ownership of all cells
         // TODO: Remove ownership of all units
@@ -59,7 +59,13 @@ mod tests {
     fn test_add_civ() {
         let mut state: crate::state::NeocivState = crate::engine::init();
         assert_eq!(state.civs.len(), 0);
-        state = match crate::engine::add_civ(state, crate::civ::Civ { id: String::from("example"), title: String::from("Example") }) {
+        state = match crate::engine::add_civ(
+            state,
+            crate::civ::Civ {
+                id: String::from("example"),
+                title: String::from("Example"),
+            },
+        ) {
             Ok(state) => state,
             Err(ex) => panic!("{:?}", ex),
         };
@@ -70,7 +76,13 @@ mod tests {
     fn test_remove_civ() {
         let mut state: crate::state::NeocivState = crate::engine::init();
         assert_eq!(state.civs.len(), 0);
-        state = match crate::engine::add_civ(state, crate::civ::Civ { id: String::from("example"), title: String::from("Example") }) {
+        state = match crate::engine::add_civ(
+            state,
+            crate::civ::Civ {
+                id: String::from("example"),
+                title: String::from("Example"),
+            },
+        ) {
             Ok(state) => state,
             Err(ex) => panic!("{:?}", ex),
         };

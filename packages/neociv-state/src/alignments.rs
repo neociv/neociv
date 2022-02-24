@@ -1,6 +1,6 @@
 pub type Alignment = f32;
 
-#[derive(Clone,Default)]
+#[derive(Clone, Default)]
 pub struct Alignments {
     /// Globalism (0) to Nationalism (1)
     pub glob_nat: Alignment,
@@ -14,7 +14,11 @@ pub struct Alignments {
 
 impl Alignments {
     fn new() -> Self {
-        return Alignments { glob_nat: 1.0, cap_soc: 0.0, anc_auth: 0.0, pac_agro: 1.0 };
+        return Alignments {
+            glob_nat: 1.0,
+            cap_soc: 0.0,
+            anc_auth: 0.0,
+            pac_agro: 1.0,
+        };
     }
 }
-

@@ -1,5 +1,5 @@
-use crate::state::NeocivState;
 use crate::engine::init;
+use crate::state::NeocivState;
 
 /// Parse the JSON representation of state.
 pub fn from_json() -> NeocivState {
@@ -10,4 +10,3 @@ pub fn from_json() -> NeocivState {
 pub fn to_json() -> String {
     return stringify!("{}").to_string();
 }
-

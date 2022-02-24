@@ -1,8 +1,8 @@
-use crate::civ::Civ;
 use crate::cell::Grid;
+use crate::civ::Civ;
 
-#[derive(Clone,Default)]
+#[derive(Clone, Default)]
 pub struct NeocivState {
-    pub civs: Vec::<Civ>,
+    pub civs: Vec<Civ>,
     pub grid: Grid,
 }
