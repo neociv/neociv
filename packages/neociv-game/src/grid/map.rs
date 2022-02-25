@@ -5,36 +5,34 @@ use bevy::render::mesh::Indices;
 
 /// Generates a flat-top hexagonal plane mesh.
 fn hex_mesh(size: f32) -> Mesh {
-
-    let x = |i: f32| (i * 2.0 * PI / 6.0).cos();
-    let y = |i: f32| (i * 2.0 * PI / 6.0).sin();
+    // Calculate pointy top hexagon x,y coords
+    let angle_deg = |i: f32| (60.0 * i - 30.0);
+    let angle_rad = |i: f32| (PI / 180.0 * angle_deg(i));
+    let x = |i: f32| (size * angle_rad(i).cos());
+    let y = |i: f32| (size * angle_rad(i).sin());
 
     let mut positions = Vec::with_capacity(6);
     let mut normals = Vec::with_capacity(6);
     let mut uvs = Vec::with_capacity(6);
 
+    // Centre and then all other coords
+    positions.push([0.0, 0.0, 0.0]);
+    for _i in 0..6 {
+        positions.push([x(_i as f32), y(_i as f32), 0.0]);
+    }
+
+    // Normals and UVs are all zero'd
     for _i in 0..7 {
         normals.push([0.0, 0.0, 1.0]);
         uvs.push([0.0, 0.0]);
     }
 
-    // Centre
-    positions.push([0.0, 0.0, 0.0]);
-    // Spikes
-    positions.push([1.0, 0.0, 0.0]);
-    positions.push([x(1.0), y(1.0), 0.0]);
-    positions.push([x(2.0), y(2.0), 0.0]);
-    positions.push([x(3.0), y(3.0), 0.0]);
-    positions.push([x(4.0), y(4.0), 0.0]);
-    positions.push([x(5.0), y(5.0), 0.0]);
-
+    // Initialise the mesh as a set of vec coordinates, ie. raw geoemetry
     let mut mesh = Mesh::new(bevy::render::render_resource::PrimitiveTopology::TriangleList);
+
+    // Attributes
     mesh.set_attribute(Mesh::ATTRIBUTE_POSITION, positions);
-
-    // Normals
     mesh.set_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
-
-    // UV
     mesh.set_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
 
     // Mesh indicies that constantly track back to the two spike x,y and then back to centre
