@@ -1,5 +1,6 @@
 use bevy::prelude::{App, Plugin};
 
+pub mod utils;
 pub mod grid;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
