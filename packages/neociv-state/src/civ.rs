@@ -5,10 +5,11 @@ use crate::alignments::Alignments;
 ///
 /// # Examples
 /// neociv.contrib.aus
-/// some.mod.ilus
+/// expanse.belters.ilus
+/// mod.civs.example
 pub type CivId = String;
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct Civ {
     pub id: CivId,
     pub title: String,

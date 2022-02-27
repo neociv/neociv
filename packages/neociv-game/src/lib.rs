@@ -1,7 +1,7 @@
 use bevy::prelude::{App, Plugin};
 
-pub mod utils;
 pub mod grid;
+pub mod utils;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum GameState {

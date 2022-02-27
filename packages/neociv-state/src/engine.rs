@@ -17,6 +17,13 @@ pub fn init() -> NeocivState {
     return NeocivState::default();
 }
 
+/// Increments the state's revision counter
+/// TODO: This could probably be better done as a trait
+pub fn rev_inc(mut state: NeocivState) -> NeocivState {
+    state.revision += 1;
+    return state;
+}
+
 /// Add a Civ to the state.
 pub fn add_civ(state: NeocivState, civ: Civ) -> StateResult {
     if state.civs.iter().any(|i| i.id == civ.id) {
@@ -26,7 +33,7 @@ pub fn add_civ(state: NeocivState, civ: Civ) -> StateResult {
     } else {
         let mut new_state = state.clone();
         new_state.civs.push(civ);
-        return Ok(new_state);
+        return Ok(rev_inc(new_state));
     }
 }
 
@@ -42,7 +49,7 @@ pub fn remove_civ(state: NeocivState, civ_id: CivId) -> StateResult {
         // TODO: Remove ownership of all units
         // Remove from the list of civs
         new_state.civs.retain(|c| c.id != civ_id);
-        return Ok(new_state);
+        return Ok(rev_inc(new_state));
     }
 }
 
@@ -51,6 +58,8 @@ mod tests {
     #[test]
     fn test_init() {
         let state: crate::state::NeocivState = crate::engine::init();
+        assert_eq!(state.revision, 0);
+        assert_eq!(state.turn, 0);
         assert_eq!(state.civs.len(), 0);
         assert_eq!(state.grid.cells.len(), 0);
     }
@@ -59,38 +68,45 @@ mod tests {
     fn test_add_civ() {
         let mut state: crate::state::NeocivState = crate::engine::init();
         assert_eq!(state.civs.len(), 0);
+        assert_eq!(state.revision, 0);
         state = match crate::engine::add_civ(
             state,
             crate::civ::Civ {
                 id: String::from("example"),
                 title: String::from("Example"),
+                ..Default::default()
             },
         ) {
             Ok(state) => state,
             Err(ex) => panic!("{:?}", ex),
         };
         assert_eq!(state.civs.len(), 1);
+        assert_eq!(state.revision, 1);
     }
 
     #[test]
     fn test_remove_civ() {
         let mut state: crate::state::NeocivState = crate::engine::init();
         assert_eq!(state.civs.len(), 0);
+        assert_eq!(state.revision, 0);
         state = match crate::engine::add_civ(
             state,
             crate::civ::Civ {
                 id: String::from("example"),
                 title: String::from("Example"),
+                ..Default::default()
             },
         ) {
             Ok(state) => state,
             Err(ex) => panic!("{:?}", ex),
         };
         assert_eq!(state.civs.len(), 1);
+        assert_eq!(state.revision, 1);
         state = match crate::engine::remove_civ(state, String::from("example")) {
             Ok(state) => state,
             Err(ex) => panic!("{:?}", ex),
         };
         assert_eq!(state.civs.len(), 0);
+        assert_eq!(state.revision, 2);
     }
 }

@@ -9,7 +9,10 @@ fn hex_mesh(size: f32) -> Mesh {
     let mut mesh = Mesh::new(bevy::render::render_resource::PrimitiveTopology::TriangleList);
 
     // Positions are 2D vec points with a zero'd z-axis
-    let positions = hex_points(size).iter().map(|&p| [p.x, p.y, 0.0]).collect::<Vec<_>>();
+    let positions = hex_points(size)
+        .iter()
+        .map(|&p| [p.x, p.y, 0.0])
+        .collect::<Vec<_>>();
     mesh.set_attribute(Mesh::ATTRIBUTE_POSITION, positions);
 
     let mut normals = Vec::with_capacity(6);

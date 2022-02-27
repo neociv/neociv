@@ -1,8 +1,20 @@
 use crate::cell::Grid;
-use crate::civ::Civ;
+use crate::civ::{Civ, CivId};
 
 #[derive(Clone, Default)]
 pub struct NeocivState {
+    /// The current change revision of the state - all actions that change the state will increment
+    /// this value which is useful for quickly checking if the state has changed and needs to be
+    /// inspected again.
+    pub revision: u64,
+    /// The turn currently being played - this is intended to tick over when the first Civ begins
+    /// playing. Games that are in turn "0" should be considered in an initialisation state.
+    pub turn: u32,
+    /// Id of the currently active Civ - if None then no Civ is active
+    pub active_civ_id: Option<CivId>,
+    /// All Civs and their relevant metadata
     pub civs: Vec<Civ>,
+    /// The grid of cells that make up the game map.
     pub grid: Grid,
 }
+

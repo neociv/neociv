@@ -1,6 +1,6 @@
 pub type Alignment = f32;
 
-#[derive(Clone, Default)]
+#[derive(Clone)]
 pub struct Alignments {
     /// Globalism (0) to Nationalism (1)
     pub glob_nat: Alignment,
@@ -12,8 +12,8 @@ pub struct Alignments {
     pub pac_agro: Alignment,
 }
 
-impl Alignments {
-    fn new() -> Self {
+impl Default for Alignments {
+    fn default() -> Self {
         return Alignments {
             glob_nat: 1.0,
             cap_soc: 0.0,
@@ -22,3 +22,13 @@ impl Alignments {
         };
     }
 }
+
+#[test]
+fn test_defaults() {
+    let alignments = Alignments::default();
+    assert_eq!(alignments.glob_nat, 1.0);
+    assert_eq!(alignments.cap_soc, 0.0);
+    assert_eq!(alignments.anc_auth, 0.0);
+    assert_eq!(alignments.pac_agro, 1.0);
+}
+

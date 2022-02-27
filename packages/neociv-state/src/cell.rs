@@ -20,3 +20,4 @@ pub struct Grid {
     pub ysize: u8,
     pub cells: Vec<Cell>,
 }
+
