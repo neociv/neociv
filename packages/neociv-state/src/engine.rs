@@ -12,16 +12,19 @@ pub enum StateError {
 /// state *or* fails with a specific StateError.
 pub type StateResult = Result<NeocivState, StateError>;
 
+/// Return a state that is deemed succesful. Most importantly increment the revision counter. This
+/// should be used *everywhere* that an action is performed that *changes* the state in any way and
+/// that change is successfully applied.
+macro_rules! return_next_state {
+    ($state:expr) => {
+        $state.revision += 1;
+        return Ok($state);
+    }
+}
+
 /// Initialise an empty & default state.
 pub fn init() -> NeocivState {
     return NeocivState::default();
-}
-
-/// Increments the state's revision counter
-/// TODO: This could probably be better done as a trait
-pub fn rev_inc(mut state: NeocivState) -> NeocivState {
-    state.revision += 1;
-    return state;
 }
 
 /// Add a Civ to the state.
@@ -33,7 +36,7 @@ pub fn add_civ(state: NeocivState, civ: Civ) -> StateResult {
     } else {
         let mut new_state = state.clone();
         new_state.civs.push(civ);
-        return Ok(rev_inc(new_state));
+        return_next_state!(new_state);
     }
 }
 
@@ -49,7 +52,7 @@ pub fn remove_civ(state: NeocivState, civ_id: CivId) -> StateResult {
         // TODO: Remove ownership of all units
         // Remove from the list of civs
         new_state.civs.retain(|c| c.id != civ_id);
-        return Ok(rev_inc(new_state));
+        return_next_state!(new_state);
     }
 }
 
@@ -77,9 +80,9 @@ mod tests {
                 ..Default::default()
             },
         ) {
-            Ok(state) => state,
-            Err(ex) => panic!("{:?}", ex),
-        };
+                Ok(state) => state,
+                Err(ex) => panic!("{:?}", ex),
+            };
         assert_eq!(state.civs.len(), 1);
         assert_eq!(state.revision, 1);
     }
@@ -97,9 +100,9 @@ mod tests {
                 ..Default::default()
             },
         ) {
-            Ok(state) => state,
-            Err(ex) => panic!("{:?}", ex),
-        };
+                Ok(state) => state,
+                Err(ex) => panic!("{:?}", ex),
+            };
         assert_eq!(state.civs.len(), 1);
         assert_eq!(state.revision, 1);
         state = match crate::engine::remove_civ(state, String::from("example")) {
