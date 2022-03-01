@@ -1,7 +1,7 @@
 use crate::cell::Grid;
 use crate::civ::{Civ, CivId};
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, Debug)]
 pub struct NeocivState {
     /// The current change revision of the state - all actions that change the state will increment
     /// this value which is useful for quickly checking if the state has changed and needs to be

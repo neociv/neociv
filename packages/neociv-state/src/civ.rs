@@ -9,7 +9,7 @@ use crate::alignments::Alignments;
 /// mod.civs.example
 pub type CivId = String;
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, Debug)]
 pub struct Civ {
     pub id: CivId,
     pub title: String,

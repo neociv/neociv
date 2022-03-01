@@ -1,6 +1,6 @@
 pub type Alignment = f32;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Alignments {
     /// Globalism (0) to Nationalism (1)
     pub glob_nat: Alignment,

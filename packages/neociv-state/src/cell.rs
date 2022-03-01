@@ -1,7 +1,7 @@
 use crate::civ::CivId;
 
 /// Representation of a single Cell in the Grid.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Cell {
     /// Horizontal (East) position of the cell.
     pub x: u8,
@@ -14,7 +14,7 @@ pub struct Cell {
 }
 
 /// Contains Cells in a 1D Vec that are addressable in 2D space according to the xsize / ysize.
-#[derive(Clone, Default)]
+#[derive(Clone, Default, Debug)]
 pub struct Grid {
     pub xsize: u8,
     pub ysize: u8,

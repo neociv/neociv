@@ -1,12 +1,6 @@
 use crate::civ::{Civ, CivId};
 use crate::state::NeocivState;
-
-#[derive(Debug)]
-pub enum StateError {
-    DuplicateCivId,
-    InvalidCivId,
-    UnknownCivId,
-}
+use crate::errors::*;
 
 /// Any modification to the state produces a result that either contains the successfully updated
 /// state *or* fails with a specific StateError.
@@ -30,9 +24,9 @@ pub fn init() -> NeocivState {
 /// Add a Civ to the state.
 pub fn add_civ(state: NeocivState, civ: Civ) -> StateResult {
     if state.civs.iter().any(|i| i.id == civ.id) {
-        return Err(StateError::DuplicateCivId);
+        err_dup_civ!(civ.id);
     } else if civ.id.len() == 0 {
-        return Err(StateError::InvalidCivId);
+        err_invalid_civ!(civ.id);
     } else {
         let mut new_state = state.clone();
         new_state.civs.push(civ);
@@ -43,9 +37,9 @@ pub fn add_civ(state: NeocivState, civ: Civ) -> StateResult {
 /// Remove a Civ from the state - including from all ownership roles and owned units
 pub fn remove_civ(state: NeocivState, civ_id: CivId) -> StateResult {
     if civ_id.len() == 0 {
-        return Err(StateError::InvalidCivId);
+        err_invalid_civ!(civ_id);
     } else if !state.civs.iter().any(|i| i.id == civ_id) {
-        return Err(StateError::UnknownCivId);
+        err_unknown_civ!(civ_id);
     } else {
         let mut new_state = state.clone();
         // TODO: Remove ownership of all cells
@@ -85,6 +79,37 @@ mod tests {
             };
         assert_eq!(state.civs.len(), 1);
         assert_eq!(state.revision, 1);
+    }
+
+    #[test]
+    fn test_err_dup_civ() {
+        let mut state: crate::state::NeocivState = crate::engine::init();
+        assert_eq!(state.civs.len(), 0);
+        assert_eq!(state.revision, 0);
+        state = match crate::engine::add_civ(
+            state,
+            crate::civ::Civ {
+                id: String::from("example"),
+                title: String::from("Example"),
+                ..Default::default()
+            },
+        ) {
+                Ok(state) => state,
+                Err(ex) => panic!("{:?}", ex),
+            };
+        assert_eq!(state.civs.len(), 1);
+        assert_eq!(state.revision, 1);
+        // Add a Civ with the same Id to cause an error
+        let error = crate::engine::add_civ(
+            state,
+            crate::civ::Civ {
+                id: String::from("example"),
+                title: String::from("Example"),
+                ..Default::default()
+            },
+        );
+        assert_eq!(error.is_ok(), false);
+        assert_eq!(error.unwrap_err().code, crate::errors::StateErrorCode::DuplicateCivId);
     }
 
     #[test]
