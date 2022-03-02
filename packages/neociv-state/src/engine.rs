@@ -27,7 +27,7 @@ macro_rules! state_panic {
 macro_rules! invalid_civ_id {
     ($id:expr) => {
         $id.len() == 0
-    }
+    };
 }
 
 /// Initialise an empty & default state.
@@ -88,9 +88,9 @@ mod tests {
                 ..Default::default()
             },
         ) {
-                Ok(state) => state,
-                Err(ex) => panic!("{:?}", ex),
-            };
+            Ok(state) => state,
+            Err(ex) => panic!("{:?}", ex),
+        };
         assert_eq!(state.civs.len(), 1);
         assert_eq!(state.revision, 1);
     }
@@ -108,9 +108,9 @@ mod tests {
                 ..Default::default()
             },
         ) {
-                Ok(state) => state,
-                Err(ex) => panic!("{:?}", ex),
-            };
+            Ok(state) => state,
+            Err(ex) => panic!("{:?}", ex),
+        };
         assert_eq!(state.civs.len(), 1);
         assert_eq!(state.revision, 1);
         // Add a Civ with the same Id to cause an error
@@ -142,9 +142,9 @@ mod tests {
                 ..Default::default()
             },
         ) {
-                Ok(state) => state,
-                Err(ex) => panic!("{:?}", ex),
-            };
+            Ok(state) => state,
+            Err(ex) => panic!("{:?}", ex),
+        };
         assert_eq!(state.civs.len(), 1);
         assert_eq!(state.revision, 1);
         state = match crate::engine::remove_civ(state, String::from("example")) {
