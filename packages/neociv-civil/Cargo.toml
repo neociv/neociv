@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 neociv-state = { path = "../neociv-state" }
+rlua = "0.19.1"

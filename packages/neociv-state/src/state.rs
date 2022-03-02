@@ -17,4 +17,3 @@ pub struct NeocivState {
     /// The grid of cells that make up the game map.
     pub grid: Grid,
 }
-

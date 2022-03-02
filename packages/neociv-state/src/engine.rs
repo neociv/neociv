@@ -1,6 +1,6 @@
 use crate::civ::{Civ, CivId};
-use crate::state::NeocivState;
 use crate::errors::*;
+use crate::state::NeocivState;
 
 /// Any modification to the state produces a result that either contains the successfully updated
 /// state *or* fails with a specific StateError.
@@ -13,6 +13,20 @@ macro_rules! return_next_state {
     ($state:expr) => {
         $state.revision += 1;
         return Ok($state);
+    };
+}
+
+/// Return an Err Result with a StateError.
+macro_rules! state_panic {
+    ($err:expr) => {
+        return Err($err);
+    };
+}
+
+/// Validate the CivId
+macro_rules! invalid_civ_id {
+    ($id:expr) => {
+        $id.len() == 0
     }
 }
 
@@ -23,10 +37,10 @@ pub fn init() -> NeocivState {
 
 /// Add a Civ to the state.
 pub fn add_civ(state: NeocivState, civ: Civ) -> StateResult {
-    if state.civs.iter().any(|i| i.id == civ.id) {
-        err_dup_civ!(civ.id);
-    } else if civ.id.len() == 0 {
-        err_invalid_civ!(civ.id);
+    if invalid_civ_id!(civ.id) {
+        state_panic!(err_invalid_civ!(civ.id));
+    } else if state.civs.iter().any(|i| i.id == civ.id) {
+        state_panic!(err_dup_civ!(civ.id));
     } else {
         let mut new_state = state.clone();
         new_state.civs.push(civ);
@@ -36,10 +50,10 @@ pub fn add_civ(state: NeocivState, civ: Civ) -> StateResult {
 
 /// Remove a Civ from the state - including from all ownership roles and owned units
 pub fn remove_civ(state: NeocivState, civ_id: CivId) -> StateResult {
-    if civ_id.len() == 0 {
-        err_invalid_civ!(civ_id);
+    if invalid_civ_id!(civ_id) {
+        state_panic!(err_invalid_civ!(civ_id));
     } else if !state.civs.iter().any(|i| i.id == civ_id) {
-        err_unknown_civ!(civ_id);
+        state_panic!(err_unknown_civ!(civ_id));
     } else {
         let mut new_state = state.clone();
         // TODO: Remove ownership of all cells
@@ -109,7 +123,10 @@ mod tests {
             },
         );
         assert_eq!(error.is_ok(), false);
-        assert_eq!(error.unwrap_err().code, crate::errors::StateErrorCode::DuplicateCivId);
+        assert_eq!(
+            error.unwrap_err().code,
+            crate::errors::StateErrorCode::DuplicateCivId
+        );
     }
 
     #[test]

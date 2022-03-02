@@ -31,4 +31,3 @@ fn test_defaults() {
     assert_eq!(alignments.anc_auth, 0.0);
     assert_eq!(alignments.pac_agro, 1.0);
 }
-
