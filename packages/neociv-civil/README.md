@@ -10,8 +10,19 @@ Supports both Lua and Lisp (via Fennel) syntax. Syntax is chosen by file extensi
 
 ## cvl
 
-The top-level API exists entirely in the `cvl` module.
+The top-level API exists entirely in the `cvl` global.
 
 ### Events
 
+To listen to events the `on` function is used. Look to an event's documentation to see what data is provided. For the most part any data can be found by querying the state, any data provided to events is simply for convenience.
 
+```lua
+cvl.on("example", exampleHandler)
+```
+
+```fennel
+(cvl.on "example" exampleHandler)
+```
+
+| Event | Data | Description |
+| ----- | ---- | ----------- |
