@@ -3,8 +3,9 @@ name = "neociv-bin"
 version = "0.0.1"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 bevy = { version = "0.6.1", features = ["bevy_render", "bevy_winit"] }
+neociv-app = { path = "../neociv-app" }
+neociv-config = { path = "../neociv-config" }
+neociv-state = { path = "../neociv-state" }
 neociv-game = { path = "../neociv-game" }

@@ -1,0 +1,8 @@
+[package]
+name = "neociv-app"
+version = "0.0.1"
+edition = "2021"
+
+[dependencies]
+bevy = { version = "0.6.1", features = ["bevy_render", "bevy_winit"] }
+neociv-config = { path = "../neociv-config" }

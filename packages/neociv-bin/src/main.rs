@@ -1,6 +1,7 @@
-use bevy::prelude::{App, ClearColor, Color, DefaultPlugins, Msaa, WindowDescriptor};
-
+//use neociv_state::state::NeocivState;
 use neociv_game::NeocivGamePlugin;
+use neociv_app::init_desktop_app;
+use neociv_config::NeocivConfig;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum AppState {
@@ -11,19 +12,13 @@ pub enum AppState {
 use bevy_webgl2;
 
 fn main() {
-    let mut app = App::new();
+    let mut app = init_desktop_app(NeocivConfig::default());
 
     // Search for config and saves
     app.add_state(AppState::Init);
 
-    app.insert_resource(Msaa { samples: 4 })
-        .insert_resource(WindowDescriptor {
-            vsync: false,
-            ..Default::default()
-        })
-        .insert_resource(ClearColor(Color::hex("000000").unwrap()))
-        .add_plugins(DefaultPlugins)
-        .add_plugin(NeocivGamePlugin);
+    // TODO: Add load state startup system here
+    app.add_plugin(NeocivGamePlugin);
 
     #[cfg(target_arch = "wasm32")]
     app.add_plugin(bevy_webgl2);
