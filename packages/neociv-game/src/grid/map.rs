@@ -9,10 +9,7 @@ fn hex_mesh(size: f32) -> Mesh {
     let mut mesh = Mesh::new(bevy::render::render_resource::PrimitiveTopology::TriangleList);
 
     // Positions are 2D vec points with a zero'd z-axis
-    let positions = hex_points(size)
-        .iter()
-        .map(|&p| [p.x, p.y, 0.0])
-        .collect::<Vec<_>>();
+    let positions = hex_pos!(hex_points(size));
     mesh.set_attribute(Mesh::ATTRIBUTE_POSITION, positions);
 
     let mut normals = Vec::with_capacity(6);
@@ -28,8 +25,7 @@ fn hex_mesh(size: f32) -> Mesh {
     mesh.set_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
 
     // Mesh indicies that constantly track back to the two spike x,y and then back to centre
-    let indices = Indices::U32(vec![0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 5, 0, 5, 6, 0, 6, 1]);
-    mesh.set_indices(Some(indices));
+    mesh.set_indices(Some(hex_idx!()));
 
     return mesh;
 }
@@ -39,9 +35,11 @@ pub fn setup_grid_map(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    state: Res<neociv_state::state::NeocivState>,
 ) {
-    //let mesh = meshes.add(Mesh::from(shape::Plane { size: 5.0 }));
-    let white_material = materials.add(Color::rgb(1.0, 0.9, 0.9).into());
+    let white_material = materials.add(Color::rgb(1.0, 1.0, 1.0).into());
+
+
     commands.spawn_bundle(PbrBundle {
         mesh: meshes.add(hex_mesh(1.0)),
         material: white_material,

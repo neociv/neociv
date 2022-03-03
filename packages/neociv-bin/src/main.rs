@@ -1,6 +1,7 @@
 //use neociv_state::state::NeocivState;
 use neociv_game::NeocivGamePlugin;
 use neociv_app::init_desktop_app;
+use neociv_state::state::NeocivState;
 use neociv_config::NeocivConfig;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -16,6 +17,9 @@ fn main() {
 
     // Search for config and saves
     app.add_state(AppState::Init);
+
+    // NB: This is just a blank default until we figure out proper loading
+    app.insert_resource(NeocivState::default());
 
     // TODO: Add load state startup system here
     app.add_plugin(NeocivGamePlugin);

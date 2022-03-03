@@ -1,5 +1,12 @@
 use crate::civ::CivId;
 
+#[derive(Clone, Debug)]
+pub enum Terrain {
+    DeepWater,
+    Water,
+    Ground,
+}
+
 /// Representation of a single Cell in the Grid.
 #[derive(Clone, Debug)]
 pub struct Cell {
@@ -11,6 +18,8 @@ pub struct Cell {
     pub z: u8,
     /// Civ that owns this cell, optional.
     pub owner: Option<CivId>,
+    /// Terrain
+    pub terrain: Option<Terrain>,
 }
 
 /// Contains Cells in a 1D Vec that are addressable in 2D space according to the xsize / ysize.

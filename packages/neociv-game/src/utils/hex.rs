@@ -2,6 +2,24 @@ use std::f32::consts::PI;
 
 use bevy::prelude::*;
 
+#[macro_export]
+macro_rules! hex_idx {
+    () => {
+        Indices::U32(vec![0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 5, 0, 5, 6, 0, 6, 1])
+    }
+}
+pub(crate) use hex_idx;
+
+#[macro_export]
+macro_rules! hex_pos {
+    ($vecs:expr) => {
+        $vecs.iter()
+            .map(|&p| [p.x, p.y, 0.0])
+            .collect::<Vec<_>>()
+    }
+}
+pub(crate) use hex_pos;
+
 /// Calculate pointy top hexagon x,y points as Vec2
 pub fn hex_points(size: f32) -> Vec<Vec2> {
     let angle_deg = |i: f32| (60.0 * i - 30.0);

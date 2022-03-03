@@ -6,6 +6,8 @@ pub enum StateErrorCode {
     DuplicateCivId,
     InvalidCivId,
     UnknownCivId,
+    GridAlreadyDefined,
+    CellOutOfBounds,
 }
 
 pub struct StateError {
@@ -65,3 +67,19 @@ macro_rules! err_unknown_civ {
     };
 }
 pub(crate) use err_unknown_civ;
+
+#[macro_export]
+macro_rules! err_grid_already_defined {
+    () => {
+        state_error!(StateErrorCode::GridAlreadyDefined, "Cannot resize a grid that already has cells")
+    }
+}
+pub(crate) use err_grid_already_defined;
+
+#[macro_export]
+macro_rules! err_cell_out_of_bounds {
+    ($axis:expr, $val:expr, $max: expr) => {
+        state_error!(StateErrorCode::CellOutOfBounds, "Cell {0} = {1} exceeds grid max {0} = {2}", $axis, $val, $max) 
+    }
+}
+pub(crate) use err_cell_out_of_bounds;
