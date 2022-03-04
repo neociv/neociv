@@ -38,11 +38,21 @@ pub fn setup_grid_map(
     state: Res<neociv_state::state::NeocivState>,
 ) {
     let white_material = materials.add(Color::rgb(1.0, 1.0, 1.0).into());
+    let sq3 = 3_f32.sqrt();
 
+    state.grid.cells.iter().for_each(|c| {
+        let offset = match c.y % 2 == 0 {
+            true => 0.0,
+            false => 1.0,
+        };
 
-    commands.spawn_bundle(PbrBundle {
-        mesh: meshes.add(hex_mesh(1.0)),
-        material: white_material,
-        ..Default::default()
+        let x = (c.x as f32) * (sq3 * 1.1) + offset;
+
+        commands.spawn_bundle(PbrBundle {
+            mesh: meshes.add(hex_mesh(1.0)),
+            material: white_material.to_owned(),
+            transform: Transform::from_xyz(x, c.y as f32 * -2.0, 0.0),
+            ..Default::default()
+        });
     });
 }

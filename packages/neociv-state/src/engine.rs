@@ -86,7 +86,7 @@ pub fn set_grid_size(state: NeocivState, xsize: u8, ysize: u8) -> StateResult {
 
         new_state.grid.cells = Vec::with_capacity(cap.into());
 
-        for i in 0..cap - 1 {
+        for i in 0..cap {
             let xy = grid_i_to_xy(&new_state.grid, i);
             new_state.grid.cells.push(Cell {
                 x: xy.0,
