@@ -1,6 +1,6 @@
 use num_integer::div_floor;
 
-use crate::civ::CivId;
+use crate::civ::CivKey;
 
 #[derive(Clone, Debug)]
 pub enum Terrain {
@@ -16,10 +16,8 @@ pub struct Cell {
     pub x: u8,
     /// Vertical (North) position of the cell.
     pub y: u8,
-    /// Elevation of the cell.
-    pub z: u8,
     /// Civ that owns this cell, optional.
-    pub owner: Option<CivId>,
+    pub owner: Option<CivKey>,
     /// Terrain
     pub terrain: Option<Terrain>,
 }
@@ -33,7 +31,7 @@ pub struct Grid {
 }
 
 /// Generate an x,y tuple for a given index in the Grid's Cells
-pub fn grid_i_to_xy(grid: &Grid, i: u16) -> (u8,u8) {
+pub fn grid_i_to_xy(grid: &Grid, i: u16) -> (u8, u8) {
     // TODO: Bounds panic here?
     let cap: u16 = (grid.xsize * grid.ysize).into();
     return (
@@ -53,7 +51,11 @@ pub fn grid_xy_to_i(grid: &Grid, x: u8, y: u8) -> u16 {
 mod tests {
     #[test]
     fn test_i_to_xy() {
-        let grid = crate::cell::Grid { xsize: 4, ysize: 3, ..Default::default() };
+        let grid = crate::cell::Grid {
+            xsize: 4,
+            ysize: 3,
+            ..Default::default()
+        };
         assert_eq!(grid.xsize, 4);
         assert_eq!(grid.ysize, 3);
         assert_eq!(crate::cell::grid_i_to_xy(&grid, 0), (0, 0));
@@ -72,7 +74,11 @@ mod tests {
 
     #[test]
     fn test_xy_to_i() {
-        let grid = crate::cell::Grid { xsize: 4, ysize: 3, ..Default::default() };
+        let grid = crate::cell::Grid {
+            xsize: 4,
+            ysize: 3,
+            ..Default::default()
+        };
         assert_eq!(grid.xsize, 4);
         assert_eq!(grid.ysize, 3);
         assert_eq!(crate::cell::grid_xy_to_i(&grid, 0, 0), 0);

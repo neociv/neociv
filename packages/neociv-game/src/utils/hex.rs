@@ -6,17 +6,15 @@ use bevy::prelude::*;
 macro_rules! hex_idx {
     () => {
         Indices::U32(vec![0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 5, 0, 5, 6, 0, 6, 1])
-    }
+    };
 }
 pub(crate) use hex_idx;
 
 #[macro_export]
 macro_rules! hex_pos {
     ($vecs:expr) => {
-        $vecs.iter()
-            .map(|&p| [p.x, p.y, 0.0])
-            .collect::<Vec<_>>()
-    }
+        $vecs.iter().map(|&p| [p.x, p.y, 0.0]).collect::<Vec<_>>()
+    };
 }
 pub(crate) use hex_pos;
 

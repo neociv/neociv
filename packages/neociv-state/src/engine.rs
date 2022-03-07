@@ -1,7 +1,7 @@
-use crate::civ::{Civ, CivId};
+use crate::cell::{grid_i_to_xy, grid_xy_to_i, Cell};
+use crate::civ::{Civ, CivKey};
 use crate::errors::*;
 use crate::state::NeocivState;
-use crate::cell::{grid_i_to_xy, grid_xy_to_i, Cell};
 
 /// Any modification to the state produces a result that either contains the successfully updated
 /// state *or* fails with a specific StateError.
@@ -27,15 +27,22 @@ macro_rules! state_panic {
 /// Validate the CivId
 macro_rules! invalid_civ_id {
     ($id:expr) => {
-        $id.len() == 0
+        crate::civ::VALID_CIV_ID.is_match($id)
     };
 }
 
-/// Validate the CivId exists
-macro_rules! civ_id_exists {
-    ($state:expr, $id:expr) => {
-        $state.civs.iter().any(|i| i.id == $id)
-    }
+/// Validate the CivKey
+macro_rules! invalid_civ_key {
+    ($key:expr) => {
+        crate::civ::VALID_CIV_KEY.is_match($key)
+    };
+}
+
+/// Whether or not the CivKey exists
+macro_rules! civ_key_exists {
+    ($state:expr, $key:expr) => {
+       $state.civs.contains_key($key) 
+    };
 }
 
 /// Initialise an empty & default state.
@@ -45,29 +52,32 @@ pub fn init() -> NeocivState {
 
 /// Add a Civ to the state.
 pub fn add_civ(state: NeocivState, civ: Civ) -> StateResult {
-    if invalid_civ_id!(civ.id) {
-        state_panic!(err_invalid_civ!(civ.id));
-    } else if civ_id_exists!(state, civ.id) {
-        state_panic!(err_dup_civ!(civ.id));
+    if invalid_civ_id!(&civ.id) {
+        state_panic!(err_invalid_civ_id!(civ.id));
     } else {
         let mut new_state = state.clone();
-        new_state.civs.push(civ);
+        let idx = state.civs.iter().fold(0, |accum, item| {
+            accum + if item.1.id == civ.id { 1 } else { 0 }
+        });
+        new_state.civs.insert(format!("{}[{}]", civ.id, idx), civ);
         return_next_state!(new_state);
     }
 }
 
-/// Remove a Civ from the state - including from all ownership roles and owned units
-pub fn remove_civ(state: NeocivState, civ_id: CivId) -> StateResult {
-    if invalid_civ_id!(civ_id) {
-        state_panic!(err_invalid_civ!(civ_id));
-    } else if !civ_id_exists!(state, civ_id) {
-        state_panic!(err_unknown_civ!(civ_id));
+/// Remove a Civ from the state - including from all ownership roles and owned units. This will
+/// never naturally be used by the game however it is useful to retain.
+pub fn remove_civ(state: NeocivState, civ_key: CivKey) -> StateResult {
+    if invalid_civ_key!(&civ_key) {
+        state_panic!(err_invalid_civ_key!(civ_key));
     } else {
         let mut new_state = state.clone();
-        // TODO: Remove ownership of all cells
+        new_state.civs.remove(&civ_key);
+        /*
+        new_state.grid.cells.for_each(|&c| {
+        });
+        */
         // TODO: Remove ownership of all units
         // Remove from the list of civs
-        new_state.civs.retain(|c| c.id != civ_id);
         return_next_state!(new_state);
     }
 }
@@ -91,7 +101,6 @@ pub fn set_grid_size(state: NeocivState, xsize: u8, ysize: u8) -> StateResult {
             new_state.grid.cells.push(Cell {
                 x: xy.0,
                 y: xy.1,
-                z: 0,
                 owner: None,
                 terrain: None,
             });
@@ -104,11 +113,11 @@ pub fn set_grid_size(state: NeocivState, xsize: u8, ysize: u8) -> StateResult {
 /// Sets the cell at the given x,y in the grid
 pub fn set_grid_cell(state: NeocivState, cell: &Cell) -> StateResult {
     if cell.owner.is_some() {
-        let civ_id = cell.to_owned().owner.unwrap();
-        if invalid_civ_id!(civ_id) {
-            state_panic!(err_invalid_civ!(civ_id));
-        } else if !civ_id_exists!(state, civ_id) {
-            state_panic!(err_unknown_civ!(civ_id));
+        let civ_key = cell.to_owned().owner.unwrap();
+        if invalid_civ_key!(&civ_key) {
+            state_panic!(err_invalid_civ_key!(civ_key));
+        } else if !civ_key_exists!(state, &civ_key) {
+            state_panic!(err_unknown_civ_key!(civ_key));
         }
     }
 
@@ -123,4 +132,3 @@ pub fn set_grid_cell(state: NeocivState, cell: &Cell) -> StateResult {
         return_next_state!(new_state);
     }
 }
-

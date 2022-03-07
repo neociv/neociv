@@ -1,4 +1,4 @@
-use rlua::{Lua,Result};
+use rlua::{Lua, Result};
 
 /// Generate the bindings for the "cvl" global
 pub fn init() -> Lua {

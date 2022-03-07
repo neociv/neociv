@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate lazy_static;
+
 pub mod alignments;
 pub mod cell;
 pub mod civ;

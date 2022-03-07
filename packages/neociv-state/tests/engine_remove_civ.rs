@@ -13,12 +13,12 @@ fn remove_civ() {
             ..Default::default()
         },
     ) {
-            Ok(state) => state,
-            Err(ex) => panic!("{:?}", ex),
-        };
+        Ok(state) => state,
+        Err(ex) => panic!("{:?}", ex),
+    };
     assert_eq!(state.civs.len(), 1);
     assert_eq!(state.revision, 1);
-    state = match engine::remove_civ(state, String::from("example")) {
+    state = match engine::remove_civ(state, String::from("example[0]")) {
         Ok(state) => state,
         Err(ex) => panic!("{:?}", ex),
     };

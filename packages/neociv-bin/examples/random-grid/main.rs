@@ -6,9 +6,7 @@ extern crate neociv_state;
 use neociv_state::engine;
 
 fn main() {
-    let mut app = app::init_desktop_app(
-        config::NeocivConfig::default()
-    );
+    let mut app = app::init_desktop_app(config::NeocivConfig::default());
 
     // Generate a random grid
     let mut state = engine::init();
@@ -27,4 +25,3 @@ fn main() {
 
     app.run();
 }
-
