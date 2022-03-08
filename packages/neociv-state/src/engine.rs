@@ -41,7 +41,7 @@ macro_rules! invalid_civ_key {
 /// Whether or not the CivKey exists
 macro_rules! civ_key_exists {
     ($state:expr, $key:expr) => {
-       $state.civs.contains_key($key) 
+        $state.civs.contains_key($key)
     };
 }
 
@@ -71,13 +71,17 @@ pub fn remove_civ(state: NeocivState, civ_key: CivKey) -> StateResult {
         state_panic!(err_invalid_civ_key!(civ_key));
     } else {
         let mut new_state = state.clone();
-        new_state.civs.remove(&civ_key);
-        /*
-        new_state.grid.cells.for_each(|&c| {
-        });
-        */
-        // TODO: Remove ownership of all units
+        // Iterate over cells to remove
+        for c in new_state.grid.cells.iter_mut() {
+            // TODO: Remove units
+            // TODO: Remove improvements?
+            // Remove ownership of any owned cells
+            if c.owner.as_ref().unwrap() == &civ_key {
+                c.owner = None;
+            }
+        }
         // Remove from the list of civs
+        new_state.civs.remove(&civ_key);
         return_next_state!(new_state);
     }
 }

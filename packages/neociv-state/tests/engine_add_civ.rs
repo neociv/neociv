@@ -18,7 +18,7 @@ fn add_civ() {
         Ok(state) => state,
         Err(ex) => panic!("{:?}", ex),
     };
-    assert_eq!(state.civs.contains_key("example[0]"), true);
+    assert!(state.civs.contains_key("example[0]"));
     assert_eq!(state.civs.len(), 1);
     assert_eq!(state.revision, 1);
 }

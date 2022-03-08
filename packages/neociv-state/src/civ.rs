@@ -24,12 +24,12 @@ pub type CivKey = String;
 
 lazy_static! {
     /// Regex to validate CivIds
-    pub static ref VALID_CIV_ID: Regex = Regex::new(r"\w+\.\w(?:\.\w)*").unwrap();
+    pub static ref VALID_CIV_ID: Regex = Regex::new(r"^[a-zA-Z0-9]+\.[a-zA-Z0-9]+(?:\.[a-zA-Z0-9])*$").unwrap();
 }
 
 lazy_static! {
     /// Regex to validate CivKeys
-    pub static ref VALID_CIV_KEY: Regex = Regex::new(r"\w+\.\w(?:\.\w)*\[\d+\]$").unwrap();
+    pub static ref VALID_CIV_KEY: Regex = Regex::new(r"^[a-zA-Z0-9]+\.[a-zA-Z0-9]+(?:\.[a-zA-Z0-9])*\[\d+\]$").unwrap();
 }
 
 #[derive(Clone, Default, Debug)]
@@ -37,4 +37,28 @@ pub struct Civ {
     pub id: CivId,
     pub title: String,
     pub alignments: Alignments,
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_valid_civ_id() {
+        // Invalid CivIds
+        assert!(!crate::civ::VALID_CIV_ID.is_match("example"));
+        // Valid CivIds
+        assert!(crate::civ::VALID_CIV_ID.is_match("example.com"));
+        assert!(crate::civ::VALID_CIV_ID.is_match("1234.5678"));
+    }
+
+    #[test]
+    fn test_valid_civ_key() {
+        // Invalid CivIds (which are also not valid CivKeys)
+        assert!(!crate::civ::VALID_CIV_KEY.is_match("example"));
+        // Valid CivIds but invalid CivKeys
+        assert!(!crate::civ::VALID_CIV_KEY.is_match("example.com"));
+        // Invalid CivKeys
+        assert!(!crate::civ::VALID_CIV_KEY.is_match("example[0]"));
+        assert!(!crate::civ::VALID_CIV_KEY.is_match("example[]"));
+        assert!(!crate::civ::VALID_CIV_KEY.is_match("example.com[]"));
+    }
 }
