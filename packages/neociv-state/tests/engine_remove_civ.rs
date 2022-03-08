@@ -8,7 +8,7 @@ fn remove_civ() {
     state = match engine::add_civ(
         state,
         civ::Civ {
-            id: String::from("example"),
+            id: String::from("test.example"),
             title: String::from("Example"),
             ..Default::default()
         },
@@ -18,7 +18,7 @@ fn remove_civ() {
     };
     assert_eq!(state.civs.len(), 1);
     assert_eq!(state.revision, 1);
-    state = match engine::remove_civ(state, String::from("example[0]")) {
+    state = match engine::remove_civ(state, String::from("test.example[0]")) {
         Ok(state) => state,
         Err(ex) => panic!("{:?}", ex),
     };

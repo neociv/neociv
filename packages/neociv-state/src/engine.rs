@@ -27,14 +27,14 @@ macro_rules! state_panic {
 /// Validate the CivId
 macro_rules! invalid_civ_id {
     ($id:expr) => {
-        crate::civ::VALID_CIV_ID.is_match($id)
+        !crate::civ::VALID_CIV_ID.is_match($id)
     };
 }
 
 /// Validate the CivKey
 macro_rules! invalid_civ_key {
     ($key:expr) => {
-        crate::civ::VALID_CIV_KEY.is_match($key)
+        !crate::civ::VALID_CIV_KEY.is_match($key)
     };
 }
 

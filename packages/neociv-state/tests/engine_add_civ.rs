@@ -10,7 +10,7 @@ fn add_civ() {
     state = match engine::add_civ(
         state,
         Civ {
-            id: String::from("example"),
+            id: String::from("test.example"),
             title: String::from("Example"),
             ..Default::default()
         },
@@ -18,7 +18,7 @@ fn add_civ() {
         Ok(state) => state,
         Err(ex) => panic!("{:?}", ex),
     };
-    assert!(state.civs.contains_key("example[0]"));
+    assert!(state.civs.contains_key("test.example[0]"));
     assert_eq!(state.civs.len(), 1);
     assert_eq!(state.revision, 1);
 }
