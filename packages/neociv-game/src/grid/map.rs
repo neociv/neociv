@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy::render::mesh::Indices;
+use bevy_mod_picking::PickableBundle;
 
 use crate::utils::hex::*;
 
@@ -48,11 +49,13 @@ pub fn setup_grid_map(
 
         let x = (c.x as f32) * (sq3 * 1.1) + offset;
 
-        commands.spawn_bundle(PbrBundle {
-            mesh: meshes.add(hex_mesh(1.0)),
-            material: white_material.to_owned(),
-            transform: Transform::from_xyz(x, c.y as f32 * -2.0, 0.0),
-            ..Default::default()
-        });
+        commands
+            .spawn_bundle(PbrBundle {
+                mesh: meshes.add(hex_mesh(1.0)),
+                material: white_material.to_owned(),
+                transform: Transform::from_xyz(x, c.y as f32 * -2.0, 0.0),
+                ..Default::default()
+            })
+            .insert_bundle(PickableBundle::default());
     });
 }

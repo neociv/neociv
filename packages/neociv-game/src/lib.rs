@@ -1,4 +1,5 @@
 use bevy::prelude::{App, Plugin};
+use bevy_mod_picking::{DebugCursorPickingPlugin, DebugEventsPickingPlugin, DefaultPickingPlugins};
 
 pub mod grid;
 pub mod utils;
@@ -16,6 +17,12 @@ pub struct NeocivGamePlugin;
 
 impl Plugin for NeocivGamePlugin {
     fn build(&self, app: &mut App) {
+        // Picking
+        app.add_plugins(DefaultPickingPlugins)
+            .add_plugin(DebugCursorPickingPlugin)
+            .add_plugin(DebugEventsPickingPlugin);
+
+        // Normal
         app.add_startup_system(grid::camera::setup_grid_camera)
             .add_startup_system(grid::map::setup_grid_map)
             .add_startup_system(grid::light::setup_grid_lights);

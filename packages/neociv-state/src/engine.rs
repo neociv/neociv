@@ -86,7 +86,8 @@ pub fn remove_civ(state: NeocivState, civ_key: CivKey) -> StateResult {
     }
 }
 
-/// Sets the grid and initialises it with a set of blank cells.
+/// Sets the grid and initialises it with a set of blank cells. Calling this will effectively
+/// prevent it from being called again on the state.
 pub fn set_grid_size(state: NeocivState, xsize: u8, ysize: u8) -> StateResult {
     if state.grid.cells.len() > 0 {
         state_panic!(err_grid_already_defined!());
