@@ -38,22 +38,25 @@ pub fn setup_grid_map(
     mut materials: ResMut<Assets<StandardMaterial>>,
     state: Res<neociv_state::state::NeocivState>,
 ) {
+    let size = 1.0;
     let white_material = materials.add(Color::rgb(1.0, 1.0, 1.0).into());
     let sq3 = 3_f32.sqrt();
 
     state.grid.cells.iter().for_each(|c| {
+        // Apply an x offset
         let offset = match c.y % 2 == 0 {
             true => 0.0,
-            false => 1.0,
+            false => (sq3 * size) / 2.0,
         };
 
-        let x = (c.x as f32) * (sq3 * 1.1) + offset;
+        let x = (c.x as f32) * (sq3 * size) + offset;
+        let y = -(c.y as f32) * (size * 1.5);
 
         commands
             .spawn_bundle(PbrBundle {
-                mesh: meshes.add(hex_mesh(1.0)),
+                mesh: meshes.add(hex_mesh(size)),
                 material: white_material.to_owned(),
-                transform: Transform::from_xyz(x, c.y as f32 * -2.0, 0.0),
+                transform: Transform::from_xyz(x, y, 0.0),
                 ..Default::default()
             })
             .insert_bundle(PickableBundle::default());
