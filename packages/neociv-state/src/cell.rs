@@ -33,7 +33,7 @@ pub struct Grid {
 /// Generate an x,y tuple for a given index in the Grid's Cells
 pub fn grid_i_to_xy(grid: &Grid, i: u16) -> (u8, u8) {
     // TODO: Bounds panic here?
-    let cap: u16 = (grid.xsize * grid.ysize).into();
+    let cap: u16 = grid.xsize as u16 * grid.ysize as u16;
     return (
         i as u8 % grid.xsize,
         div_floor(i, div_floor(cap, grid.ysize as u16)) as u8,

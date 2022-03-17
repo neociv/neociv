@@ -12,7 +12,7 @@ fn main() {
     let mut state = engine::init();
 
     // Generate a 5 x 5 unowned grid
-    state = match engine::set_grid_size(state, 5, 5) {
+    state = match engine::set_grid_size(state, 25, 25) {
         Ok(s) => s,
         Err(ex) => panic!("{:?}", ex),
     };

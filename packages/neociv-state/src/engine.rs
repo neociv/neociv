@@ -97,7 +97,7 @@ pub fn set_grid_size(state: NeocivState, xsize: u8, ysize: u8) -> StateResult {
         new_state.grid.ysize = ysize;
 
         // The maximum number of cells that this grid can contain
-        let cap: u16 = (xsize * ysize) as u16;
+        let cap: u16 = xsize as u16 * ysize as u16;
 
         new_state.grid.cells = Vec::with_capacity(cap.into());
 
