@@ -15,6 +15,9 @@ pub struct NeocivState {
     pub turn: u32,
     /// Key of the currently active Civ
     pub active_civ_key: Option<CivKey>,
+    /// Order of civs to play through which removes inactive civs and avoids issues with ordering
+    /// between serialized formats.
+    pub civ_order: Vec<CivKey>,
     /// Directory of all Civs
     pub civs: HashMap<CivKey, Civ>,
     /// The grid of cells that make up the game map.

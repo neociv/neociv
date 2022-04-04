@@ -59,7 +59,15 @@ pub fn add_civ(state: NeocivState, civ: Civ) -> StateResult {
         let idx = state.civs.iter().fold(0, |accum, item| {
             accum + if item.1.id == civ.id { 1 } else { 0 }
         });
-        new_state.civs.insert(format!("{}[{}]", civ.id, idx), civ);
+
+        // Generate the civ_key as a combination of the CivId and the 0-based index
+        let civ_key = format!("{}[{}]", civ.id, idx);
+
+        // Add to the order
+        new_state.civ_order.push(civ_key.to_string());
+
+        // Add to the map of Civs
+        new_state.civs.insert(civ_key, civ);
         return_next_state!(new_state);
     }
 }
@@ -71,6 +79,8 @@ pub fn remove_civ(state: NeocivState, civ_key: CivKey) -> StateResult {
         state_panic!(err_invalid_civ_key!(civ_key));
     } else {
         let mut new_state = state.clone();
+        // Remove from civ order
+        new_state.civ_order.retain(|ck| ck != &civ_key);
         // Iterate over cells to remove
         for c in new_state.grid.cells.iter_mut() {
             // TODO: Remove units
