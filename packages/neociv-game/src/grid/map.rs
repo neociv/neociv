@@ -11,7 +11,7 @@ fn hex_mesh(size: f32) -> Mesh {
 
     // Positions are 2D vec points with a zero'd z-axis
     let positions = hex_pos!(hex_points(size));
-    mesh.set_attribute(Mesh::ATTRIBUTE_POSITION, positions);
+    mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
 
     let mut normals = Vec::with_capacity(6);
     let mut uvs = Vec::with_capacity(6);
@@ -22,8 +22,8 @@ fn hex_mesh(size: f32) -> Mesh {
         uvs.push([0.0, 0.0]);
     }
 
-    mesh.set_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
-    mesh.set_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
+    mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
+    mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
 
     // Mesh indicies that constantly track back to the two spike x,y and then back to centre
     mesh.set_indices(Some(hex_idx!()));

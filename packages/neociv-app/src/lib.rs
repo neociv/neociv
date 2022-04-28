@@ -14,7 +14,6 @@ pub fn init_desktop_app(config: NeocivConfig) -> App {
 
     // Basic window descriptor
     app.insert_resource(WindowDescriptor {
-        vsync: config.video.vsync,
         width: config.window.resolution_width as f32,
         height: config.window.resolution_height as f32,
         mode: if config.window.fullscreen {
