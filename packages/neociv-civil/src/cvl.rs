@@ -1,10 +1,10 @@
-use rlua::{Lua, Result};
+use rlua::{Lua, Result as LuaResult};
 
 /// Generate the bindings for the "cvl" global
 pub fn init() -> Lua {
     let lua = Lua::new();
 
-    let result: Result<()> = lua.context(|lua_ctx| {
+    let result: LuaResult<()> = lua.context(|lua_ctx| {
         let globals = lua_ctx.globals();
 
         let cvl = lua_ctx.create_table()?;
@@ -19,6 +19,7 @@ pub fn init() -> Lua {
 
         // TODO: New state handling
 
+
         globals.set("cvl", cvl)?;
 
         return Ok(());
@@ -28,4 +29,16 @@ pub fn init() -> Lua {
         Ok(_) => lua,
         Err(ex) => panic!("{:?}", ex),
     };
+}
+
+pub fn load_file(lua: &Lua, filepath: String) -> Result<(),()> {
+    return Err(());
+}
+
+pub fn load_lua_str(lua: &Lua, content: String) -> Result<(),()> {
+    return Err(());
+}
+
+pub fn load_cvl_str(lua: &Lua, content: String) -> Result<(),()> {
+    return Err(());
 }
