@@ -9,6 +9,9 @@ pub fn init() -> Lua {
 
         let cvl = lua_ctx.create_table()?;
 
+        // Create a key mapping registry
+        cvl.set("_key_maps", lua_ctx.create_table()?)?;
+
         // Create an event registry
         cvl.set("_event_registry", lua_ctx.create_table()?)?;
 
