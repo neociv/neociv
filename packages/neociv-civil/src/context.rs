@@ -13,7 +13,10 @@ impl Default for NeocivContext {
     fn default() -> Self {
         return NeocivContext {
             state: NeocivState::default(),
-            context: cvl::init(),
+            context: match cvl::init() {
+                Ok(lua) => lua,
+                Err(ex) => panic!("{:?}", ex),
+            },
         };
     }
 }
