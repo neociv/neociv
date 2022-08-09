@@ -1,10 +1,29 @@
 use indoc::formatdoc;
+use std::{error::Error, fs::read_to_string};
+use std::fmt::Display;
+use std::fs::File;
+use std::io;
 use std::path::Path;
 use std::result::Result;
 
 use rlua::{Error as LuaError, FromLuaMulti, Lua, Result as LuaResult};
 
 static FENNEL_FILE: &'static str = include_str!("fennel.lua");
+
+#[derive(Debug)]
+pub enum CvlError {
+    LuaError(LuaError),
+    FileNotFound,
+    UnknownFileType,
+}
+
+impl Error for CvlError {}
+
+impl Display for CvlError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
 
 /// Generate the bindings for the "cvl" global
 pub fn init() -> Result<Lua, LuaError> {
@@ -45,42 +64,59 @@ pub fn init() -> Result<Lua, LuaError> {
     };
 }
 
-pub fn compile_cvl(lua: &Lua, content: String) -> Result<String, LuaError> {
-    let block = formatdoc! {"
-            local fnl_compiler = require(\"fennel.compiler\") 
-            return fnl_compiler[\"compile-string\"]([[
-                {content}
+pub fn compile_cvl(lua: &Lua, content: &str) -> Result<String, LuaError> {
+    let block = formatdoc! {r#"
+            local fnl_compiler = require("fennel.compiler") 
+            return fnl_compiler["compile-string"]([[
+                {}
             ]])
-        ", content = content.as_str()};
+        "#, content};
 
-    return eval(lua, block);
+    return eval::<String>(lua, block.as_str());
 }
 
 /// Load a file into the lua context, appropriately deciding whether to parse it as cvl (fennel) or lua.
-pub fn load_file(lua: &Lua, filepath: String) -> Result<&Lua, ()> {
-    return Err(());
+pub fn load_file<'a>(lua: &'a Lua, filepath: &str) -> Result<&'a Lua, CvlError> {
+    let path = Path::new(filepath);
+
+    if !path.exists() {
+        return Err(CvlError::FileNotFound);
+    } else if path.extension().unwrap() == "lua" {
+        return match load_lua_str(lua, read_to_string(path.as_os_str()).unwrap().as_str()) {
+            Ok(_) => Ok(lua),
+            Err(ex) => Err(CvlError::LuaError(ex)),
+        };
+    } else if path.extension().unwrap() == "fnl" || path.extension().unwrap() == "cvl" {
+        return match load_cvl_str(lua, read_to_string(path.as_os_str()).unwrap().as_str()) {
+            Ok(_) => Ok(lua),
+            Err(ex) => Err(CvlError::LuaError(ex))
+        }
+    } else {
+        return Err(CvlError::UnknownFileType);
+    }
 }
 
 /// Load a string containing lua into the context only caring if successfully parsed or not.
-pub fn load_lua_str(lua: &Lua, content: String) -> Result<&Lua, LuaError> {
+pub fn load_lua_str<'a>(lua: &'a Lua, content: &str) -> Result<&'a Lua, LuaError> {
     lua.context(move |lua_ctx| {
-        return lua_ctx.load(r#content.as_str()).exec().unwrap();
+        return lua_ctx.load(content).exec().unwrap();
     });
     return Ok(lua);
 }
 
 /// Load a string containing cvl (fennel) into the context by pre-parsing it.
-pub fn load_cvl_str(lua: &Lua, content: String) -> Result<&Lua, LuaError> {
-    return load_lua_str(lua, compile_cvl(lua, content).unwrap());
+pub fn load_cvl_str<'a>(lua: &'a Lua, content: &str) -> Result<&'a Lua, LuaError> {
+    return load_lua_str(lua, compile_cvl(lua, content).unwrap().as_str());
 }
 
-/// Run a lua string and *return* the result
-pub fn eval<R: for<'lua> FromLuaMulti<'lua>>(lua: &Lua, content: String) -> LuaResult<R> {
+/// Run a lua string and *return* the result.
+pub fn eval<R: for<'lua> FromLuaMulti<'lua>>(lua: &Lua, content: &str) -> LuaResult<R> {
     return lua.context(move |lua_ctx| {
-        return lua_ctx.load(content.as_str()).eval();
+        return lua_ctx.load(content).eval();
     });
 }
 
-pub fn eval_cvl<R: for<'lua> FromLuaMulti<'lua>>(lua: &Lua, content: String) -> LuaResult<R> {
-    return eval(lua, compile_cvl(lua, content).unwrap());
+/// Run a cvl (fennel) string and *return* the result.
+pub fn eval_cvl<R: for<'lua> FromLuaMulti<'lua>>(lua: &Lua, content: &str) -> LuaResult<R> {
+    return eval::<R>(lua, compile_cvl(lua, content).unwrap().as_str());
 }
