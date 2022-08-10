@@ -8,10 +8,10 @@ fn init() {
 #[test]
 fn load_file() {
     let lua = cvl::init().unwrap();
-    assert!(cvl::load_file(&lua, "hello").is_err());
-    assert!(cvl::load_file(&lua, "resources/example.lua").is_ok());
-    assert!(cvl::load_file(&lua, "resources/example.fnl").is_ok());
-    assert!(cvl::load_file(&lua, "resources/example.cvl").is_ok());
+    assert!(cvl::load_file(&lua, "does-not-exist").is_err());
+    assert!(cvl::load_file(&lua, "./tests/resources/example.lua").is_ok());
+    assert!(cvl::load_file(&lua, "./tests/resources/example.fnl").is_ok());
+    assert!(cvl::load_file(&lua, "./tests/resources/example.cvl").is_ok());
 }
 
 #[test]
