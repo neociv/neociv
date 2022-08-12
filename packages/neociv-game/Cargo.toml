@@ -7,6 +7,6 @@ edition = "2021"
 
 [dependencies]
 bevy = { version = "0.8.0", features = ["bevy_render"] }
-bevy_mod_picking = "0.8.0"
+bevy_mod_picking = "0.8.1"
 neociv-state = { path = "../neociv-state" }
 neociv-civil = { path = "../neociv-civil" }
