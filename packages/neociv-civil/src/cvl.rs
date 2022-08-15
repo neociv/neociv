@@ -29,9 +29,10 @@ impl Display for CvlError {
 
 /// Generate the bindings for the "cvl" global
 pub fn init() -> Result<Lua, LuaError> {
-    let lua = Lua::new();
+    unsafe {
+        let lua = Lua::new_with_debug();
 
-    let result: LuaResult<()> = lua.context(|lua_ctx| {
+        let result: LuaResult<()> = lua.context(|lua_ctx| {
         let globals = lua_ctx.globals();
 
         let cvl = lua_ctx.create_table()?;
@@ -52,17 +53,27 @@ pub fn init() -> Result<Lua, LuaError> {
 
         globals.set("cvl", cvl)?;
 
+        // Compile in the (slightly modified) fennel API
+        lua_ctx.load(FENNEL_FILE).exec()?;
+
+        // Allow the fennel searcher to look for .fnl and .cvl files automatically
+        lua_ctx.load(r#"
+            table.insert(package.loaders or package.searchers, require("fennel.specials")["make-searcher"]())
+        "#).exec()?;
+
         return Ok(());
     });
 
-    load_lua_str(&lua, FENNEL_FILE)?;
+        // Load fennel compiler
+        //load_lua_str(&lua, FENNEL_FILE)?;
 
-    //load_cvl_str(&lua, MACROS_FILE)?;
+        load_cvl_str(&lua, MACROS_FILE)?;
 
-    return match result {
-        Ok(_) => Ok(lua),
-        Err(ex) => Err(ex),
-    };
+        return match result {
+            Ok(_) => Ok(lua),
+            Err(ex) => Err(ex),
+        };
+    }
 }
 
 /// This is such a shonky compiler - there should be some module metadata, proper string construct
@@ -74,11 +85,11 @@ pub fn compile_cvl(lua: &Lua, content: &str) -> Result<String, LuaError> {
 
         // Get reference to fennel compiler function
         let require: LuaFunction = lua_ctx.globals().get("require")?;
-        let fennel: LuaTable = require.call::<_, LuaTable>("fennel")?;
-        let compiler: LuaFunction = fennel.get("compileString")?;
+        let fennel: LuaTable = require.call::<_, LuaTable>("fennel.compiler")?;
+        let compiler: LuaFunction = fennel.get("compile-string")?;
 
         // Get the string from compiler function
-        return compiler.call::<_, String>(cvl_block)
+        return compiler.call::<_, String>(cvl_block);
     });
 }
 
@@ -94,13 +105,25 @@ pub fn load_file<'a>(lua: &'a Lua, filepath: &str) -> Result<&'a Lua, CvlError> 
             Err(ex) => Err(CvlError::LuaError(ex)),
         };
     } else if path.extension().unwrap() == "fnl" || path.extension().unwrap() == "cvl" {
-        return match load_cvl_str(lua, read_to_string(path.as_os_str()).unwrap().as_str()) {
+        return match load_fnl_file(lua, path.to_str().unwrap()) {
             Ok(_) => Ok(lua),
             Err(ex) => Err(CvlError::LuaError(ex)),
         };
     } else {
         return Err(CvlError::UnknownFileType);
     }
+}
+
+fn load_fnl_file<'a>(lua: &'a Lua, filepath: &str) -> Result<(), LuaError> {
+    return lua.context(move |lua_ctx| {
+        let path = lua_ctx.create_string(filepath).unwrap();
+        let require: LuaFunction = lua_ctx.globals().get("require")?;
+        let fennel_utils: LuaTable = require.call::<_, LuaTable>("fennel.utils")?;
+        let fennel_module: LuaTable = fennel_utils.get("fennel-module")?;
+        let fennel_dofile: LuaFunction = fennel_module.get("dofile")?;
+        fennel_dofile.call::<_, String>(path)?;
+        return Ok(());
+    });
 }
 
 /// Load a string containing lua into the context only caring if successfully parsed or not.

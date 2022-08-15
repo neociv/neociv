@@ -1,7 +1,4 @@
-;; Convenient action dispatcher callback
-(fn actbk! [action]
-    `(> (fn [] (cvl.dispatch ,(tostring action)))))
+(fn actbk [action]
+    `(fn [] (print ,(tostring action))))
 
-{
-: actbk!
-}
+(set package.preload["cvl.macros"] { : actbk })

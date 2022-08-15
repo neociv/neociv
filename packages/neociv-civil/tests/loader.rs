@@ -6,11 +6,26 @@ fn init() {
 }
 
 #[test]
-fn load_file() {
+fn load_file_no_exist() {
     let lua = cvl::init().unwrap();
     assert!(cvl::load_file(&lua, "does-not-exist").is_err());
+}
+
+#[test]
+fn load_file_lua() {
+    let lua = cvl::init().unwrap();
     assert!(cvl::load_file(&lua, "./tests/resources/example.lua").is_ok());
+}
+
+#[test]
+fn load_file_fnl() {
+    let lua = cvl::init().unwrap();
     assert!(cvl::load_file(&lua, "./tests/resources/example.fnl").is_ok());
+}
+
+#[test]
+fn load_file_cvl() {
+    let lua = cvl::init().unwrap();
     assert!(cvl::load_file(&lua, "./tests/resources/example.cvl").is_ok());
 }
 
@@ -45,6 +60,10 @@ fn eval() {
 fn compile_cvl() {
     let lua = cvl::init().unwrap();
     assert_eq!(cvl::compile_cvl(&lua, "(+ 1 1)").unwrap(), "return (1 + 1)");
+    assert_eq!(
+        cvl::compile_cvl(&lua, r#"(local foo (require "path/to/bar"))"#).unwrap(),
+        "local foo = require(\"path/to/bar\")\nreturn nil"
+    );
 }
 
 #[test]
