@@ -1,5 +1,6 @@
-use cgmath::Vector3;
+use bevy_math::Vec3;
 
+#[derive(Clone, Debug, Default)]
 pub struct Camera {
-    position: Vector3<f32>,
+    pub position: Vec3,
 }

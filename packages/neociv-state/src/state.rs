@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use crate::camera::Camera;
 use crate::cell::Grid;
 use crate::civ::{Civ, CivKey};
 
@@ -22,4 +23,6 @@ pub struct NeocivState {
     pub civs: HashMap<CivKey, Civ>,
     /// The grid of cells that make up the game map.
     pub grid: Grid,
+    /// The current camera state
+    pub camera: Camera,
 }

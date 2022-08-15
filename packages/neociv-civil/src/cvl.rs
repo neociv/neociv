@@ -1,14 +1,16 @@
 use indoc::formatdoc;
-use std::{error::Error, fs::read_to_string};
 use std::fmt::Display;
-use std::fs::File;
-use std::io;
 use std::path::Path;
 use std::result::Result;
+use std::{error::Error, fs::read_to_string};
 
-use rlua::{Error as LuaError, FromLuaMulti, Lua, Result as LuaResult};
+use rlua::{
+    Error as LuaError, FromLuaMulti, Function as LuaFunction, Lua, Result as LuaResult,
+    Table as LuaTable,
+};
 
 static FENNEL_FILE: &'static str = include_str!("fennel.lua");
+static MACROS_FILE: &'static str = include_str!("./runtime/api/macros.fnl");
 
 #[derive(Debug)]
 pub enum CvlError {
@@ -35,14 +37,14 @@ pub fn init() -> Result<Lua, LuaError> {
         let cvl = lua_ctx.create_table()?;
 
         // Create a key mapping registry
-        cvl.set("_key_maps", lua_ctx.create_table()?)?;
+        //cvl.set("_key_maps", lua_ctx.create_table()?)?;
 
         // Create an event registry
-        cvl.set("_event_registry", lua_ctx.create_table()?)?;
+        //cvl.set("_event_registry", lua_ctx.create_table()?)?;
 
         // "on" will be used to add items to the event registry
-        let on = lua_ctx.create_function(|_, name: String| {
-            println!("Hello, {}!", name);
+        let on = lua_ctx.create_function(|_, _name: String| {
+            //println!("Hello, {}!", name);
             return Ok(());
         })?;
 
@@ -50,13 +52,12 @@ pub fn init() -> Result<Lua, LuaError> {
 
         globals.set("cvl", cvl)?;
 
-        // Add Fennel
-        lua_ctx.load(FENNEL_FILE).exec()?;
-
-        // TODO: Get a reference to the fennel compiler function
-
         return Ok(());
     });
+
+    load_lua_str(&lua, FENNEL_FILE)?;
+
+    //load_cvl_str(&lua, MACROS_FILE)?;
 
     return match result {
         Ok(_) => Ok(lua),
@@ -64,15 +65,21 @@ pub fn init() -> Result<Lua, LuaError> {
     };
 }
 
+/// This is such a shonky compiler - there should be some module metadata, proper string construct
+/// creation and other niceities in here but for now this'll do.
 pub fn compile_cvl(lua: &Lua, content: &str) -> Result<String, LuaError> {
-    let block = formatdoc! {r#"
-            local fnl_compiler = require("fennel.compiler") 
-            return fnl_compiler["compile-string"]([[
-                {}
-            ]])
-        "#, content};
+    return lua.context(move |lua_ctx| {
+        // Create a lua string
+        let cvl_block = lua_ctx.create_string(content).unwrap();
 
-    return eval::<String>(lua, block.as_str());
+        // Get reference to fennel compiler function
+        let require: LuaFunction = lua_ctx.globals().get("require")?;
+        let fennel: LuaTable = require.call::<_, LuaTable>("fennel")?;
+        let compiler: LuaFunction = fennel.get("compileString")?;
+
+        // Get the string from compiler function
+        return compiler.call::<_, String>(cvl_block)
+    });
 }
 
 /// Load a file into the lua context, appropriately deciding whether to parse it as cvl (fennel) or lua.
@@ -89,8 +96,8 @@ pub fn load_file<'a>(lua: &'a Lua, filepath: &str) -> Result<&'a Lua, CvlError> 
     } else if path.extension().unwrap() == "fnl" || path.extension().unwrap() == "cvl" {
         return match load_cvl_str(lua, read_to_string(path.as_os_str()).unwrap().as_str()) {
             Ok(_) => Ok(lua),
-            Err(ex) => Err(CvlError::LuaError(ex))
-        }
+            Err(ex) => Err(CvlError::LuaError(ex)),
+        };
     } else {
         return Err(CvlError::UnknownFileType);
     }

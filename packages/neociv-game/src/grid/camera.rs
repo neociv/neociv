@@ -9,3 +9,6 @@ pub fn setup_grid_camera(mut commands: Commands) {
         })
         .insert_bundle(PickingCameraBundle::default());
 }
+
+pub fn update_grid_camera_system() {
+}

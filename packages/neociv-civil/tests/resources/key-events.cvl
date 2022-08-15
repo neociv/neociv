@@ -1,0 +1,8 @@
+;; (module key_events { require {} })
+;; (import-macros {: actbk!} "./src/runtime/api/macros")
+(cvl.on [:key.w :key.up] (actbk! :camera.move.up))
+
+;; (cvl.on [:key.w :key.up] (fn [] (cvl.action :camera.move.up)))
+;; (cvl.on [:key.a :key.left] (fn [] (cvl.action :camera.move.left)))
+;; (cvl.on [:key.s :key.down] (fn [] (cvl.action :camera.move.down)))
+;; (cvl.on [:key.d :key.right] (fn [] (cvl.action :camera.move.right)))
