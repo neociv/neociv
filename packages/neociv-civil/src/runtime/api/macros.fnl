@@ -1,5 +1,5 @@
 (fn actbk! [action]
-    `(fn [] (print ,(tostring action))))
+    `(fn [] (cvl.dispatch ,(tostring action))))
 
 {
     : actbk!
