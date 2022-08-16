@@ -2,8 +2,8 @@ cvl = cvl or {
     events = {}
 }
 
-function cvl.on (event, handler)
-    events = type(event) == "table" and event or { event }
+function cvl.on(event, handler)
+    local events = type(event) == "table" and event or { event }
     for _, evt in ipairs(events) do
         if cvl.events[evt] == nil then
             cvl.events[evt] = {}
@@ -13,13 +13,15 @@ function cvl.on (event, handler)
     return cvl
 end
 
-function cvl.dispatch (event, data)
+function cvl.dispatch(event, data)
     if cvl.events[event] ~= nil then
-        table.foreach(cvl.events[evt], function (handler)
+        for _, handler in pairs(cvl.events[event]) do
             handler({ type = event, data = data })
-        end)
+        end
     end
     return cvl
 end
+
+package.preload["cvl"] = function() return cvl end
 
 return cvl
