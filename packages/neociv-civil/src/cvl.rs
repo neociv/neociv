@@ -1,15 +1,17 @@
-use indoc::formatdoc;
+use std::any::Any;
 use std::fmt::Display;
 use std::path::Path;
 use std::result::Result;
 use std::{error::Error, fs::read_to_string};
 
 use rlua::{
-    Error as LuaError, FromLuaMulti, Function as LuaFunction, Lua, Result as LuaResult,
-    Table as LuaTable,
+    Error as LuaError, FromLuaMulti, Function as LuaFunction, Lua, Nil as LuaNil,
+    Result as LuaResult, String as LuaString, Table as LuaTable, Value as LuaValue,
+    AnyUserData, FromLua
 };
 
 static FENNEL_FILE: &'static str = include_str!("fennel.lua");
+static CVL_FILE: &'static str = include_str!("./runtime/api/cvl.lua");
 static MACROS_FILE: &'static str = include_str!("./runtime/api/macros.fnl");
 
 #[derive(Debug)]
@@ -33,41 +35,42 @@ pub fn init() -> Result<Lua, LuaError> {
         let lua = Lua::new_with_debug();
 
         let result: LuaResult<()> = lua.context(|lua_ctx| {
-        let globals = lua_ctx.globals();
+            let globals = lua_ctx.globals();
 
-        let cvl = lua_ctx.create_table()?;
+            /*
+            let cvl = lua_ctx.create_table()?;
 
-        // Create a key mapping registry
-        //cvl.set("_key_maps", lua_ctx.create_table()?)?;
+            // Create a key mapping registry
+            //cvl.set("_key_maps", lua_ctx.create_table()?)?;
 
-        // Create an event registry
-        //cvl.set("_event_registry", lua_ctx.create_table()?)?;
+            // Create an event registry
+            //cvl.set("_event_registry", lua_ctx.create_table()?)?;
 
-        // "on" will be used to add items to the event registry
-        let on = lua_ctx.create_function(|_, _name: String| {
-            //println!("Hello, {}!", name);
+            // "on" will be used to add items to the event registry
+            let on = lua_ctx.create_function(|_, _name: String| {
+                //println!("Hello, {}!", name);
+                return Ok(());
+            })?;
+
+            cvl.set("on", on)?;
+
+            globals.set("cvl", cvl)?;
+            */
+
+            // Compile in the (slightly modified) fennel API
+            lua_ctx.load(FENNEL_FILE).exec()?;
+
+            // Allow the fennel searcher to look for .fnl and .cvl files automatically
+            lua_ctx.load(r#"
+                table.insert(package.loaders or package.searchers, require("fennel.specials")["make-searcher"]())
+            "#).exec()?;
+
+            lua_ctx.load(CVL_FILE).exec()?;
+
             return Ok(());
-        })?;
+        });
 
-        cvl.set("on", on)?;
-
-        globals.set("cvl", cvl)?;
-
-        // Compile in the (slightly modified) fennel API
-        lua_ctx.load(FENNEL_FILE).exec()?;
-
-        // Allow the fennel searcher to look for .fnl and .cvl files automatically
-        lua_ctx.load(r#"
-            table.insert(package.loaders or package.searchers, require("fennel.specials")["make-searcher"]())
-        "#).exec()?;
-
-        return Ok(());
-    });
-
-        // Load fennel compiler
-        //load_lua_str(&lua, FENNEL_FILE)?;
-
-        load_cvl_str(&lua, MACROS_FILE)?;
+        //eval_cvl(&lua, MACROS_FILE)?;
 
         return match result {
             Ok(_) => Ok(lua),
@@ -100,7 +103,7 @@ pub fn load_file<'a>(lua: &'a Lua, filepath: &str) -> Result<&'a Lua, CvlError> 
     if !path.exists() {
         return Err(CvlError::FileNotFound);
     } else if path.extension().unwrap() == "lua" {
-        return match load_lua_str(lua, read_to_string(path.as_os_str()).unwrap().as_str()) {
+        return match load_lua_file(lua, path.to_str().unwrap()) {
             Ok(_) => Ok(lua),
             Err(ex) => Err(CvlError::LuaError(ex)),
         };
@@ -121,8 +124,15 @@ fn load_fnl_file<'a>(lua: &'a Lua, filepath: &str) -> Result<(), LuaError> {
         let fennel_utils: LuaTable = require.call::<_, LuaTable>("fennel.utils")?;
         let fennel_module: LuaTable = fennel_utils.get("fennel-module")?;
         let fennel_dofile: LuaFunction = fennel_module.get("dofile")?;
-        fennel_dofile.call::<_, String>(path)?;
-        return Ok(());
+        return fennel_dofile.call::<_, ()>(path);
+    });
+}
+
+fn load_lua_file<'a>(lua: &'a Lua, filepath: &str) -> Result<(), LuaError> {
+    return lua.context(move |lua_ctx| {
+        let path = lua_ctx.create_string(filepath).unwrap();
+        let dofile: LuaFunction = lua_ctx.globals().get("dofile")?;
+        return dofile.call::<_, ()>(path);
     });
 }
 
@@ -148,5 +158,12 @@ pub fn eval<R: for<'lua> FromLuaMulti<'lua>>(lua: &Lua, content: &str) -> LuaRes
 
 /// Run a cvl (fennel) string and *return* the result.
 pub fn eval_cvl<R: for<'lua> FromLuaMulti<'lua>>(lua: &Lua, content: &str) -> LuaResult<R> {
-    return eval::<R>(lua, compile_cvl(lua, content).unwrap().as_str());
+    return lua.context(move |lua_ctx| {
+        let cvl_str: LuaString = lua_ctx.create_string(content)?;
+        let require: LuaFunction = lua_ctx.globals().get("require")?;
+        let fennel_utils: LuaTable = require.call::<_, LuaTable>("fennel.utils")?;
+        let fennel_module: LuaTable = fennel_utils.get("fennel-module")?;
+        let fennel_eval: LuaFunction = fennel_module.get("eval")?;
+        return fennel_eval.call::<LuaString, R>(cvl_str);
+    });
 }
