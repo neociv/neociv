@@ -1,4 +1,5 @@
-use neociv_civil::runtime::lua::{init_lua, NeocivLuaRuntime};
+use neociv_civil::runtime::lua::{NeocivLuaRuntime};
+use neociv_civil::runtime::init_lua;
 
 #[test]
 fn lua_require_lua() {

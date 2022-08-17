@@ -1,4 +1,5 @@
-use neociv_civil::runtime::lua::{init_lua, NeocivLuaRuntime};
+use neociv_civil::runtime::init_lua;
+use neociv_civil::runtime::lua::NeocivLuaRuntime;
 
 #[test]
 fn init() {
