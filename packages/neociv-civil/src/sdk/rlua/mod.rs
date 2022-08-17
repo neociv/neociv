@@ -1,9 +1,9 @@
-use crate::runtime::lua::{NeocivLuaRuntime, CvlError};
+use crate::runtime::lua::{CvlError, NeocivLuaRuntime};
 use std::path::Path;
 
 use rlua::{
-    Error as LuaError, Function as LuaFunction, Lua as RLua, String as LuaString, Table as LuaTable,
-    FromLuaMulti,
+    Error as LuaError, FromLuaMulti, Function as LuaFunction, Lua as RLua, String as LuaString,
+    Table as LuaTable,
 };
 
 static FENNEL_FILE: &'static str = include_str!("../../runtime/api/fennel.lua");
@@ -21,7 +21,19 @@ impl NeocivLuaRuntime for RLua {
             lua.context(move |ctx| {
                 ctx.load(FENNEL_FILE).exec()?;
                 ctx.load(SEARCHERS_FILE).exec()?;
-                return ctx.load(CVL_FILE).exec();
+                ctx.load(CVL_FILE).exec()?;
+                let require: LuaFunction = ctx.globals().get("require")?;
+                let fennel_utils: LuaTable = require.call::<_, LuaTable>("fennel.utils")?;
+                let fennel_module: LuaTable = fennel_utils.get("fennel-module")?;
+
+                // Include ".cvl" files when searching for modules and macros
+                let fennel_path: String = fennel_module.get("path")?;
+                let fennel_macro_path: String = fennel_module.get("macro-path")?;
+                let path_mod = "./?.cvl;";
+                let path_result: String = format!("{}{}", path_mod, fennel_path);
+                let macro_path_result: String = format!("{}{}", path_mod, fennel_macro_path);
+                fennel_module.set("path", path_result)?;
+                return fennel_module.set("macro-path", macro_path_result);
             })?;
             return Ok(lua);
         }
