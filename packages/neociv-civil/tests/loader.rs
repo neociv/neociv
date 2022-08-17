@@ -1,80 +1,67 @@
-use neociv_civil::cvl;
+use neociv_civil::runtime::lua::{init_lua, NeocivLuaRuntime};
 
 #[test]
 fn init() {
-    assert!(cvl::init().is_ok());
+    assert!(init_lua().is_ok());
 }
 
 #[test]
 fn load_file_no_exist() {
-    let lua = cvl::init().unwrap();
-    assert!(cvl::load_file(&lua, "does-not-exist").is_err());
+    let lua = init_lua().unwrap();
+    assert!(lua.dofile("does-not-exist").is_err());
 }
 
 #[test]
 fn load_file_lua() {
-    let lua = cvl::init().unwrap();
-    assert!(cvl::load_file(&lua, "./tests/resources/example.lua").is_ok());
+    let lua = init_lua().unwrap();
+    assert!(lua.dofile("./tests/resources/example.lua").is_ok());
 }
 
 #[test]
 fn load_file_fnl() {
-    let lua = cvl::init().unwrap();
-    assert!(cvl::load_file(&lua, "./tests/resources/example.fnl").is_ok());
+    let lua = init_lua().unwrap();
+    assert!(lua.dofile("./tests/resources/example.fnl").is_ok());
 }
 
 #[test]
 fn load_file_cvl() {
-    let lua = cvl::init().unwrap();
-    assert!(cvl::load_file(&lua, "./tests/resources/example.cvl").is_ok());
+    let lua = init_lua().unwrap();
+    assert!(lua.dofile("./tests/resources/example.cvl").is_ok());
 }
 
 #[test]
-fn load_lua_str() {
-    let lua = cvl::init().unwrap();
-    let result = cvl::load_lua_str(&lua, "return (1 + 1)");
-    assert!(result.is_ok());
-}
-
-#[test]
-fn load_cvl_str() {
-    let lua = cvl::init().unwrap();
-    let result = cvl::load_cvl_str(&lua, "(+ 1 1)");
-    assert!(result.is_ok());
-}
-
-#[test]
-fn eval() {
-    let lua = cvl::init().unwrap();
+fn eval_lua() {
+    let lua = init_lua().unwrap();
     // String
     assert_eq!(
-        cvl::eval::<String>(&lua, "\"Hello World\"").unwrap(),
+        lua.eval_lua::<String>("\"Hello World\"").unwrap(),
         "Hello World"
     );
     // Number
-    assert_eq!(cvl::eval::<u8>(&lua, "42").unwrap(), 42);
-    assert_eq!(cvl::eval::<u8>(&lua, "1 + 1").unwrap(), 2);
+    assert_eq!(lua.eval_lua::<u8>("42").unwrap(), 42);
+    assert_eq!(lua.eval_lua::<u8>("1 + 1").unwrap(), 2);
 }
 
 #[test]
-fn compile_cvl() {
-    let lua = cvl::init().unwrap();
-    assert_eq!(cvl::compile_cvl(&lua, "(+ 1 1)").unwrap(), "return (1 + 1)");
+fn compile_fnl() {
+    let lua = init_lua().unwrap();
+    assert_eq!(lua.compile_fnl("(+ 1 1)").unwrap(), "return (1 + 1)");
     assert_eq!(
-        cvl::compile_cvl(&lua, r#"(local foo (require "path/to/bar"))"#).unwrap(),
+        lua.compile_fnl(r#"(local foo (require "path/to/bar"))"#)
+            .unwrap(),
         "local foo = require(\"path/to/bar\")\nreturn nil"
     );
 }
 
 #[test]
-fn eval_cvl() {
-    let lua = cvl::init().unwrap();
+fn eval_fnl() {
+    let lua = init_lua().unwrap();
     // String
     assert_eq!(
-        cvl::eval_cvl::<String>(&lua, "\"Hello World\"").unwrap(),
+        lua.eval_fnl::<String>("\"Hello World\"").unwrap(),
         "Hello World"
     );
     // Number
-    assert_eq!(cvl::eval_cvl::<u8>(&lua, "42").unwrap(), 42);
-    assert_eq!(cvl::eval_cvl::<u8>(&lua, "(+ 1 1)").unwrap(), 2);
+    assert_eq!(lua.eval_fnl::<u8>("42").unwrap(), 42);
+    assert_eq!(lua.eval_fnl::<u8>("(+ 1 1)").unwrap(), 2);
 }

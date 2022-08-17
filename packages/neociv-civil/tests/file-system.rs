@@ -1,38 +1,40 @@
-use neociv_civil::cvl;
+use neociv_civil::runtime::lua::{init_lua, NeocivLuaRuntime};
 
 #[test]
 fn lua_require_lua() {
-    let lua = cvl::init().unwrap();
+    let lua = init_lua().unwrap();
     assert_eq!(
-        cvl::eval::<u8>(&lua, "require(\"./tests/resources/include1\").example()").unwrap(),
+        lua.eval_lua::<u8>("require(\"./tests/resources/include1\").example()")
+            .unwrap(),
         42
     );
 }
 
 #[test]
 fn lua_require_fnl() {
-    let lua = cvl::init().unwrap();
+    let lua = init_lua().unwrap();
     assert_eq!(
-        cvl::eval::<u8>(&lua, "require(\"./tests/resources/include2\").example()").unwrap(),
+        lua.eval_lua::<u8>("require(\"./tests/resources/include2\").example()")
+            .unwrap(),
         42
     );
 }
 
 #[test]
 fn lua_require_cvl() {
-    let lua = cvl::init().unwrap();
+    let lua = init_lua().unwrap();
     assert_eq!(
-        cvl::eval::<u8>(&lua, "require(\"./tests/resources/include3\").example()").unwrap(),
+        lua.eval_lua::<u8>("require(\"./tests/resources/include3\").example()")
+            .unwrap(),
         42
     );
 }
 
 #[test]
 fn fnl_require_lua() {
-    let lua = cvl::init().unwrap();
+    let lua = init_lua().unwrap();
     assert_eq!(
-        cvl::eval_cvl::<u8>(
-            &lua,
+        lua.eval_fnl::<u8>(
             "(local include1 (require \"./tests/resources/include1\"))(include1.example)"
         )
         .unwrap(),
@@ -42,10 +44,9 @@ fn fnl_require_lua() {
 
 #[test]
 fn fnl_require_fnl() {
-    let lua = cvl::init().unwrap();
+    let lua = init_lua().unwrap();
     assert_eq!(
-        cvl::eval_cvl::<u8>(
-            &lua,
+        lua.eval_fnl::<u8>(
             "(local include2 (require \"./tests/resources/include2\"))(include2.example)"
         )
         .unwrap(),
@@ -55,10 +56,9 @@ fn fnl_require_fnl() {
 
 #[test]
 fn fnl_require_cvl() {
-    let lua = cvl::init().unwrap();
+    let lua = init_lua().unwrap();
     assert_eq!(
-        cvl::eval_cvl::<u8>(
-            &lua,
+        lua.eval_fnl::<u8>(
             "(local include3 (require \"./tests/resources/include3\"))(include3.example)"
         )
         .unwrap(),

@@ -10,7 +10,7 @@ use rlua::{
     AnyUserData, FromLua
 };
 
-static FENNEL_FILE: &'static str = include_str!("fennel.lua");
+static FENNEL_FILE: &'static str = include_str!("./runtime/api/fennel.lua");
 static CVL_FILE: &'static str = include_str!("./runtime/api/cvl.lua");
 static MACROS_FILE: &'static str = include_str!("./runtime/api/macros.fnl");
 
