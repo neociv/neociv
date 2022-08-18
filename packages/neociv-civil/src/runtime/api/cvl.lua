@@ -1,5 +1,6 @@
 cvl = cvl or {
-    events = {}
+    events = {},
+    state = nil
 }
 
 function cvl.on(event, handler)
@@ -20,6 +21,14 @@ function cvl.dispatch(event, data)
         end
     end
     return cvl
+end
+
+function cvl.set(prop_path, value)
+    cvl.state = cvl.state;
+end
+
+function cvl.get(prop_path, value)
+    return _.get(cvl.state, )
 end
 
 package.preload["cvl"] = function() return cvl end

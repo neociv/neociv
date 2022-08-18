@@ -1,3 +1,5 @@
+use bevy_math::Vec3;
+
 use crate::cell::{grid_i_to_xy, grid_xy_to_i, Cell};
 use crate::civ::{Civ, CivKey};
 use crate::errors::*;
@@ -146,4 +148,11 @@ pub fn set_grid_cell(state: NeocivState, cell: &Cell) -> StateResult {
         new_state.grid.cells[i as usize] = cell.to_owned();
         return_next_state!(new_state);
     }
+}
+
+/// Modify the camera's position
+pub fn mod_camera_position(state: NeocivState, vector: Vec3) -> StateResult {
+   let mut new_state = state.clone(); 
+   new_state.camera.position += vector;
+   return_next_state!(new_state);
 }
