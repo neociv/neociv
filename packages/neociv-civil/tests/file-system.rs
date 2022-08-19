@@ -1,11 +1,10 @@
-use neociv_civil::runtime::lua::{NeocivLuaRuntime};
-use neociv_civil::runtime::init_lua;
+use neociv_civil::runtime::NeocivRuntime;
 
 #[test]
 fn lua_require_lua() {
-    let lua = init_lua().unwrap();
+    let cvl = NeocivRuntime::default();
     assert_eq!(
-        lua.eval_lua::<u8>("require(\"./tests/resources/include1\").example()")
+        cvl.eval_lua::<u8>("require(\"./tests/resources/include1\").example()")
             .unwrap(),
         42
     );
@@ -13,9 +12,9 @@ fn lua_require_lua() {
 
 #[test]
 fn lua_require_fnl() {
-    let lua = init_lua().unwrap();
+    let cvl = NeocivRuntime::default();
     assert_eq!(
-        lua.eval_lua::<u8>("require(\"./tests/resources/include2\").example()")
+        cvl.eval_lua::<u8>("require(\"./tests/resources/include2\").example()")
             .unwrap(),
         42
     );
@@ -23,9 +22,9 @@ fn lua_require_fnl() {
 
 #[test]
 fn lua_require_cvl() {
-    let lua = init_lua().unwrap();
+    let cvl = NeocivRuntime::default();
     assert_eq!(
-        lua.eval_lua::<u8>("require(\"./tests/resources/include3\").example()")
+        cvl.eval_lua::<u8>("require(\"./tests/resources/include3\").example()")
             .unwrap(),
         42
     );
@@ -33,9 +32,9 @@ fn lua_require_cvl() {
 
 #[test]
 fn fnl_require_lua() {
-    let lua = init_lua().unwrap();
+    let cvl = NeocivRuntime::default();
     assert_eq!(
-        lua.eval_fnl::<u8>(
+        cvl.eval_fnl::<u8>(
             "(local include1 (require \"./tests/resources/include1\"))(include1.example)"
         )
         .unwrap(),
@@ -45,9 +44,9 @@ fn fnl_require_lua() {
 
 #[test]
 fn fnl_require_fnl() {
-    let lua = init_lua().unwrap();
+    let cvl = NeocivRuntime::default();
     assert_eq!(
-        lua.eval_fnl::<u8>(
+        cvl.eval_fnl::<u8>(
             "(local include2 (require \"./tests/resources/include2\"))(include2.example)"
         )
         .unwrap(),
@@ -57,9 +56,9 @@ fn fnl_require_fnl() {
 
 #[test]
 fn fnl_require_cvl() {
-    let lua = init_lua().unwrap();
+    let cvl = NeocivRuntime::default();
     assert_eq!(
-        lua.eval_fnl::<u8>(
+        cvl.eval_fnl::<u8>(
             "(local include3 (require \"./tests/resources/include3\"))(include3.example)"
         )
         .unwrap(),
