@@ -48,8 +48,13 @@ function cvl.set(prop_path, value)
 end
 
 -- Get a property in the state
-function cvl.get(prop_path, value)
-    return _.get(cvl.state, prop_path)
+function cvl.get(prop_path)
+    return cvl.state:get(prop_path)
+end
+
+-- Get a config property or the default value
+function cvl.get_config(prop_path, default)
+    return nil
 end
 
 package.preload["cvl"] = function() return cvl end

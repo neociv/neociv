@@ -67,7 +67,10 @@ impl NeocivRuntime {
         } else if file_str.ends_with(".fnl") || file_str.ends_with(".cvl") {
             return self.dofile_fnl(file_str);
         } else {
-            return Err(LuaError::RuntimeError(format!("[neociv] Invalid file '{}'", file_str)));
+            return Err(LuaError::RuntimeError(format!(
+                "[neociv] Invalid file '{}'",
+                file_str
+            )));
         }
     }
 
@@ -146,6 +149,14 @@ fn test_state_in_lua() {
 
     assert!(type_result.is_ok());
     assert!(type_result.unwrap());
+
+    let rev_result = cvl.eval_lua::<bool>("assert(cvl.get('revision') == 0)");
+
+    assert!(rev_result.is_ok());
+    assert!(rev_result.unwrap());
+
+    let turn_result = cvl.eval_lua::<bool>("assert(cvl.get('turn') == 0)");
+
+    assert!(turn_result.is_ok());
+    assert!(turn_result.unwrap());
 }
-
-

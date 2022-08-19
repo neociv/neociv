@@ -1,4 +1,4 @@
-use rlua::UserData;
+use rlua::{Nil as LuaNil, String as LuaString, UserData, UserDataMethods, Error as LuaError, FromLuaMulti, ToLuaMulti, Value as LuaValue};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -29,4 +29,16 @@ pub struct NeocivState {
     pub camera: Camera,
 }
 
-impl UserData for NeocivState {}
+impl UserData for NeocivState {
+    fn add_methods<'lua, M: UserDataMethods<'lua, Self>>(methods: &mut M) {
+        methods.add_method("get", |_, this, path: String| {
+            if path.eq("revision") {
+                Ok(LuaValue::Integer(this.revision as i64))
+            } else if path.eq("turn") {
+                Ok(LuaValue::Integer(this.turn as i64))
+            } else {
+                Err(LuaError::RuntimeError(format!("Unknown path '{}'", path)))
+            }
+        });
+    }
+}
