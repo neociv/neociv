@@ -1,4 +1,5 @@
-use rlua::{Error as LuaError, FromLuaMulti};
+use neociv_state::state::NeocivState;
+use rlua::{Error as LuaError, FromLuaMulti, Table as LuaTable};
 use std::error::Error;
 use std::fmt::Display;
 
@@ -41,6 +42,10 @@ pub trait NeocivLuaRuntime {
         Self: Sized;
 
     fn eval_fnl<R: for<'lua> FromLuaMulti<'lua>>(&self, fnl_str: &str) -> Result<R, LuaError>
+    where
+        Self: Sized;
+
+    fn inject_state(&self, state: &NeocivState) -> Result<&Self, LuaError>
     where
         Self: Sized;
 }

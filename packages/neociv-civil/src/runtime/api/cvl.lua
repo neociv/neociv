@@ -28,7 +28,11 @@ function cvl.set(prop_path, value)
 end
 
 function cvl.get(prop_path, value)
-    return _.get(cvl.state, )
+    --return _.get(cvl.state, )
+end
+
+function cvl.inject_state(state)
+    cvl.state = state
 end
 
 package.preload["cvl"] = function() return cvl end

@@ -1,10 +1,15 @@
 use crate::runtime::lua::{CvlError, NeocivLuaRuntime};
 use std::path::Path;
 
+use neociv_state::state::NeocivState;
+use crate::sdk::rlua::state::state_to_lua;
+
 use rlua::{
     Error as LuaError, FromLuaMulti, Function as LuaFunction, Lua as RLua, String as LuaString,
     Table as LuaTable,
 };
+
+pub mod state;
 
 static FENNEL_FILE: &'static str = include_str!("../../runtime/api/fennel.lua");
 static SEARCHERS_FILE: &'static str = include_str!("../../runtime/api/searchers.lua");
@@ -122,4 +127,21 @@ impl NeocivLuaRuntime for RLua {
             return fennel_eval.call::<LuaString, R>(eval_str);
         });
     }
+
+    fn inject_state<'lua>(&self, state: &NeocivState) -> Result<&Self, LuaError> {
+        self.context(move |ctx| {
+            let cvl: LuaTable = ctx.globals().get("cvl")?;
+            let inject_fn: LuaFunction = cvl.get("inject_state")?;
+            let lua_state = state_to_lua(&ctx, state);
+            return inject_fn.call::<_, ()>(lua_state);
+        })?;
+        return Ok(self);
+    }
+}
+
+#[test]
+fn test_rlua_inject_state() {
+    let state = NeocivState::default();
+    let lua: RLua = NeocivLuaRuntime::init().unwrap();
+    assert!(lua.inject_state(&state).is_ok());
 }

@@ -1,4 +1,6 @@
 use regex::*;
+use rlua::UserData;
+use serde::{Deserialize, Serialize};
 
 use crate::alignments::Alignments;
 
@@ -32,12 +34,14 @@ lazy_static! {
     pub static ref VALID_CIV_KEY: Regex = Regex::new(r"^[a-zA-Z0-9]+\.[a-zA-Z0-9]+(?:\.[a-zA-Z0-9])*\[\d+\]$").unwrap();
 }
 
-#[derive(Clone, Default, Debug)]
+#[derive(Clone, Default, Debug, Serialize, Deserialize)]
 pub struct Civ {
     pub id: CivId,
     pub title: String,
     pub alignments: Alignments,
 }
+
+impl UserData for Civ {}
 
 #[cfg(test)]
 mod tests {

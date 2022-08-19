@@ -1,8 +1,10 @@
 use num_integer::div_floor;
+use rlua::UserData;
+use serde::{Serialize, Deserialize};
 
 use crate::civ::CivKey;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Terrain {
     DeepWater,
     Water,
@@ -10,7 +12,7 @@ pub enum Terrain {
 }
 
 /// Representation of a single Cell in the Grid.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Cell {
     /// Horizontal (East) position of the cell.
     pub x: u8,
@@ -22,13 +24,17 @@ pub struct Cell {
     pub terrain: Option<Terrain>,
 }
 
+impl UserData for Cell {}
+
 /// Contains Cells in a 1D Vec that are addressable in 2D space according to the xsize / ysize.
-#[derive(Clone, Default, Debug)]
+#[derive(Clone, Default, Debug, Serialize, Deserialize)]
 pub struct Grid {
     pub xsize: u8,
     pub ysize: u8,
     pub cells: Vec<Cell>,
 }
+
+impl UserData for Grid {}
 
 /// Generate an x,y tuple for a given index in the Grid's Cells
 pub fn grid_i_to_xy(grid: &Grid, i: u16) -> (u8, u8) {

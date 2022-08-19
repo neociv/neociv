@@ -1,6 +1,9 @@
+use rlua::UserData;
+use serde::{Deserialize, Serialize};
+
 pub type Alignment = f32;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Alignments {
     /// Globalism (0) to Nationalism (1)
     pub glob_nat: Alignment,
@@ -22,6 +25,8 @@ impl Default for Alignments {
         };
     }
 }
+
+impl UserData for Alignments {}
 
 #[test]
 fn test_defaults() {

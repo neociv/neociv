@@ -1,3 +1,5 @@
+use rlua::UserData;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use crate::camera::Camera;
@@ -5,7 +7,7 @@ use crate::cell::Grid;
 use crate::civ::{Civ, CivKey};
 
 /// Game state structure
-#[derive(Clone, Default, Debug)]
+#[derive(Clone, Default, Debug, Serialize, Deserialize)]
 pub struct NeocivState {
     /// The current change revision of the state - all actions that change the state will increment
     /// this value which is useful for quickly checking if the state has changed and needs to be
@@ -26,3 +28,5 @@ pub struct NeocivState {
     /// The current camera state
     pub camera: Camera,
 }
+
+impl UserData for NeocivState {}
