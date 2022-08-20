@@ -9,3 +9,4 @@ edition = "2021"
 neociv-state = { path = "../neociv-state" }
 rlua = "0.19.1"
 indoc = "1.0.7"
+rustyline = "10.0.0"

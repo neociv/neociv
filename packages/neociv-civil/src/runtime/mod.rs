@@ -7,6 +7,8 @@ use std::error::Error;
 use std::fmt::Display;
 use std::path::Path;
 
+pub mod repl;
+
 #[derive(Debug)]
 pub enum CvlError {
     LuaError(LuaError),
