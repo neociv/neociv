@@ -1,4 +1,7 @@
-use rlua::{Nil as LuaNil, String as LuaString, UserData, UserDataMethods, Error as LuaError, FromLuaMulti, ToLuaMulti, Value as LuaValue};
+use rlua::{
+    Error as LuaError, FromLua, FromLuaMulti, Nil as LuaNil, String as LuaString, ToLuaMulti,
+    UserData, UserDataMethods, Value as LuaValue,
+};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -31,13 +34,21 @@ pub struct NeocivState {
 
 impl UserData for NeocivState {
     fn add_methods<'lua, M: UserDataMethods<'lua, Self>>(methods: &mut M) {
-        methods.add_method("get", |_, this, path: String| {
+        methods.add_method("get", |ctx, this, path: String| {
             if path.eq("revision") {
                 Ok(LuaValue::Integer(this.revision as i64))
             } else if path.eq("turn") {
                 Ok(LuaValue::Integer(this.turn as i64))
+            } else if path.eq("active_civ_key") {
+                match &this.active_civ_key {
+                    Some(ack) => Ok(LuaValue::String(ctx.create_string(ack.as_str())?)),
+                    None => Ok(LuaNil),
+                }
             } else {
-                Err(LuaError::RuntimeError(format!("Unknown path '{}'", path)))
+                Err(LuaError::RuntimeError(format!(
+                    "[neociv] Unknown state path '{}'",
+                    path
+                )))
             }
         });
     }

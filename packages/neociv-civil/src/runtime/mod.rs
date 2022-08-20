@@ -140,7 +140,7 @@ impl NeocivRuntime {
 #[test]
 fn test_state_in_lua() {
     let cvl = NeocivRuntime::default();
-    let state = NeocivState::default();
+    let mut state = NeocivState::default();
     let inject_result = cvl.inject_state(&state);
 
     assert!(inject_result.is_ok());
@@ -159,4 +159,16 @@ fn test_state_in_lua() {
 
     assert!(turn_result.is_ok());
     assert!(turn_result.unwrap());
+
+    let active_civ_nil_result = cvl.eval_lua::<bool>("assert(cvl.get('active_civ_key') == nil)");
+    assert!(active_civ_nil_result.is_ok());
+    assert!(active_civ_nil_result.unwrap());
+
+    state.active_civ_key = Some(String::from("example"));
+    assert!(cvl.inject_state(&state).is_ok());
+
+    let active_civ_result = cvl.eval_lua::<bool>("assert(type(cvl.get('active_civ_key')) == 'string')");
+    assert!(active_civ_result.is_ok());
+    assert!(active_civ_result.unwrap());
+
 }

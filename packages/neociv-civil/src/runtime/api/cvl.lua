@@ -1,6 +1,7 @@
 cvl = cvl or {
     revision = 0,
     events = {},
+    config = {},
     state = nil
 }
 
