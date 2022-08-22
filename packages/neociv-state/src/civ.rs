@@ -1,5 +1,5 @@
 use regex::*;
-use rlua::UserData;
+use rlua::{UserData, ToLua, Value as LuaValue};
 use serde::{Deserialize, Serialize};
 
 use crate::alignments::Alignments;
@@ -8,7 +8,7 @@ use crate::alignments::Alignments;
 /// be referenced from another context. This should be the only means of identifying a Civ.
 ///
 /// # Examples
-/// neociv.contrib.aus
+/// org.neociv.civs.aus
 /// expanse.belters.ilus
 /// mod.civs.example
 pub type CivId = String;
@@ -19,7 +19,7 @@ pub type CivId = String;
 /// CivId.
 ///
 /// # Examples
-/// neociv.contrib.aus[0]
+/// org.neociv.civs[0]
 /// expanse.belters[0]
 /// mod.civs.example[0]
 pub type CivKey = String;
@@ -41,7 +41,16 @@ pub struct Civ {
     pub alignments: Alignments,
 }
 
-impl UserData for Civ {}
+impl<'lua> ToLua<'lua> for Civ {
+    fn to_lua(self, ctx: rlua::Context<'lua>) -> rlua::Result<rlua::Value<'lua>> {
+       let civ_tbl = ctx.create_table()?; 
+       civ_tbl.set("id", self.id)?;
+       civ_tbl.set("title", self.title)?;
+       let aligns_tbl = ctx.create_table_from(self.alignments)?;
+       civ_tbl.set("alignments", aligns_tbl);
+       Ok(LuaValue::Table(civ_tbl))
+    }
+}
 
 #[cfg(test)]
 mod tests {

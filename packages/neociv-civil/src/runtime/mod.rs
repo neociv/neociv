@@ -3,28 +3,10 @@ use rlua::{
     Error as LuaError, FromLuaMulti, Function as LuaFunction, Lua, Result as LuaResult,
     String as LuaString, Table as LuaTable,
 };
-use std::error::Error;
-use std::fmt::Display;
 use std::path::Path;
 
+pub mod errors;
 pub mod repl;
-
-#[derive(Debug)]
-pub enum CvlError {
-    LuaError(LuaError),
-    FileNotFound,
-    UnknownFileType,
-}
-
-impl Error for CvlError {}
-
-impl Display for CvlError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
-
-type NeocivRuntimeError = CvlError;
 
 static FENNEL_FILE: &'static str = include_str!("./api/fennel.lua");
 static SEARCHERS_FILE: &'static str = include_str!("./api/searchers.lua");
@@ -50,7 +32,7 @@ impl Default for NeocivRuntime {
                 // Include ".cvl" files when searching for modules and macros
                 let fennel_path: String = fennel_module.get("path")?;
                 let fennel_macro_path: String = fennel_module.get("macro-path")?;
-                let path_mod = "./?.cvl;";
+                let path_mod = "./?.cvl;./?/init.cvl;";
                 let path_result: String = format!("{}{}", path_mod, fennel_path);
                 let macro_path_result: String = format!("{}{}", path_mod, fennel_macro_path);
                 fennel_module.set("path", path_result)?;
@@ -131,7 +113,7 @@ impl NeocivRuntime {
         self.lua.context(move |ctx| {
             let cvl: LuaTable = ctx.globals().get("cvl")?;
             let inject_fn: LuaFunction = cvl.get("inject_state")?;
-            let lua_state = ctx.create_userdata(state.clone());
+            let lua_state = state.clone(); 
             return inject_fn.call::<_, ()>(lua_state);
         })?;
 
@@ -147,7 +129,7 @@ fn test_state_in_lua() {
 
     assert!(inject_result.is_ok());
 
-    let type_result = cvl.eval_lua::<bool>("assert(type(cvl.state) == 'userdata')");
+    let type_result = cvl.eval_lua::<bool>("assert(type(cvl.state) == 'table')");
 
     assert!(type_result.is_ok());
     assert!(type_result.unwrap());
@@ -169,8 +151,8 @@ fn test_state_in_lua() {
     state.active_civ_key = Some(String::from("example"));
     assert!(cvl.inject_state(&state).is_ok());
 
-    let active_civ_result = cvl.eval_lua::<bool>("assert(type(cvl.get('active_civ_key')) == 'string')");
+    let active_civ_result =
+        cvl.eval_lua::<bool>("assert(type(cvl.get('active_civ_key')) == 'string')");
     assert!(active_civ_result.is_ok());
     assert!(active_civ_result.unwrap());
-
 }

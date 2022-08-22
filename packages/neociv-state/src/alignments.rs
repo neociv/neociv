@@ -1,38 +1,26 @@
-use rlua::UserData;
+use rlua::{ToLua, Value as LuaValue};
 use serde::{Deserialize, Serialize};
-
-pub type Alignment = f32;
+use std::collections::HashMap;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Alignments {
-    /// Globalism (0) to Nationalism (1)
-    pub glob_nat: Alignment,
-    /// Capitalism (0) to Socialism (1)
-    pub cap_soc: Alignment,
-    /// Anarchy (0) to Authoritarianism (1)
-    pub anc_auth: Alignment,
-    /// Pacifism (0) to Aggressive (1)
-    pub pac_agro: Alignment,
+pub struct Alignment {
+    pub id: String,
+    pub min: String,
+    pub max: String,
+    pub default: f32,
+    pub value: f32,
 }
 
-impl Default for Alignments {
-    fn default() -> Self {
-        return Alignments {
-            glob_nat: 1.0,
-            cap_soc: 0.0,
-            anc_auth: 0.0,
-            pac_agro: 1.0,
-        };
+impl<'lua> ToLua<'lua> for Alignment {
+    fn to_lua(self, ctx: rlua::Context<'lua>) -> rlua::Result<rlua::Value<'lua>> {
+        let align_tbl = ctx.create_table()?;
+        align_tbl.set("id", self.id)?;
+        align_tbl.set("min", self.min)?;
+        align_tbl.set("max", self.max)?;
+        align_tbl.set("default", self.default)?;
+        align_tbl.set("value", self.value)?;
+        Ok(LuaValue::Table(align_tbl))
     }
 }
 
-impl UserData for Alignments {}
-
-#[test]
-fn test_defaults() {
-    let alignments = Alignments::default();
-    assert_eq!(alignments.glob_nat, 1.0);
-    assert_eq!(alignments.cap_soc, 0.0);
-    assert_eq!(alignments.anc_auth, 0.0);
-    assert_eq!(alignments.pac_agro, 1.0);
-}
+pub type Alignments = HashMap<String, Alignment>;

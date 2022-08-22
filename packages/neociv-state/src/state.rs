@@ -1,6 +1,6 @@
 use rlua::{
-    Error as LuaError, FromLua, FromLuaMulti, Nil as LuaNil, String as LuaString, ToLuaMulti,
-    UserData, UserDataMethods, Value as LuaValue,
+    Error as LuaError, FromLua, FromLuaMulti, Nil as LuaNil, String as LuaString, ToLua, UserData,
+    UserDataMethods, Value as LuaValue,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -32,6 +32,29 @@ pub struct NeocivState {
     pub camera: Camera,
 }
 
+impl<'lua> ToLua<'lua> for NeocivState {
+    fn to_lua(self, ctx: rlua::Context<'lua>) -> rlua::Result<LuaValue<'lua>> {
+        let state_tbl = ctx.create_table()?;
+        state_tbl.set("revision", self.revision)?;
+        state_tbl.set("turn", self.turn)?;
+        state_tbl.set(
+            "active_civ_key",
+            match self.active_civ_key {
+                Some(civ_key) => LuaValue::String(ctx.create_string(&civ_key)?),
+                None => LuaNil,
+            },
+        )?;
+        let civ_order_seq = ctx.create_sequence_from(self.civ_order)?;
+        state_tbl.set("civ_order", civ_order_seq)?;
+        let civs_tbl = ctx.create_table_from(self.civs)?;
+        state_tbl.set("civs", civs_tbl)?;
+        state_tbl.set("grid", self.grid)?;
+        state_tbl.set("camera", self.camera)?;
+        Ok(LuaValue::Table(state_tbl))
+    }
+}
+
+/*
 impl UserData for NeocivState {
     fn add_methods<'lua, M: UserDataMethods<'lua, Self>>(methods: &mut M) {
         methods.add_method("get", |ctx, this, path: String| {
@@ -53,3 +76,4 @@ impl UserData for NeocivState {
         });
     }
 }
+*/

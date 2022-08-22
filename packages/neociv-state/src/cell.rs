@@ -1,6 +1,6 @@
 use num_integer::div_floor;
-use rlua::UserData;
-use serde::{Serialize, Deserialize};
+use rlua::{Nil as LuaNil, ToLua, Value as LuaValue};
+use serde::{Deserialize, Serialize};
 
 use crate::civ::CivKey;
 
@@ -24,7 +24,21 @@ pub struct Cell {
     pub terrain: Option<Terrain>,
 }
 
-impl UserData for Cell {}
+impl<'lua> ToLua<'lua> for Cell {
+    fn to_lua(self, ctx: rlua::Context<'lua>) -> rlua::Result<rlua::Value<'lua>> {
+        let cell_tbl = ctx.create_table()?;
+        cell_tbl.set("x", self.x)?;
+        cell_tbl.set("y", self.y)?;
+        cell_tbl.set(
+            "owner",
+            match self.owner {
+                Some(civ_key) => LuaValue::String(ctx.create_string(&civ_key)?),
+                None => LuaNil,
+            },
+        )?;
+        Ok(LuaValue::Table(cell_tbl))
+    }
+}
 
 /// Contains Cells in a 1D Vec that are addressable in 2D space according to the xsize / ysize.
 #[derive(Clone, Default, Debug, Serialize, Deserialize)]
@@ -34,7 +48,17 @@ pub struct Grid {
     pub cells: Vec<Cell>,
 }
 
-impl UserData for Grid {}
+impl<'lua> ToLua<'lua> for Grid {
+    fn to_lua(self, ctx: rlua::Context<'lua>) -> rlua::Result<LuaValue<'lua>> {
+        let grid_tbl = ctx.create_table()?;
+        grid_tbl.set("xsize", self.xsize)?;
+        grid_tbl.set("ysize", self.ysize)?;
+
+        let cells = ctx.create_sequence_from(self.cells)?;
+        grid_tbl.set("cells", cells)?;
+        Ok(LuaValue::Table(grid_tbl))
+    }
+}
 
 /// Generate an x,y tuple for a given index in the Grid's Cells
 pub fn grid_i_to_xy(grid: &Grid, i: u16) -> (u8, u8) {

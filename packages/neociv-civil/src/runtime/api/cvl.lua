@@ -16,10 +16,10 @@ end
 
 function cvl.inject_state(state)
     cvl.state = state
-    --if cvl.state.revision ~= cvl.revision then
-    --    cvl.revision = cvl.state.revision
-    --    cvl.dispatch("state.updated", cvl.state)
-    --end
+    if cvl.get("revision") ~= cvl.revision then
+        cvl.revision = cvl.state.revision
+        cvl.dispatch("state.updated", cvl.state)
+    end
 end
 
 -- Listen for events
@@ -50,12 +50,35 @@ end
 
 -- Get a property in the state
 function cvl.get(prop_path)
-    return cvl.state:get(prop_path)
+    return cvl.state[prop_path]
 end
 
 -- Get a config property or the default value
 function cvl.get_config(prop_path, default)
-    return nil
+    return default or nil
+end
+
+-- Tells cvl to go and load a package directory
+function cvl.load_pkg(pkg_path)
+    return cvl
+end
+
+-- Generic register
+function cvl.register(type, id, data)
+    return cvl
+end
+
+function cvl.dump(o)
+    if type(o) == 'table' then
+        local s = '{ '
+        for k,v in pairs(o) do
+                if type(k) ~= 'number' then k = '"'..k..'"' end
+                s = s .. '['..k..'] = ' .. cvl.dump(v) .. ','
+        end
+        return s .. '} '
+    else
+        return tostring(o)
+    end
 end
 
 package.preload["cvl"] = function() return cvl end
