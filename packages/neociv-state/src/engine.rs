@@ -150,7 +150,7 @@ pub fn set_grid_cell(state: NeocivState, cell: &Cell) -> StateResult {
     }
 }
 
-/// Modify the camera's position
+/// Modify the camera's position with relative values
 pub fn mod_camera_position(state: NeocivState, vector: Vec3) -> StateResult {
    let mut new_state = state.clone(); 
    new_state.camera.position += vector;

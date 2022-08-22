@@ -47,7 +47,7 @@ impl<'lua> ToLua<'lua> for Civ {
        civ_tbl.set("id", self.id)?;
        civ_tbl.set("title", self.title)?;
        let aligns_tbl = ctx.create_table_from(self.alignments)?;
-       civ_tbl.set("alignments", aligns_tbl);
+       civ_tbl.set("alignments", aligns_tbl)?;
        Ok(LuaValue::Table(civ_tbl))
     }
 }

@@ -37,6 +37,14 @@ impl Default for NeocivRuntime {
                 let macro_path_result: String = format!("{}{}", path_mod, fennel_macro_path);
                 fennel_module.set("path", path_result)?;
                 return fennel_module.set("macro-path", macro_path_result);
+
+                // Inject functionality for cvl.do to hook into
+                //let cvl: LuaTable = ctx.globals().get("cvl")?;
+                /*
+                let cvl_do = ctx.create_function(|_, action) 
+
+                cvl.set("do", 
+                */
             });
             return NeocivRuntime { lua };
         }

@@ -1,4 +1,4 @@
-use rlua::{ToLua, Value as LuaValue};
+use rlua::{Error as LuaError, FromLua, ToLua, Value as LuaValue};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -20,6 +20,25 @@ impl<'lua> ToLua<'lua> for Alignment {
         align_tbl.set("default", self.default)?;
         align_tbl.set("value", self.value)?;
         Ok(LuaValue::Table(align_tbl))
+    }
+}
+
+impl<'lua> FromLua<'lua> for Alignment {
+    fn from_lua(lua_value: LuaValue<'lua>, _: rlua::Context<'lua>) -> rlua::Result<Self> {
+        match lua_value {
+            LuaValue::Table(table) => Ok(Alignment {
+                id: table.get::<_, String>("id")?,
+                min: table.get::<_, String>("min")?,
+                max: table.get::<_, String>("max")?,
+                default: table.get::<_, f32>("default")?,
+                value: table.get::<_, f32>("value")?,
+            }),
+            _ => Err(LuaError::FromLuaConversionError {
+                from: lua_value.type_name(),
+                to: "Alignment",
+                message: None,
+            }),
+        }
     }
 }
 
