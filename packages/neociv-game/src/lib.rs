@@ -26,5 +26,8 @@ impl Plugin for NeocivGamePlugin {
         app.add_startup_system(grid::camera::setup_grid_camera)
             .add_startup_system(grid::map::setup_grid_map)
             .add_startup_system(grid::light::setup_grid_lights);
+        
+        // Systems
+        app.add_system(grid::camera::grid_camera_system);
     }
 }

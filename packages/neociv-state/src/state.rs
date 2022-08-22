@@ -1,7 +1,5 @@
-use rlua::{
-    Error as LuaError, FromLua, FromLuaMulti, Nil as LuaNil, String as LuaString, ToLua, UserData,
-    UserDataMethods, Value as LuaValue,
-};
+use bevy_ecs::component::Component;
+use rlua::{Nil as LuaNil, ToLua, Value as LuaValue};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -10,7 +8,7 @@ use crate::cell::Grid;
 use crate::civ::{Civ, CivKey};
 
 /// Game state structure
-#[derive(Clone, Default, Debug, Serialize, Deserialize)]
+#[derive(Clone, Default, Debug, Component, Serialize, Deserialize)]
 pub struct NeocivState {
     /// The current change revision of the state - all actions that change the state will increment
     /// this value which is useful for quickly checking if the state has changed and needs to be
