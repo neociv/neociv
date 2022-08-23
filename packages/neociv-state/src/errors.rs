@@ -3,6 +3,7 @@ use strum::Display;
 
 #[derive(Display, Debug, PartialEq)]
 pub enum StateErrorCode {
+    UnknownEngineAction,
     DuplicateCivId,
     InvalidCivId,
     UnknownCivId,
@@ -42,6 +43,18 @@ macro_rules! state_error {
     }
 }
 pub(crate) use state_error;
+
+#[macro_export]
+macro_rules! err_unknown_engine_action {
+    ($action: expr) => {
+        state_error!(
+            StateErrorCode::UnknownEngineAction,
+            "Unknown Neociv Engine Action \"{}\"",
+            $action
+        )
+    }
+}
+pub(crate) use err_unknown_engine_action;
 
 #[macro_export]
 macro_rules! err_dup_civ_id {

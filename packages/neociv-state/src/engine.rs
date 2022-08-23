@@ -20,11 +20,13 @@ macro_rules! return_next_state {
 }
 
 /// Return an Err Result with a StateError.
+#[macro_export]
 macro_rules! state_panic {
     ($err:expr) => {
         return Err($err);
     };
 }
+pub(crate) use state_panic;
 
 /// Validate the CivId
 macro_rules! invalid_civ_id {

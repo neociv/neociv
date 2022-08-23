@@ -7,6 +7,8 @@ use neociv_state::state::NeocivState;
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum AppState {
     Init,
+    Menu,
+    Game,
 }
 
 #[cfg(target_arch = "wasm32")]

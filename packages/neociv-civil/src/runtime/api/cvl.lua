@@ -81,6 +81,11 @@ function cvl.dump(o)
     end
 end
 
+function cvl.op(action, args)
+   cvl.inject_state(cvl._engine_do(action, args))
+   return cvl 
+end
+
 package.preload["cvl"] = function() return cvl end
 
 return cvl

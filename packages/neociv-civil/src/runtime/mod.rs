@@ -1,10 +1,13 @@
 use neociv_state::state::NeocivState;
 use rlua::{
     Error as LuaError, FromLuaMulti, Function as LuaFunction, Lua, Result as LuaResult,
-    String as LuaString, Table as LuaTable,
+    String as LuaString, Table as LuaTable, Value as LuaValue,
 };
 use std::path::Path;
 
+use self::engine::engine_do;
+
+pub mod engine;
 pub mod errors;
 pub mod repl;
 
@@ -15,13 +18,17 @@ static CVL_FILE: &'static str = include_str!("./api/cvl.lua");
 
 pub struct NeocivRuntime {
     lua: Lua,
+    state: NeocivState,
 }
 
 impl Default for NeocivRuntime {
     fn default() -> Self {
         unsafe {
-            let lua = Lua::new_with_debug();
-            let _result = lua.context(move |ctx| {
+            let runtime = NeocivRuntime {
+                lua: Lua::new_with_debug(),
+                state: NeocivState::default(),
+            };
+            let _result = runtime.lua.context(move |ctx| {
                 ctx.load(FENNEL_FILE).exec()?;
                 ctx.load(SEARCHERS_FILE).exec()?;
                 ctx.load(CVL_FILE).exec()?;
@@ -36,22 +43,36 @@ impl Default for NeocivRuntime {
                 let path_result: String = format!("{}{}", path_mod, fennel_path);
                 let macro_path_result: String = format!("{}{}", path_mod, fennel_macro_path);
                 fennel_module.set("path", path_result)?;
-                return fennel_module.set("macro-path", macro_path_result);
+                fennel_module.set("macro-path", macro_path_result);
 
-                // Inject functionality for cvl.do to hook into
-                //let cvl: LuaTable = ctx.globals().get("cvl")?;
-                /*
-                let cvl_do = ctx.create_function(|_, action) 
-
-                cvl.set("do", 
-                */
+                // Perform engine operations
+                let do_fn: LuaFunction =
+                    ctx.create_function(move |_, (state, action, args): (NeocivState, String, LuaValue)| {
+                        return engine_do(state, action.as_str(), args);
+                        Ok(())
+                    })?;
+                let cvl_tbl: LuaTable = ctx.globals().get("cvl")?;
+                return cvl_tbl.set("_engine_do", do_fn);
             });
-            return NeocivRuntime { lua };
+            return runtime;
         }
     }
 }
 
 impl NeocivRuntime {
+    /// Create a runtime from a provided state object
+    pub fn from(state: NeocivState) -> Self {
+        NeocivRuntime {
+            state,
+            ..NeocivRuntime::default()
+        }
+    }
+
+    /// Create a runtime from a JSON state file
+    pub fn from_file(file: &str) -> Result<Self, ()> {
+        return Ok(NeocivRuntime::default());
+    }
+
     pub fn dofile<T: for<'lua> FromLuaMulti<'lua>>(&self, file_str: &str) -> LuaResult<T> {
         let _path_obj = Path::new(file_str);
         if file_str.ends_with(".lua") {
@@ -121,7 +142,7 @@ impl NeocivRuntime {
         self.lua.context(move |ctx| {
             let cvl: LuaTable = ctx.globals().get("cvl")?;
             let inject_fn: LuaFunction = cvl.get("inject_state")?;
-            let lua_state = state.clone(); 
+            let lua_state = state.clone();
             return inject_fn.call::<_, ()>(lua_state);
         })?;
 
