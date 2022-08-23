@@ -1,6 +1,7 @@
 use bevy_math::Vec3;
 
-use crate::cell::{grid_i_to_xy, grid_xy_to_i, Cell};
+use crate::cell::{Cell};
+use crate::grid::{grid_i_to_xy, grid_xy_to_i};
 use crate::civ::{Civ, CivKey};
 use crate::errors::*;
 use crate::state::NeocivState;

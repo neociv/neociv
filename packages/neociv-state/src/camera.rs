@@ -1,6 +1,8 @@
 use bevy_math::Vec3;
-use rlua::{ToLua, Value as LuaValue};
+use rlua::{Error as LuaError, FromLua, Table as LuaTable, ToLua, Value as LuaValue};
 use serde::{Deserialize, Serialize};
+
+use crate::utils::vec3_from_table;
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Camera {
@@ -16,5 +18,20 @@ impl<'lua> ToLua<'lua> for Camera {
         position_tbl.set("z", self.position.z)?;
         camera_tbl.set("position", position_tbl)?;
         Ok(LuaValue::Table(camera_tbl))
+    }
+}
+
+impl<'lua> FromLua<'lua> for Camera {
+    fn from_lua(lua_value: LuaValue<'lua>, _: rlua::Context<'lua>) -> rlua::Result<Self> {
+        match lua_value {
+            LuaValue::Table(table) => Ok(Camera {
+                position: vec3_from_table(table)?,
+            }),
+            _ => Err(LuaError::FromLuaConversionError {
+                from: lua_value.type_name(),
+                to: "Camera",
+                message: None,
+            }),
+        }
     }
 }

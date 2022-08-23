@@ -4,8 +4,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use crate::camera::Camera;
-use crate::cell::Grid;
 use crate::civ::{Civ, CivKey};
+use crate::grid::{Grid};
 
 /// Game state structure
 #[derive(Clone, Default, Debug, Component, Serialize, Deserialize)]
