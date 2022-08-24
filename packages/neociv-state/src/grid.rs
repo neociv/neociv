@@ -1,6 +1,6 @@
 use num_integer::div_floor;
 
-use rlua::{ToLua, Value as LuaValue};
+use rlua::{Error as LuaError, FromLua, ToLua, Value as LuaValue};
 use serde::{Deserialize, Serialize};
 
 use crate::cell::Cell;
@@ -22,6 +22,23 @@ impl<'lua> ToLua<'lua> for Grid {
         let cells = ctx.create_sequence_from(self.cells)?;
         grid_tbl.set("cells", cells)?;
         Ok(LuaValue::Table(grid_tbl))
+    }
+}
+
+impl<'lua> FromLua<'lua> for Grid {
+    fn from_lua(lua_value: LuaValue<'lua>, _lua: rlua::Context<'lua>) -> rlua::Result<Self> {
+        match lua_value {
+            LuaValue::Table(tbl) => Ok(Grid {
+                xsize: tbl.get("xsize")?,
+                ysize: tbl.get("ysize")?,
+                cells: tbl.get("cells")?,
+            }),
+            _ => Err(LuaError::FromLuaConversionError {
+                from: lua_value.type_name(),
+                to: "Grid",
+                message: None,
+            }),
+        }
     }
 }
 

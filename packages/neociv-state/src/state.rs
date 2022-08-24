@@ -1,11 +1,11 @@
 use bevy_ecs::component::Component;
-use rlua::{Nil as LuaNil, ToLua, Value as LuaValue};
+use rlua::{Nil as LuaNil, ToLua, Value as LuaValue, Error as LuaError, FromLua};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use crate::camera::Camera;
 use crate::civ::{Civ, CivKey};
-use crate::grid::{Grid};
+use crate::grid::Grid;
 
 /// Game state structure
 #[derive(Clone, Default, Debug, Component, Serialize, Deserialize)]
@@ -49,5 +49,22 @@ impl<'lua> ToLua<'lua> for NeocivState {
         state_tbl.set("grid", self.grid)?;
         state_tbl.set("camera", self.camera)?;
         Ok(LuaValue::Table(state_tbl))
+    }
+}
+
+impl<'lua> FromLua<'lua> for NeocivState {
+    fn from_lua(lua_value: LuaValue<'lua>, _lua: rlua::Context<'lua>) -> rlua::Result<Self> {
+        match lua_value {
+            LuaValue::Table(tbl) => Ok(NeocivState { 
+                revision: tbl.get("revision")?,
+                turn: tbl.get("turn")?,
+                active_civ_key: tbl.get("active_civ_key")?,
+                civ_order: tbl.get("civ_order")?,
+                civs: tbl.get("civs")?,
+                grid: tbl.get("grid")?,
+                camera: tbl.get("camera")?,
+            }),
+            _ => Err(LuaError::FromLuaConversionError { from: lua_value.type_name(), to: "NeocivState", message: None })
+        }
     }
 }

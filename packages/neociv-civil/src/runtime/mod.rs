@@ -48,7 +48,7 @@ impl Default for NeocivRuntime {
                 // Perform engine operations
                 let do_fn: LuaFunction =
                     ctx.create_function(move |_, (state, action, args): (NeocivState, String, LuaValue)| {
-                        return engine_do(state, action.as_str(), args);
+                        let result = engine_do(state, action.as_str(), args)?;
                         Ok(())
                     })?;
                 let cvl_tbl: LuaTable = ctx.globals().get("cvl")?;

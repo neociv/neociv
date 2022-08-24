@@ -25,7 +25,7 @@ impl<'lua> FromLua<'lua> for Camera {
     fn from_lua(lua_value: LuaValue<'lua>, _: rlua::Context<'lua>) -> rlua::Result<Self> {
         match lua_value {
             LuaValue::Table(table) => Ok(Camera {
-                position: vec3_from_table(table)?,
+                position: vec3_from_table(table.get("position")?)?,
             }),
             _ => Err(LuaError::FromLuaConversionError {
                 from: lua_value.type_name(),

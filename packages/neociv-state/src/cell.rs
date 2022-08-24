@@ -1,4 +1,4 @@
-use rlua::{FromLua, Nil as LuaNil, ToLua, Value as LuaValue, Error as LuaError};
+use rlua::{Error as LuaError, FromLua, Nil as LuaNil, ToLua, Value as LuaValue};
 use serde::{Deserialize, Serialize};
 
 use crate::{civ::CivKey, utils::opt_str_to_lua};
@@ -28,7 +28,7 @@ impl<'lua> ToLua<'lua> for Cell {
         let cell_tbl = ctx.create_table()?;
         cell_tbl.set("x", self.x)?;
         cell_tbl.set("y", self.y)?;
-        cell_tbl.set("owner", opt_str_to_lua(ctx, self.owner)?)?;
+        cell_tbl.set("owner", opt_str_to_lua(self.owner, &ctx)?)?;
         Ok(LuaValue::Table(cell_tbl))
     }
 }
@@ -36,7 +36,13 @@ impl<'lua> ToLua<'lua> for Cell {
 impl<'lua> FromLua<'lua> for Cell {
     fn from_lua(lua_value: LuaValue<'lua>, _: rlua::Context<'lua>) -> rlua::Result<Self> {
         match lua_value {
-            LuaValue::Table(tbl) => Ok({}),
+            LuaValue::Table(tbl) => Ok(Cell {
+                x: tbl.get("x")?,
+                y: tbl.get("y")?,
+                owner: tbl.get("owner")?,
+                terrain: None,
+                //terrain: tbl.get("terrain")?,
+            }),
             _ => Err(LuaError::FromLuaConversionError {
                 from: lua_value.type_name(),
                 to: "Cell",

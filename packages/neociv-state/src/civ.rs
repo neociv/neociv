@@ -1,5 +1,5 @@
 use regex::*;
-use rlua::{ToLua, Value as LuaValue};
+use rlua::{Error as LuaError, FromLua, ToLua, Value as LuaValue};
 use serde::{Deserialize, Serialize};
 
 use crate::alignments::Alignments;
@@ -49,6 +49,23 @@ impl<'lua> ToLua<'lua> for Civ {
         let aligns_tbl = ctx.create_table_from(self.alignments)?;
         civ_tbl.set("alignments", aligns_tbl)?;
         Ok(LuaValue::Table(civ_tbl))
+    }
+}
+
+impl<'lua> FromLua<'lua> for Civ {
+    fn from_lua(lua_value: LuaValue<'lua>, _lua: rlua::Context<'lua>) -> rlua::Result<Self> {
+        match lua_value {
+            LuaValue::Table(tbl) => Ok(Civ {
+                id: tbl.get("id")?,
+                title: tbl.get("title")?,
+                alignments: tbl.get("alignments")?,
+            }),
+            _ => Err(LuaError::FromLuaConversionError {
+                from: lua_value.type_name(),
+                to: "Civ",
+                message: None,
+            }),
+        }
     }
 }
 
