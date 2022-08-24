@@ -3,6 +3,8 @@ use bevy::window::WindowMode;
 
 use neociv_config::NeocivConfig;
 
+pub mod plugins;
+
 /// Initialise and setup a basic app window
 pub fn init_desktop_app(config: NeocivConfig) -> App {
     let mut app = App::new();

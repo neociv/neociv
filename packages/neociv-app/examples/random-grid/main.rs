@@ -23,5 +23,7 @@ fn main() {
     // Add the game plugin
     app.add_plugin(game::NeocivGamePlugin);
 
+    app.add_plugin(app::plugins::console::ConsolePlugin);
+
     app.run();
 }

@@ -4,6 +4,8 @@ use neociv_config::NeocivConfig;
 use neociv_game::NeocivGamePlugin;
 use neociv_state::state::NeocivState;
 
+use neociv_app::plugins::console::ConsolePlugin;
+
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum AppState {
     Init,
@@ -25,6 +27,9 @@ fn main() {
 
     // TODO: Add load state startup system here
     app.add_plugin(NeocivGamePlugin);
+
+    // TODO: Put this behind some options
+    app.add_plugin(ConsolePlugin);
 
     #[cfg(target_arch = "wasm32")]
     app.add_plugin(bevy_webgl2);

@@ -5,4 +5,7 @@ edition = "2021"
 
 [dependencies]
 bevy = { version = "0.8.0", features = ["bevy_render", "bevy_winit"] }
+crossbeam = "0.8.2"
 neociv-config = { path = "../neociv-config" }
+neociv-state = { path = "../neociv-state" }
+neociv-game = { path = "../neociv-game" }
