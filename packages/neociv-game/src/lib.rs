@@ -5,6 +5,7 @@ use neociv_civil::runtime::NeocivRuntime;
 
 pub mod grid;
 pub mod utils;
+pub mod plugins;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum GameState {
@@ -20,7 +21,7 @@ pub struct NeocivGamePlugin;
 impl Plugin for NeocivGamePlugin {
     fn build(&self, app: &mut App) {
         // Add the runtime to the resources
-        app.insert_resource(NeocivRuntime::default());
+        app.add_plugin(plugins::runtime::NeocivRuntimePlugin);
 
         // Picking
         app.add_plugins(DefaultPickingPlugins)
