@@ -4,7 +4,16 @@ use bevy::prelude::*;
 use bevy::tasks::AsyncComputeTaskPool;
 use crossbeam::channel::{bounded, Receiver};
 
-fn repl_input(channel: Res<Receiver<String>>) {
+use neociv_civil::runtime::{repl::NeocivRepl, NeocivRuntime};
+
+fn repl_input(cvl: Res<NeocivRuntime>, channel: Res<Receiver<String>>) {
+    if let Ok(line) = channel.try_recv() {
+        let result = cvl.lua_repl_line(&line);
+        match result {
+            Ok(s) => println!("{}", s),
+            Err(ex) => error!("{:?}", ex),
+        }
+    }
 }
 
 fn spawn_io_thread(mut commands: Commands) {

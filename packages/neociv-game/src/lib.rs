@@ -1,6 +1,8 @@
 use bevy::prelude::{App, Plugin};
 use bevy_mod_picking::{DebugCursorPickingPlugin, DebugEventsPickingPlugin, DefaultPickingPlugins};
 
+use neociv_civil::runtime::NeocivRuntime;
+
 pub mod grid;
 pub mod utils;
 
@@ -17,6 +19,9 @@ pub struct NeocivGamePlugin;
 
 impl Plugin for NeocivGamePlugin {
     fn build(&self, app: &mut App) {
+        // Add the runtime to the resources
+        app.insert_resource(NeocivRuntime::default());
+
         // Picking
         app.add_plugins(DefaultPickingPlugins)
             .add_plugin(DebugCursorPickingPlugin)
