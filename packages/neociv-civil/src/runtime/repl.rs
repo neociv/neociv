@@ -9,7 +9,7 @@ pub trait NeocivRepl {
 
 impl NeocivRepl for NeocivRuntime {
     fn lua_repl(&self) -> &Self {
-        self.lua.context(move |ctx| loop {
+        self.lua.lock().unwrap().context(move |ctx| loop {
             let mut editor = Editor::<()>::new().unwrap();
 
             loop {

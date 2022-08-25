@@ -4,6 +4,9 @@ use bevy::prelude::*;
 use bevy::tasks::AsyncComputeTaskPool;
 use crossbeam::channel::{bounded, Receiver};
 
+fn repl_input(channel: Res<Receiver<String>>) {
+}
+
 fn spawn_io_thread(mut commands: Commands) {
     let thread_pool = AsyncComputeTaskPool::get();
     info!("Starting console...");
@@ -27,5 +30,6 @@ pub struct ConsolePlugin;
 impl Plugin for ConsolePlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(spawn_io_thread);
+        app.add_system(repl_input);
     }
 }

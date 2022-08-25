@@ -4,6 +4,8 @@ use rlua::{
     String as LuaString, Table as LuaTable, Value as LuaValue,
 };
 use std::path::Path;
+use bevy_ecs::component::Component;
+use std::sync::{Arc, Mutex};
 
 use self::engine::engine_do;
 
@@ -16,8 +18,9 @@ static SEARCHERS_FILE: &'static str = include_str!("./api/searchers.lua");
 static MACROS_FILE: &'static str = include_str!("./api/macros.fnl");
 static CVL_FILE: &'static str = include_str!("./api/cvl.lua");
 
+#[derive(Component)]
 pub struct NeocivRuntime {
-    lua: Lua,
+    lua: Arc<Mutex<Lua>>,
     state: NeocivState,
 }
 
@@ -25,10 +28,10 @@ impl Default for NeocivRuntime {
     fn default() -> Self {
         unsafe {
             let runtime = NeocivRuntime {
-                lua: Lua::new_with_debug(),
+                lua: Arc::new(Mutex::new(Lua::new_with_debug())),
                 state: NeocivState::default(),
             };
-            let _result = runtime.lua.context(move |ctx| {
+            let _result = runtime.lua.lock().unwrap().context(move |ctx| {
                 ctx.load(FENNEL_FILE).exec()?;
                 ctx.load(SEARCHERS_FILE).exec()?;
                 ctx.load(CVL_FILE).exec()?;
@@ -88,7 +91,7 @@ impl NeocivRuntime {
     }
 
     pub fn dofile_lua<T: for<'lua> FromLuaMulti<'lua>>(&self, file_str: &str) -> LuaResult<T> {
-        return self.lua.context(move |ctx| {
+        return self.lua.lock().unwrap().context(move |ctx| {
             let path_str: LuaString = ctx.create_string(file_str)?;
             let dofile: LuaFunction = ctx.globals().get("dofile")?;
             return dofile.call::<_, T>(path_str);
@@ -96,13 +99,13 @@ impl NeocivRuntime {
     }
 
     pub fn eval_lua<T: for<'lua> FromLuaMulti<'lua>>(&self, lua_str: &str) -> LuaResult<T> {
-        return self.lua.context(move |ctx| {
+        return self.lua.lock().unwrap().context(move |ctx| {
             return ctx.load(lua_str).eval();
         });
     }
 
     pub fn compile_fnl(&self, fnl_str: &str) -> LuaResult<String> {
-        return self.lua.context(move |ctx| {
+        return self.lua.lock().unwrap().context(move |ctx| {
             // Create a lua string containing the provided code
             let code_str: LuaString = ctx.create_string(fnl_str)?;
 
@@ -117,7 +120,7 @@ impl NeocivRuntime {
     }
 
     pub fn dofile_fnl<T: for<'lua> FromLuaMulti<'lua>>(&self, file_str: &str) -> LuaResult<T> {
-        return self.lua.context(move |ctx| {
+        return self.lua.lock().unwrap().context(move |ctx| {
             let path_str: LuaString = ctx.create_string(file_str)?;
             let require: LuaFunction = ctx.globals().get("require")?;
             let fennel_utils: LuaTable = require.call::<_, LuaTable>("fennel.utils")?;
@@ -128,7 +131,7 @@ impl NeocivRuntime {
     }
 
     pub fn eval_fnl<T: for<'lua> FromLuaMulti<'lua>>(&self, fnl_str: &str) -> LuaResult<T> {
-        return self.lua.context(move |ctx| {
+        return self.lua.lock().unwrap().context(move |ctx| {
             let eval_str: LuaString = ctx.create_string(fnl_str)?;
             let require: LuaFunction = ctx.globals().get("require")?;
             let fennel_utils: LuaTable = require.call::<_, LuaTable>("fennel.utils")?;
@@ -139,7 +142,7 @@ impl NeocivRuntime {
     }
 
     pub fn inject_state(&self, state: &NeocivState) -> Result<&Self, LuaError> {
-        self.lua.context(move |ctx| {
+        self.lua.lock().unwrap().context(move |ctx| {
             let cvl: LuaTable = ctx.globals().get("cvl")?;
             let inject_fn: LuaFunction = cvl.get("inject_state")?;
             let lua_state = state.clone();

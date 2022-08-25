@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 neociv-state = { path = "../neociv-state" }
 bevy_math = "0.8.0"
+bevy_ecs = "0.8.0"
 rlua = "0.19.1"
 indoc = "1.0.7"
 rustyline = "10.0.0"
