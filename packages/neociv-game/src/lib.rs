@@ -23,6 +23,9 @@ impl Plugin for NeocivGamePlugin {
         // Add the runtime to the resources
         app.add_plugin(plugins::runtime::NeocivRuntimePlugin);
 
+        // Grid plugin
+        app.add_plugin(plugins::grid::NeocivGridPlugin);
+
         // Picking
         app.add_plugins(DefaultPickingPlugins)
             .add_plugin(DebugCursorPickingPlugin)
