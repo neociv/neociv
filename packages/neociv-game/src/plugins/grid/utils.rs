@@ -1,3 +1,6 @@
+use crate::utils::hex::*;
+use bevy::prelude::*;
+
 pub fn hex_mesh(size: f32) -> Mesh {
     // Initialise the mesh as a set of vec coordinates, ie. raw geoemetry
     let mut mesh = Mesh::new(bevy::render::render_resource::PrimitiveTopology::TriangleList);

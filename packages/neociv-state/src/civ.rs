@@ -1,6 +1,7 @@
 use regex::*;
 use rlua::{Error as LuaError, FromLua, ToLua, Value as LuaValue};
 use serde::{Deserialize, Serialize};
+use serde_diff::SerdeDiff;
 
 use crate::alignments::Alignments;
 
@@ -34,7 +35,7 @@ lazy_static! {
     pub static ref VALID_CIV_KEY: Regex = Regex::new(r"^[a-zA-Z0-9]+\.[a-zA-Z0-9]+(?:\.[a-zA-Z0-9])*\[\d+\]$").unwrap();
 }
 
-#[derive(Clone, Default, Debug, Serialize, Deserialize)]
+#[derive(Clone, Default, Debug, Serialize, Deserialize, SerdeDiff)]
 pub struct Civ {
     pub id: CivId,
     pub title: String,

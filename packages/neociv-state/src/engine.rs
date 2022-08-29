@@ -4,6 +4,7 @@ use crate::cell::{Cell};
 use crate::grid::{grid_i_to_xy, grid_xy_to_i};
 use crate::civ::{Civ, CivKey};
 use crate::errors::*;
+use crate::mask::CellMasks;
 use crate::state::NeocivState;
 
 /// Any modification to the state produces a result that either contains the successfully updated
@@ -123,6 +124,7 @@ pub fn set_grid_size(state: NeocivState, xsize: u8, ysize: u8) -> StateResult {
                 y: xy.1,
                 owner: None,
                 terrain: None,
+                masks: CellMasks::default(),
             });
         }
 

@@ -1,5 +1,5 @@
 use bevy_math::Vec3;
-use rlua::{Error as LuaError, FromLua, Table as LuaTable, ToLua, Value as LuaValue};
+use rlua::{Error as LuaError, FromLua, ToLua, Value as LuaValue};
 use serde::{Deserialize, Serialize};
 
 use crate::utils::vec3_from_table;

@@ -21,7 +21,7 @@ static CVL_FILE: &'static str = include_str!("./api/cvl.lua");
 #[derive(Component)]
 pub struct NeocivRuntime {
     lua: Arc<Mutex<Lua>>,
-    state: NeocivState,
+    pub state: NeocivState,
 }
 
 impl Default for NeocivRuntime {

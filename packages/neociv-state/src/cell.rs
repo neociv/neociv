@@ -1,7 +1,7 @@
-use rlua::{Error as LuaError, FromLua, Nil as LuaNil, ToLua, Value as LuaValue};
+use rlua::{Error as LuaError, FromLua, ToLua, Value as LuaValue};
 use serde::{Deserialize, Serialize};
 
-use crate::{civ::CivKey, utils::opt_str_to_lua};
+use crate::{civ::CivKey, utils::opt_str_to_lua, mask::CellMasks};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Terrain {
@@ -21,6 +21,8 @@ pub struct Cell {
     pub owner: Option<CivKey>,
     /// Terrain
     pub terrain: Option<Terrain>,
+    /// Masks
+    pub masks: CellMasks
 }
 
 impl<'lua> ToLua<'lua> for Cell {
@@ -41,7 +43,7 @@ impl<'lua> FromLua<'lua> for Cell {
                 y: tbl.get("y")?,
                 owner: tbl.get("owner")?,
                 terrain: None,
-                //terrain: tbl.get("terrain")?,
+                masks: tbl.get("masks")?,
             }),
             _ => Err(LuaError::FromLuaConversionError {
                 from: lua_value.type_name(),

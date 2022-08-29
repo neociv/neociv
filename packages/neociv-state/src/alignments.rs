@@ -1,8 +1,10 @@
 use rlua::{Error as LuaError, FromLua, ToLua, Value as LuaValue};
 use serde::{Deserialize, Serialize};
+use serde_diff::SerdeDiff;
 use std::collections::HashMap;
+use bevy_ecs::system::Resource;
 
-#[derive(Clone, Debug, Serialize, Deserialize, Default)]
+#[derive(Resource, Clone, Debug, Serialize, Deserialize, Default, SerdeDiff)]
 pub struct Alignment {
     pub id: String,
     pub left: String,
