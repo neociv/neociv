@@ -1,13 +1,13 @@
+use bevy_ecs::component::Component;
 use neociv_state::state::NeocivState;
 use rlua::{
-    Error as LuaError, FromLuaMulti, Function as LuaFunction, Lua, Result as LuaResult,
+    Context, Error as LuaError, FromLuaMulti, Function as LuaFunction, Lua, Result as LuaResult,
     String as LuaString, Table as LuaTable, Value as LuaValue,
 };
 use std::path::Path;
-use bevy_ecs::component::Component;
 use std::sync::{Arc, Mutex};
 
-use self::engine::engine_do;
+use self::{engine::engine_do, errors::NeocivRuntimeError};
 
 pub mod engine;
 pub mod errors;
@@ -46,14 +46,21 @@ impl Default for NeocivRuntime {
                 let path_result: String = format!("{}{}", path_mod, fennel_path);
                 let macro_path_result: String = format!("{}{}", path_mod, fennel_macro_path);
                 fennel_module.set("path", path_result)?;
-                fennel_module.set("macro-path", macro_path_result);
+                fennel_module.set("macro-path", macro_path_result)?;
+
+                ctx.set_named_registry_value("state", NeocivState::default())?;
 
                 // Perform engine operations
-                let do_fn: LuaFunction =
-                    ctx.create_function(move |_, (state, action, args): (NeocivState, String, LuaValue)| {
-                        let result = engine_do(state, action.as_str(), args)?;
-                        Ok(())
-                    })?;
+                let do_fn: LuaFunction = ctx.create_function(
+                    |fn_ctx, (action, args): (String, LuaValue)| match engine_do(
+                        fn_ctx.named_registry_value("state")?,
+                        action.as_str(),
+                        args,
+                    ) {
+                        Ok(s) => NeocivRuntime::inject_state_into_context(&fn_ctx, &s),
+                        _ => panic!("Oh no!"),
+                    },
+                )?;
                 let cvl_tbl: LuaTable = ctx.globals().get("cvl")?;
                 return cvl_tbl.set("_engine_do", do_fn);
             });
@@ -141,21 +148,37 @@ impl NeocivRuntime {
         });
     }
 
-    pub fn inject_state(&self, state: &NeocivState) -> Result<&Self, LuaError> {
-        self.lua.lock().unwrap().context(move |ctx| {
-            let cvl: LuaTable = ctx.globals().get("cvl")?;
-            let inject_fn: LuaFunction = cvl.get("inject_state")?;
-            let lua_state = state.clone();
-            return inject_fn.call::<_, ()>(lua_state);
-        })?;
+    pub fn inject_state_into_context(ctx: &Context, state: &NeocivState) -> LuaResult<()> {
+        ctx.set_named_registry_value("state", state.clone())?;
+        let cvl: LuaTable = ctx.globals().get("cvl")?;
+        let inject_fn: LuaFunction = cvl.get("inject_state")?;
+        return inject_fn.call::<_, ()>(state.clone());
+    }
 
+    pub fn inject_state(&mut self, state: &NeocivState) -> Result<&Self, LuaError> {
+        self.lua
+            .lock()
+            .unwrap()
+            .context(move |ctx| NeocivRuntime::inject_state_into_context(&ctx, state))?;
+
+        self.state = state.clone();
         return Ok(self);
+    }
+
+    pub fn update(&mut self) -> Result<&Self, LuaError> {
+        let lua_state = self.lua.lock().unwrap().context(move |ctx| {
+            return ctx.named_registry_value("state");
+        });
+        return match lua_state {
+            Ok(s) => { self.state = s; return Ok(self) },
+            Err(ex) => Err(ex)
+        }
     }
 }
 
 #[test]
 fn test_state_in_lua() {
-    let cvl = NeocivRuntime::default();
+    let mut cvl = NeocivRuntime::default();
     let mut state = NeocivState::default();
     let inject_result = cvl.inject_state(&state);
 

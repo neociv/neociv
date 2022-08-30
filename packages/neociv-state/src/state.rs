@@ -1,3 +1,4 @@
+use bevy_ecs::prelude::Component;
 use bevy_ecs::system::Resource;
 use rlua::{Nil as LuaNil, ToLua, Value as LuaValue, Error as LuaError, FromLua};
 use serde::{Deserialize, Serialize};
@@ -8,7 +9,7 @@ use crate::civ::{Civ, CivKey};
 use crate::grid::Grid;
 
 /// Game state structure
-#[derive(Clone, Default, Debug, Serialize, Deserialize, Resource)]
+#[derive(Clone, Default, Debug, Serialize, Deserialize, Component)]
 pub struct NeocivState {
     /// The current change revision of the state - all actions that change the state will increment
     /// this value which is useful for quickly checking if the state has changed and needs to be

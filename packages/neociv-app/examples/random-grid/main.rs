@@ -17,7 +17,7 @@ fn main() {
         Err(ex) => panic!("{:?}", ex),
     };
 
-    // Add the state resource
+    // Add the state resource - the runtime setup will detect and instead use this instance
     app.insert_resource(state);
 
     // Add the game plugin

@@ -1,8 +1,6 @@
 use bevy::prelude::{App, Plugin};
 use bevy_mod_picking::{DebugCursorPickingPlugin, DebugEventsPickingPlugin, DefaultPickingPlugins};
 
-use neociv_civil::runtime::NeocivRuntime;
-
 pub mod grid;
 pub mod utils;
 pub mod plugins;

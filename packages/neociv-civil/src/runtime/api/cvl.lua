@@ -1,5 +1,5 @@
 cvl = cvl or {
-    revision = 0,
+    revision = -1,
     events = {},
     config = {},
     state = nil
@@ -15,8 +15,8 @@ local function chain(input)
 end
 
 function cvl.inject_state(state)
-    cvl.state = state
-    if cvl.get("revision") ~= cvl.revision then
+    if cvl.state == nil or state ~= nil and state.revision ~= cvl.revision  then
+        cvl.state = state
         cvl.revision = cvl.state.revision
         cvl.dispatch("state.updated", cvl.state)
     end
@@ -71,9 +71,9 @@ end
 function cvl.dump(o)
     if type(o) == 'table' then
         local s = '{ '
-        for k,v in pairs(o) do
-                if type(k) ~= 'number' then k = '"'..k..'"' end
-                s = s .. '['..k..'] = ' .. cvl.dump(v) .. ','
+        for k, v in pairs(o) do
+            if type(k) ~= 'number' then k = '"' .. k .. '"' end
+            s = s .. '[' .. k .. '] = ' .. cvl.dump(v) .. ','
         end
         return s .. '} '
     else
@@ -82,8 +82,14 @@ function cvl.dump(o)
 end
 
 function cvl.op(action, args)
-   cvl.inject_state(cvl._engine_do(action, args))
-   return cvl 
+    cvl.inject_state(cvl._engine_do(action, args))
+    return cvl
+end
+
+function cvl.dbp()
+    print(cvl.dump(cvl.state))
+    cvl.op("mod_camera_position", { x = 100, y = 100, z = 100 })
+    print(cvl.dump(cvl.state))
 end
 
 package.preload["cvl"] = function() return cvl end

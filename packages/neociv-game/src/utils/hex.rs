@@ -5,7 +5,7 @@ use bevy::prelude::*;
 #[macro_export]
 macro_rules! hex_idx {
     () => {
-        Indices::U32(vec![0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 5, 0, 5, 6, 0, 6, 1])
+        bevy::render::mesh::Indices::U32(vec![0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 5, 0, 5, 6, 0, 6, 1])
     };
 }
 pub(crate) use hex_idx;

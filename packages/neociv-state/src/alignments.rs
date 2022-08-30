@@ -4,7 +4,7 @@ use serde_diff::SerdeDiff;
 use std::collections::HashMap;
 use bevy_ecs::system::Resource;
 
-#[derive(Resource, Clone, Debug, Serialize, Deserialize, Default, SerdeDiff)]
+#[derive(Clone, Debug, Serialize, Deserialize, Default, SerdeDiff)]
 pub struct Alignment {
     pub id: String,
     pub left: String,
