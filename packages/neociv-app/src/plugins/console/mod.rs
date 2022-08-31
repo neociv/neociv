@@ -6,7 +6,7 @@ use crossbeam::channel::{bounded, Receiver};
 
 use neociv_civil::runtime::{repl::NeocivRepl, NeocivRuntime};
 
-fn repl_input(cvl: Res<NeocivRuntime>, channel: Res<Receiver<String>>) {
+fn repl_input(cvl: ResMut<NeocivRuntime>, channel: Res<Receiver<String>>) {
     if let Ok(line) = channel.try_recv() {
         let result = cvl.lua_repl_line(&line);
         match result {

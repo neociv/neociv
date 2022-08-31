@@ -4,6 +4,7 @@ use rlua::{
     Context, Error as LuaError, FromLuaMulti, Function as LuaFunction, Lua, Result as LuaResult,
     String as LuaString, Table as LuaTable, Value as LuaValue,
 };
+use std::fs;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 
@@ -71,16 +72,30 @@ impl Default for NeocivRuntime {
 
 impl NeocivRuntime {
     /// Create a runtime from a provided state object
-    pub fn from(state: NeocivState) -> Self {
-        NeocivRuntime {
-            state,
-            ..NeocivRuntime::default()
-        }
+    pub fn from(state: NeocivState) -> Result<Self, NeocivRuntimeError> {
+        let mut base = NeocivRuntime::default();
+        return match base.inject_state(&state.clone()) {
+            Ok(_) => Ok(base),
+            Err(ex) => Err(NeocivRuntimeError::LuaError(ex)),
+        };
     }
 
     /// Create a runtime from a JSON state file
-    pub fn from_file(file: &str) -> Result<Self, ()> {
-        return Ok(NeocivRuntime::default());
+    pub fn from_file(file: &str) -> Result<Self, NeocivRuntimeError> {
+        let path_obj = Path::new(file);
+        if !path_obj.exists() {
+            return Err(NeocivRuntimeError::FileNotFound);
+        } else {
+            let json_str = fs::read_to_string(file).unwrap();
+            return Ok(NeocivRuntime::default());
+        }
+    }
+
+    /// Pulls the state out from the Lua context
+    pub fn get_state(&self) -> LuaResult<NeocivState> {
+        return self.lua.lock().unwrap().context(move |ctx| {
+            return ctx.named_registry_value("state");
+        });
     }
 
     pub fn dofile<T: for<'lua> FromLuaMulti<'lua>>(&self, file_str: &str) -> LuaResult<T> {
@@ -166,13 +181,14 @@ impl NeocivRuntime {
     }
 
     pub fn update(&mut self) -> Result<&Self, LuaError> {
-        let lua_state = self.lua.lock().unwrap().context(move |ctx| {
-            return ctx.named_registry_value("state");
-        });
+        let lua_state = self.get_state();
         return match lua_state {
-            Ok(s) => { self.state = s; return Ok(self) },
-            Err(ex) => Err(ex)
-        }
+            Ok(s) => {
+                self.state = s;
+                return Ok(self);
+            }
+            Err(ex) => Err(ex),
+        };
     }
 }
 

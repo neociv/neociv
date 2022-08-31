@@ -10,9 +10,22 @@ use std::error::Error;
 
 use super::errors::NeocivRuntimeError;
 
+macro_rules! table_safe_get {
+    ($tbl: expr, $key: expr, $default: expr) => {
+        match $tbl.get($key) {
+            Ok(v) => v,
+            Err(_) => $default,
+        }
+    };
+}
+
 fn arg_vec3(v: LuaValue) -> Result<Vec3, NeocivRuntimeError> {
     match v {
-        LuaValue::Table(tbl) => Ok(Vec3::new(tbl.get("x")?, tbl.get("y")?, tbl.get("z")?)),
+        LuaValue::Table(tbl) => Ok(Vec3::new(
+            table_safe_get!(tbl, "x", 0.0),
+            table_safe_get!(tbl, "y", 0.0),
+            table_safe_get!(tbl, "z", 0.0),
+        )),
         _ => Err(NeocivRuntimeError::LuaError(
             LuaError::FromLuaConversionError {
                 from: v.type_name(),

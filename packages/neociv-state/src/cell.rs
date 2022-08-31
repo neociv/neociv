@@ -1,7 +1,7 @@
 use rlua::{Error as LuaError, FromLua, ToLua, Value as LuaValue};
 use serde::{Deserialize, Serialize};
 
-use crate::{civ::CivKey, utils::opt_str_to_lua, mask::CellMasks};
+use crate::{civ::CivKey, mask::CellMasks, utils::opt_str_to_lua};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Terrain {
@@ -10,8 +10,14 @@ pub enum Terrain {
     Ground,
 }
 
+impl Default for Terrain {
+    fn default() -> Self {
+        Terrain::Ground
+    }
+}
+
 /// Representation of a single Cell in the Grid.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Default, Debug, Serialize, Deserialize)]
 pub struct Cell {
     /// Horizontal (East) position of the cell.
     pub x: u8,
@@ -22,7 +28,7 @@ pub struct Cell {
     /// Terrain
     pub terrain: Option<Terrain>,
     /// Masks
-    pub masks: CellMasks
+    pub masks: CellMasks,
 }
 
 impl<'lua> ToLua<'lua> for Cell {
@@ -31,6 +37,7 @@ impl<'lua> ToLua<'lua> for Cell {
         cell_tbl.set("x", self.x)?;
         cell_tbl.set("y", self.y)?;
         cell_tbl.set("owner", opt_str_to_lua(self.owner, &ctx)?)?;
+        cell_tbl.set("masks", self.masks)?;
         Ok(LuaValue::Table(cell_tbl))
     }
 }
