@@ -47,7 +47,7 @@ pub fn grid_i_to_xy(grid: &Grid, i: u16) -> (u8, u8) {
     // TODO: Bounds panic here?
     let cap: u16 = grid.xsize as u16 * grid.ysize as u16;
     return (
-        i as u8 % grid.xsize,
+        (i % (grid.xsize as u16)) as u8,
         div_floor(i, div_floor(cap, grid.ysize as u16)) as u8,
     );
 }
@@ -105,5 +105,17 @@ mod tests {
         assert_eq!(crate::grid::grid_xy_to_i(&grid, 1, 2), 9);
         assert_eq!(crate::grid::grid_xy_to_i(&grid, 2, 2), 10);
         assert_eq!(crate::grid::grid_xy_to_i(&grid, 3, 2), 11);
+    }
+
+    // This test is purely just to confirm that u8/u16 conversions
+    // all behave correctly and indicies aren't overflowing.
+    #[test]
+    fn test_i_to_xy_large() {
+        let grid = crate::grid::Grid { 
+            xsize: 25,
+            ysize: 11,
+            ..Default::default()
+        };
+        assert_eq!(crate::grid::grid_i_to_xy(&grid, 274), (24, 10));
     }
 }

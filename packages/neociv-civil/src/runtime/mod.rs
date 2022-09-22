@@ -220,7 +220,11 @@ fn test_state_in_lua() {
     assert!(active_civ_nil_result.unwrap());
 
     state.active_civ_key = Some(String::from("example"));
+    // Must be done - otherwise the injection won't take as the revision hasn't changed
+    // TODO: Write this with engine actions
+    state.revision += 1;
     assert!(cvl.inject_state(&state).is_ok());
+    assert!(cvl.update().is_ok());
 
     let active_civ_result =
         cvl.eval_lua::<bool>("assert(type(cvl.get('active_civ_key')) == 'string')");

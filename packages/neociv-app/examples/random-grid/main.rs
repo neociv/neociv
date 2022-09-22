@@ -12,11 +12,11 @@ fn main() {
     // Generate a random grid
     let mut state = engine::init();
 
-    // Generate a 5 x 5 unowned grid
-    state = engine::set_grid_size(state, 25, 15).unwrap();
+    // Generate an unowned default grid
+    state = engine::set_grid_size(state, 25, 25).unwrap();
 
-    // Correctly position the camera
-    state = engine::mod_camera_position(state, Vec3::new(0.0, 0.0, 100.0)).unwrap();
+    // Move the camera
+    state = engine::mod_camera_position(state, bevy::math::Vec3::new(0.0, 0.0, 100.0)).unwrap();
 
     // Add the state resource - the runtime setup will detect and instead use this instance
     app.insert_resource(state);
