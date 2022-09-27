@@ -1,12 +1,8 @@
 use bevy_math::Vec3;
-use neociv_state::alignments::Alignment;
 use neociv_state::civ::CivKey;
-use neociv_state::engine::{mod_camera_position, StateResult};
-use neociv_state::errors::{StateError, StateErrorCode};
+use neociv_state::engine::mod_camera_position;
 use neociv_state::state::NeocivState;
-use neociv_state::{err_unknown_engine_action, state_error, state_panic};
-use rlua::{Error as LuaError, FromLua, Table as LuaTable, Value as LuaValue};
-use std::error::Error;
+use rlua::{Error as LuaError, Value as LuaValue};
 
 use super::errors::NeocivRuntimeError;
 

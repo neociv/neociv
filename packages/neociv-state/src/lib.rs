@@ -11,4 +11,5 @@ pub mod camera;
 pub mod engine;
 pub mod errors;
 pub mod json;
+pub mod scales;
 pub mod state;

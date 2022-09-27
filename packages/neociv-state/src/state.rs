@@ -1,5 +1,4 @@
 use bevy_ecs::prelude::Component;
-use bevy_ecs::system::Resource;
 use rlua::{Nil as LuaNil, ToLua, Value as LuaValue, Error as LuaError, FromLua};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -7,6 +6,7 @@ use std::collections::HashMap;
 use crate::camera::Camera;
 use crate::civ::{Civ, CivKey};
 use crate::grid::Grid;
+use crate::scales::Scales;
 
 /// Game state structure
 #[derive(Clone, Default, Debug, Serialize, Deserialize, Component)]
@@ -29,6 +29,8 @@ pub struct NeocivState {
     pub grid: Grid,
     /// The current camera state
     pub camera: Camera,
+    /// The scales used to control the display of particular values
+    pub scales: Scales,
 }
 
 impl<'lua> ToLua<'lua> for NeocivState {
@@ -49,6 +51,7 @@ impl<'lua> ToLua<'lua> for NeocivState {
         state_tbl.set("civs", civs_tbl)?;
         state_tbl.set("grid", self.grid)?;
         state_tbl.set("camera", self.camera)?;
+        state_tbl.set("scales", self.scales)?;
         Ok(LuaValue::Table(state_tbl))
     }
 }
@@ -64,6 +67,7 @@ impl<'lua> FromLua<'lua> for NeocivState {
                 civs: tbl.get("civs")?,
                 grid: tbl.get("grid")?,
                 camera: tbl.get("camera")?,
+                scales: tbl.get("scales")?,
             }),
             _ => Err(LuaError::FromLuaConversionError { from: lua_value.type_name(), to: "NeocivState", message: None })
         }
