@@ -1,11 +1,11 @@
 [workspace]
 resolver = "2"
 members = [
-    "packages/neociv-bin",
     "packages/neociv-app",
+    "packages/neociv-bin",
+    "packages/neociv-civil",
     "packages/neociv-config",
     "packages/neociv-game",
-    "packages/neociv-civil",
     "packages/neociv-state"
 ]
 
