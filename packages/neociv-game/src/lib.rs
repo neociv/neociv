@@ -21,6 +21,8 @@ impl Plugin for NeocivGamePlugin {
         // Add the runtime to the resources
         app.add_plugin(plugins::runtime::NeocivRuntimePlugin);
 
+        // Setup the UI
+
         // Grid plugin
         app.add_plugin(plugins::grid::NeocivGridPlugin);
 
