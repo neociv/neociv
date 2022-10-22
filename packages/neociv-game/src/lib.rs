@@ -22,6 +22,7 @@ impl Plugin for NeocivGamePlugin {
         app.add_plugin(plugins::runtime::NeocivRuntimePlugin);
 
         // Setup the UI
+        app.add_plugin(plugins::ui::NeocivUiPlugin);
 
         // Grid plugin
         app.add_plugin(plugins::grid::NeocivGridPlugin);
