@@ -12,4 +12,5 @@ pub mod engine;
 pub mod errors;
 pub mod json;
 pub mod scales;
+pub mod tree;
 pub mod state;
