@@ -1,6 +1,7 @@
 use bevy::prelude::{App, Plugin};
 use bevy_mod_picking::{DebugCursorPickingPlugin, DebugEventsPickingPlugin, DefaultPickingPlugins};
 
+pub mod registry;
 pub mod grid;
 pub mod utils;
 pub mod plugins;

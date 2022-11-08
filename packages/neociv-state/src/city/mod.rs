@@ -1,6 +1,6 @@
 use regex::*;
 
-use crate::cell::improvement::{ Improvement, ImprovementType };
+use crate::{cell::improvement::{ Improvement, ImprovementType }, civ::CivKey};
 
 pub type CityKey = String;
 

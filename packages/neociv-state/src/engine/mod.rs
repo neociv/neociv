@@ -170,5 +170,11 @@ pub fn run_meta_action(state: NeocivState, action: &MetaAction) -> StateResult {
     return_next_state!(state);
 }
 
+pub fn can_add_city(state: NeocivState, civ_key: CivKey, cell_x: u8, cell_y: u8) -> bool {
+    // TODO: Check cell existance
+    // TODO: Check cell owner
+    // TODO: Check cell improvements (false if one exists, demolish first?)
+}
+
 pub fn add_city(state: NeocivState, civ_key: CivKey) -> StateResult {
 } 

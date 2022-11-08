@@ -40,6 +40,7 @@ pub struct Civ {
     pub id: CivId,
     pub title: String,
     pub alignments: Alignments,
+    pub city_counter: u16,
 }
 
 impl<'lua> ToLua<'lua> for Civ {
@@ -49,6 +50,7 @@ impl<'lua> ToLua<'lua> for Civ {
         civ_tbl.set("title", self.title)?;
         let aligns_tbl = ctx.create_table_from(self.alignments)?;
         civ_tbl.set("alignments", aligns_tbl)?;
+        civ_tbl.set("city_counter", self.city_counter)?;
         Ok(LuaValue::Table(civ_tbl))
     }
 }
@@ -60,6 +62,7 @@ impl<'lua> FromLua<'lua> for Civ {
                 id: tbl.get("id")?,
                 title: tbl.get("title")?,
                 alignments: tbl.get("alignments")?,
+                city_counter: tbl.get("city_counter")?,
             }),
             _ => Err(LuaError::FromLuaConversionError {
                 from: lua_value.type_name(),
