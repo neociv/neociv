@@ -20,8 +20,8 @@ pub type CivId = String;
 /// CivId.
 ///
 /// # Examples
-/// org.neociv.civs[0]
-/// expanse.belters[0]
+/// org.neociv.civs.aus[0]
+/// expanse.belters.ilus[0]
 /// mod.civs.example[0]
 pub type CivKey = String;
 

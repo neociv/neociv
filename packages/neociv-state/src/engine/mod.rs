@@ -1,11 +1,14 @@
 use bevy_math::Vec3;
 
-use crate::cell::{Cell};
+use crate::actions::meta::MetaAction;
+use crate::cell::Cell;
 use crate::grid::{grid_i_to_xy, grid_xy_to_i};
 use crate::civ::{Civ, CivKey};
 use crate::errors::*;
 use crate::mask::CellMasks;
 use crate::state::NeocivState;
+
+pub mod query;
 
 /// Any modification to the state produces a result that either contains the successfully updated
 /// state *or* fails with a specific StateError.
@@ -161,3 +164,11 @@ pub fn mod_camera_position(state: NeocivState, vector: Vec3) -> StateResult {
    new_state.camera.position += vector;
    return_next_state!(new_state);
 }
+
+/// Performs one of the meta actions on the state.
+pub fn run_meta_action(state: NeocivState, action: &MetaAction) -> StateResult {
+    return_next_state!(state);
+}
+
+pub fn add_city(state: NeocivState, civ_key: CivKey) -> StateResult {
+} 

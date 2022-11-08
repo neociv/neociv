@@ -3,6 +3,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::{civ::CivKey, mask::CellMasks, utils::opt_str_to_lua};
 
+use self::improvement::Improvement;
+
+pub mod improvement;
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Terrain {
     DeepWater,
@@ -29,6 +33,8 @@ pub struct Cell {
     pub terrain: Option<Terrain>,
     /// Masks
     pub masks: CellMasks,
+    /// Improvement
+    pub improvement: Option<dyn Improvement>,
 }
 
 impl<'lua> ToLua<'lua> for Cell {
