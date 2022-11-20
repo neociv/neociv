@@ -6,6 +6,7 @@ members = [
     "packages/neociv-civil",
     "packages/neociv-config",
     "packages/neociv-game",
+    "packages/neociv-macros",
     "packages/neociv-state"
 ]
 
