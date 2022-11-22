@@ -33,8 +33,8 @@ pub struct Cell {
     pub terrain: Option<Terrain>,
     /// Masks
     pub masks: CellMasks,
-    /// Improvement
-    pub improvement: Option<dyn Improvement>,
+    //? Improvement
+    //pub improvement: Option<dyn Improvement>,
 }
 
 impl<'lua> ToLua<'lua> for Cell {

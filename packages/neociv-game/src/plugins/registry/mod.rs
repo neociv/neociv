@@ -6,10 +6,10 @@ use bevy::utils::HashMap;
 /// Images, etc... all live here. All content from mods run through the... run... time will be stored here. The
 /// registry will then handle interfacing with Bevy.
 pub struct NeocivRegistry {
-    mesh_map: HashMap<&str, ()>,
-    mat_map: HashMap<&str, ()>,
-    img_map: HashMap<&str, ()>,
-    snd_map: HashMap<&str, ()>,
+    mesh_map: HashMap<String, ()>,
+    mat_map: HashMap<String, ()>,
+    img_map: HashMap<String, ()>,
+    snd_map: HashMap<String, ()>,
 }
 
 impl NeocivRegistry {

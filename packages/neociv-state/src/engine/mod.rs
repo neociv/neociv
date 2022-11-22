@@ -167,9 +167,10 @@ pub fn mod_camera_position(state: NeocivState, vector: Vec3) -> StateResult {
 
 /// Performs one of the meta actions on the state.
 pub fn run_meta_action(state: NeocivState, action: &MetaAction) -> StateResult {
-    return_next_state!(state);
+    return_next_state!(state.clone());
 }
 
+/*
 pub fn can_add_city(state: NeocivState, civ_key: CivKey, cell_x: u8, cell_y: u8) -> bool {
     // TODO: Check cell existance
     // TODO: Check cell owner
@@ -178,3 +179,4 @@ pub fn can_add_city(state: NeocivState, civ_key: CivKey, cell_x: u8, cell_y: u8)
 
 pub fn add_city(state: NeocivState, civ_key: CivKey) -> StateResult {
 } 
+*/
