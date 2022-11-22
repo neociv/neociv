@@ -61,7 +61,7 @@ impl ToString for MetaActionType {
 }
 
 impl FromStr for MetaActionType {
-    type Err = core::convert::Infallible;
+    type Err = std::fmt::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
@@ -73,7 +73,7 @@ impl FromStr for MetaActionType {
             CITY_UNIT_UNLOCK => Ok(Self::CityUnitUnlock),
             CITY_BUILDING_BLOCK => Ok(Self::CityBuildingBlock),
             CITY_BUILDING_UNLOCK => Ok(Self::CityBuildingUnlock),
-            _ => unreachable!(),
+            _ => Err(std::fmt::Error),
         }
     }
 }
