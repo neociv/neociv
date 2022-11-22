@@ -1,9 +1,16 @@
-pub enum ImprovementType {
+use neociv_macros::StateTable;
+use serde::{Deserialize, Serialize};
+
+pub enum ImprovementCategory {
     Building,
+    City,
+    District,
 }
 
-pub trait Improvement {
-    fn improvement_type() -> ImprovementType;
-    fn improvement_integrity() -> f32;
-    fn improvement_content() -> String;
+#[derive(Clone, Debug, Serialize, Deserialize, StateTable)]
+pub struct Improvement {
+    //pub category: ImprovementCategory,
+    pub integrity: f32,
+    pub integrity_max: f32,
+    pub content: String,
 }

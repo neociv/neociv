@@ -1,3 +1,5 @@
+use std::default;
+
 use rlua::{Error as LuaError, FromLua, ToLua, Value as LuaValue};
 use serde::{Deserialize, Serialize};
 
@@ -7,17 +9,12 @@ use self::improvement::Improvement;
 
 pub mod improvement;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub enum Terrain {
     DeepWater,
     Water,
+    #[default]
     Ground,
-}
-
-impl Default for Terrain {
-    fn default() -> Self {
-        Terrain::Ground
-    }
 }
 
 /// Representation of a single Cell in the Grid.
@@ -57,6 +54,7 @@ impl<'lua> FromLua<'lua> for Cell {
                 owner: tbl.get("owner")?,
                 terrain: None,
                 masks: tbl.get("masks")?,
+                //improvement: tbl.get("improvement")?,
             }),
             _ => Err(LuaError::FromLuaConversionError {
                 from: lua_value.type_name(),

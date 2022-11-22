@@ -1,4 +1,4 @@
-use std::{error::Error, str::FromStr};
+use std::{error::Error, num::ParseIntError, str::FromStr};
 
 const CIV_UNIT_BLOCK: &str = "civ.unit.block";
 const CIV_UNIT_UNLOCK: &str = "civ.unit.unlock";

@@ -2,9 +2,9 @@ use bevy_math::Vec3;
 
 use crate::actions::meta::MetaAction;
 use crate::cell::Cell;
-use crate::grid::{grid_i_to_xy, grid_xy_to_i};
 use crate::civ::{Civ, CivKey};
 use crate::errors::*;
+use crate::grid::{grid_i_to_xy, grid_xy_to_i};
 use crate::mask::CellMasks;
 use crate::state::NeocivState;
 
@@ -160,9 +160,9 @@ pub fn set_grid_cell(state: NeocivState, cell: &Cell) -> StateResult {
 
 /// Modify the camera's position with relative values
 pub fn mod_camera_position(state: NeocivState, vector: Vec3) -> StateResult {
-   let mut new_state = state.clone(); 
-   new_state.camera.position += vector;
-   return_next_state!(new_state);
+    let mut new_state = state.clone();
+    new_state.camera.position += vector;
+    return_next_state!(new_state);
 }
 
 /// Performs one of the meta actions on the state.
@@ -178,5 +178,5 @@ pub fn can_add_city(state: NeocivState, civ_key: CivKey, cell_x: u8, cell_y: u8)
 }
 
 pub fn add_city(state: NeocivState, civ_key: CivKey) -> StateResult {
-} 
+}
 */
