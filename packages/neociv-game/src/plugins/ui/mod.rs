@@ -1,6 +1,7 @@
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContext, EguiPlugin};
+use bevy_egui::EguiPlugin;
 
+pub mod state;
 pub mod startup;
 pub mod system;
 
@@ -13,3 +14,4 @@ impl Plugin for NeocivUiPlugin {
         app.add_system(system::ui_system);
     }
 }
+

@@ -14,12 +14,46 @@ local function chain(input)
     end
 end
 
+local function strsplit(str, sep)
+    sep = sep or "%s";
+    local tbl = {};
+    local i = 1;
+    for str in string.gmatch(str, "([^"..sep.."]+)") do
+        tbl[i] = str;
+        i = i + 1;
+    end
+    return tbl;
+end
+
+local function setter(tbl, path, val)
+    local value;
+    local keys = strsplit(path, ".");
+    local pre = { table.unpack(keys, 1, #keys - 1) }
+    local final = table.unpack(keys, #keys)
+
+    for _, key in pairs(pre) do
+        value = (value and value[key]) or tbl[key];
+    end
+
+    value[final] = val
+
+    -- TODO: Update the revision upon successful setting
+    tbl.revision = tbl.revision + 1
+    
+    return tbl
+end
+
 function cvl.inject_state(state)
     if cvl.state == nil or state ~= nil and state.revision ~= cvl.revision  then
         cvl.state = state
         cvl.revision = cvl.state.revision
         cvl.dispatch("state.updated", cvl.state)
     end
+end
+
+-- Push the changed state back up to the runtime
+function cvl.push_state(state)
+    return cvl
 end
 
 -- Listen for events
@@ -34,6 +68,7 @@ function cvl.on(event, handler)
     return cvl
 end
 
+-- Dispatch an event to handlers
 function cvl.dispatch(event, data)
     if cvl.events[event] ~= nil then
         for _, handler in pairs(cvl.events[event]) do
@@ -45,7 +80,9 @@ end
 
 -- Set a property in the state, will dispatch a new state
 function cvl.set(prop_path, value)
-    cvl.state = cvl.state;
+    local state = setter(cvl.state, prop_path, value)
+    cvl.inject_state(state)
+    return cvl
 end
 
 -- Get a property in the state
