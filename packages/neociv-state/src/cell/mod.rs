@@ -1,7 +1,9 @@
 use std::default;
 
+use neociv_macros::StateEnum;
 use rlua::{Error as LuaError, FromLua, ToLua, Value as LuaValue};
 use serde::{Deserialize, Serialize};
+use serde_diff::SerdeDiff;
 
 use crate::{civ::CivKey, mask::CellMasks, utils::opt_str_to_lua};
 
@@ -9,7 +11,7 @@ use self::improvement::Improvement;
 
 pub mod improvement;
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize, SerdeDiff, StateEnum)]
 pub enum Terrain {
     DeepWater,
     Water,
@@ -30,8 +32,8 @@ pub struct Cell {
     pub terrain: Option<Terrain>,
     /// Masks
     pub masks: CellMasks,
-    //? Improvement
-    //pub improvement: Option<dyn Improvement>,
+    /// Improvement
+    pub improvement: Option<Improvement>,
 }
 
 impl<'lua> ToLua<'lua> for Cell {
@@ -52,9 +54,9 @@ impl<'lua> FromLua<'lua> for Cell {
                 x: tbl.get("x")?,
                 y: tbl.get("y")?,
                 owner: tbl.get("owner")?,
-                terrain: None,
+                terrain: tbl.get("terrain")?,
                 masks: tbl.get("masks")?,
-                //improvement: tbl.get("improvement")?,
+                improvement: tbl.get("improvement")?,
             }),
             _ => Err(LuaError::FromLuaConversionError {
                 from: lua_value.type_name(),

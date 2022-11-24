@@ -128,6 +128,7 @@ pub fn set_grid_size(state: NeocivState, xsize: u8, ysize: u8) -> StateResult {
                 owner: None,
                 terrain: None,
                 masks: CellMasks::default(),
+                improvement: None,
             });
         }
 

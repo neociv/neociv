@@ -1,13 +1,16 @@
-use neociv_macros::StateTable;
-use serde::{Deserialize, Serialize};
+use neociv_macros::{StateEnum, StateTable};
 
+use serde::{Deserialize, Serialize};
+use serde_diff::SerdeDiff;
+
+#[derive(Copy, Clone, Debug, Serialize, Deserialize, SerdeDiff, StateEnum)]
 pub enum ImprovementCategory {
     Building,
     City,
     District,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, StateTable)]
+#[derive(Clone, Debug, Serialize, Deserialize, SerdeDiff, StateTable)]
 pub struct Improvement {
     //pub category: ImprovementCategory,
     pub integrity: f32,

@@ -1,91 +1,17 @@
 #[macro_use]
-extern crate synstructure;
-#[macro_use]
 extern crate quote;
 extern crate proc_macro2;
 
-/*
-fn state_table_derive(s: synstructure::Structure) -> proc_macro2::TokenStream {
-    let to_lua_body = s.each(|bi| {
-        quote! {
-            tbl.set(format!("{}", #bi), self.#bi)?;
-        }
-    });
+mod utils;
 
-    print!(">> {:?}", to_lua_body);
-
-    let _from_lua_body = s.each(|_bi| {
-        quote! {
-            //tbl.get(format!("{}", #bi))?;
-        }
-    });
-
-    s.gen_impl(quote! {
-        gen impl<'lua> ToLua<'lua> for @Self {
-            fn to_lua(self, ctx: rlua::Context<'lua>) -> rlua::Result<rlua::Value<'lua>> {
-                let tbl = ctx.create_table()?;
-                //#to_lua_body
-                Ok(rlua::Value::Table(tbl))
-            }
-        }
-
-        gen impl<'lua> FromLua<'lua> for @Self {
-            fn from_lua(value: rlua::Value<'lua>, _ctx: rlua::Context<'lua>) -> rlua::Result<Self> {
-                match value {
-                    rlua::Value::Table(tbl) => Ok(@Self {
-                        //#from_lua_body
-                    }),
-                    _ => Err(rlua::Error::FromLuaConversionError {
-                        from: value.type_name(),
-                        to: "@Self",
-                        message: None,
-                    })
-                }
-            }
-        }
-    })
-}
-synstructure::decl_derive!([StateTable] => state_table_derive);
-*/
+use self::utils::*;
 
 #[proc_macro_derive(StateTable)]
 pub fn state_table_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let syn::DeriveInput { ident, data, .. } = syn::parse_macro_input!(input);
-    if let syn::Data::Struct(ds) = data {
-        /*
-        if let syn::Fields::Named(named) = ds.fields {
-            named.named.iter().for_each(|f| {
-                let fnms = f.ident.as_ref().unwrap();
-                /*
-                let span = fnm.span();
-                let fnms = &syn::Ident::new(
-                    syn::LitStr::new(&fnm.to_string(), span).value().as_str(),
-                    span,
-                );
-                dbg!(fnms);
-                */
-                let output = quote! {
-                    #fnms = 1
-                };
-                dbg!(output);
-                /*
-                match &f.ident {
-                    Some(id) => dbg!(id),
-                    None => panic!("FUCKED"),
-                };
-                */
-            });
-        }
-        */
 
-        let fields: Vec<String> = match ds.fields {
-            syn::Fields::Named(named) => named
-                .named
-                .iter()
-                .map(|fnm| fnm.ident.as_ref().unwrap().to_string())
-                .collect(),
-            _ => vec![],
-        };
+    if let syn::Data::Struct(ds) = data {
+        let fields = get_fields(ds.fields);
 
         let to_lua_body: Vec<proc_macro2::TokenStream> = fields
             .iter()
@@ -107,23 +33,11 @@ pub fn state_table_derive(input: proc_macro::TokenStream) -> proc_macro::TokenSt
             })
             .collect();
 
-        /*
-        let mut fields_vec_innards = quote!();
-        let fields_vec = match ds.fields {
-            syn::Fields::Named(named) => {
-                &named.named.iter().for_each(|f| {
-                    dbg!(f.ident);
-                })
-            }
-            _ => unimplemented!(),
-        };
-        */
-
-        let output = quote! {
+        // Generate the implementations
+        quote! {
             impl<'lua> rlua::ToLua<'lua> for #ident {
                 fn to_lua(self, ctx: rlua::Context<'lua>) -> rlua::Result<rlua::Value<'lua>> {
                     let tbl = ctx.create_table()?;
-                    // TODO: Iterate over fields in the derive input
                     #(#to_lua_body)*
                     Ok(rlua::Value::Table(tbl))
                 }
@@ -132,25 +46,120 @@ pub fn state_table_derive(input: proc_macro::TokenStream) -> proc_macro::TokenSt
             impl<'lua> rlua::FromLua<'lua> for #ident {
                 fn from_lua(value: rlua::Value<'lua>, _lua: rlua::Context<'lua>) -> rlua::Result<Self> {
                     match value {
-                       rlua::Value::Table(tbl) => Ok(#ident {
-                        // TODO: Iterate over fields in the derive input
-                        #(#from_lua_body)*
-                       }),
-                       _ => Err(rlua::Error::FromLuaConversionError {
-                            from: value.type_name(),
-                            to: "#ident",
-                            message: None,
-                       }),
+                        rlua::Value::Table(tbl) => Ok(#ident {
+                            #(#from_lua_body)*
+                        }),
+                        _ => Err(rlua::Error::FromLuaConversionError {
+                                from: value.type_name(),
+                                to: stringify!(#ident),
+                                message: None,
+                        }),
                     }
                 }
             }
-        };
-        output.into()
+        }.into()
     } else {
-        let output = quote! { impl Example for #ident {}  };
-        output.into()
+        unreachable!()
         //compile_error!("StateTable can only be run on structs")
     }
 
     //return output.into();
+}
+
+/// Turn an enum into a namespaced string with an optional prefix
+#[proc_macro_derive(StateEnum)]
+pub fn state_enum_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let syn::DeriveInput { ident, data, .. } = syn::parse_macro_input!(input);
+    if let syn::Data::Enum(enm) = data {
+        let fields = get_enum_fields(enm.variants);
+
+        let as_str_body: Vec<proc_macro2::TokenStream> = fields
+            .iter()
+            .map(|f| {
+                let flid = syn::Ident::new(f, proc_macro2::Span::call_site());
+                let nsid = to_namespace(f.to_string(), None);
+                quote! {
+                    Self::#flid => #nsid,
+                }
+            })
+            .collect();
+
+        let from_str_body: Vec<proc_macro2::TokenStream> = fields
+            .iter()
+            .map(|f| {
+                let flid = syn::Ident::new(f, proc_macro2::Span::call_site());
+                let nsid = to_namespace(f.to_string(), None);
+                quote! {
+                    #nsid => Ok(Self::#flid),
+                }
+            })
+            .collect();
+
+
+        let from_lua_body: Vec<proc_macro2::TokenStream> = fields
+            .iter()
+            .map(|f| {
+                let flid = syn::Ident::new(f, proc_macro2::Span::call_site());
+                let nsid = to_namespace(f.to_string(), None);
+                quote! {
+                    #nsid => Ok(Self::#flid),
+                }
+            })
+            .collect();
+
+        quote! {
+            impl #ident {
+                fn as_str(&self) -> &'static str {
+                    match self {
+                        #(#as_str_body)*
+                    }
+                }
+            }
+
+            impl ToString for #ident {
+                fn to_string(&self) -> String {
+                    self.as_str().into()
+                }
+            }
+
+            impl std::str::FromStr for #ident {
+                type Err = std::fmt::Error;
+                fn from_str(s: &str) -> Result<Self, Self::Err> {
+                    match s {
+                        #(#from_str_body)*
+                        _ => Err(std::fmt::Error),
+                    }
+                }
+            }
+
+            impl<'lua> rlua::ToLua<'lua> for #ident {
+                fn to_lua(self, ctx: rlua::Context<'lua>) -> rlua::Result<rlua::Value<'lua>> {
+                    Ok(rlua::Value::String(ctx.create_string(self.as_str())?))
+                }
+            }
+
+            impl<'lua> rlua::FromLua<'lua> for #ident {
+                fn from_lua(value: rlua::Value<'lua>, _lua: rlua::Context<'lua>) -> rlua::Result<Self> {
+                    let tn = value.type_name();
+                    match value {
+                        rlua::Value::String(s) => match s.to_str().unwrap() {
+                            #(#from_lua_body)*
+                            _ => Err(rlua::Error::FromLuaConversionError {
+                                from: tn,
+                                to: stringify!(#ident),
+                                message: None,
+                            })
+                        },
+                        _ => Err(rlua::Error::FromLuaConversionError {
+                            from: tn,
+                            to: stringify!(#ident),
+                            message: None,
+                        }),
+                    }
+                }
+            }
+        }.into()
+    } else {
+        unreachable!()
+    }
 }
