@@ -18,6 +18,7 @@ static FENNEL_FILE: &'static str = include_str!("./api/fennel.lua");
 static SEARCHERS_FILE: &'static str = include_str!("./api/searchers.lua");
 static MACROS_FILE: &'static str = include_str!("./api/macros.fnl");
 static CVL_FILE: &'static str = include_str!("./api/cvl.lua");
+static EVENTS_FILE: &'static str = include_str!("./api/events.fnl");
 
 #[derive(Component)]
 pub struct NeocivRuntime {
@@ -65,6 +66,13 @@ impl Default for NeocivRuntime {
                 let cvl_tbl: LuaTable = ctx.globals().get("cvl")?;
                 return cvl_tbl.set("_engine_do", do_fn);
             });
+
+            // Setup basic events
+            match runtime.eval_fnl::<()>(EVENTS_FILE) {
+                Ok(_) => (),
+                Err(_) => panic!("events failed to parse"),
+            }
+
             return runtime;
         }
     }
