@@ -50,7 +50,7 @@ pub fn engine_do(
     action: &str,
     args: LuaValue,
 ) -> Result<NeocivState, NeocivRuntimeError> {
-    if action == "mod_camera_position" {
+    if action == "mod.camera.position" {
         match mod_camera_position(state, arg_vec3(args)?) {
             Ok(s) => Ok(s),
             Err(ex) => Err(NeocivRuntimeError::from(ex)),

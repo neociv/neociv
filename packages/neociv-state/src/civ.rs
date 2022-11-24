@@ -1,3 +1,4 @@
+use neociv_macros::StateTable;
 use regex::*;
 use rlua::{Error as LuaError, FromLua, ToLua, Value as LuaValue};
 use serde::{Deserialize, Serialize};
@@ -35,42 +36,12 @@ lazy_static! {
     pub static ref VALID_CIV_KEY: Regex = Regex::new(r"^[a-zA-Z0-9]+\.[a-zA-Z0-9]+(?:\.[a-zA-Z0-9])*\[\d+\]$").unwrap();
 }
 
-#[derive(Clone, Default, Debug, Serialize, Deserialize, SerdeDiff)]
+#[derive(Clone, Default, Debug, Serialize, Deserialize, SerdeDiff, StateTable)]
 pub struct Civ {
     pub id: CivId,
     pub title: String,
     pub alignments: Alignments,
     pub city_counter: u16,
-}
-
-impl<'lua> ToLua<'lua> for Civ {
-    fn to_lua(self, ctx: rlua::Context<'lua>) -> rlua::Result<rlua::Value<'lua>> {
-        let civ_tbl = ctx.create_table()?;
-        civ_tbl.set("id", self.id)?;
-        civ_tbl.set("title", self.title)?;
-        let aligns_tbl = ctx.create_table_from(self.alignments)?;
-        civ_tbl.set("alignments", aligns_tbl)?;
-        civ_tbl.set("city_counter", self.city_counter)?;
-        Ok(LuaValue::Table(civ_tbl))
-    }
-}
-
-impl<'lua> FromLua<'lua> for Civ {
-    fn from_lua(lua_value: LuaValue<'lua>, _lua: rlua::Context<'lua>) -> rlua::Result<Self> {
-        match lua_value {
-            LuaValue::Table(tbl) => Ok(Civ {
-                id: tbl.get("id")?,
-                title: tbl.get("title")?,
-                alignments: tbl.get("alignments")?,
-                city_counter: tbl.get("city_counter")?,
-            }),
-            _ => Err(LuaError::FromLuaConversionError {
-                from: lua_value.type_name(),
-                to: "Civ",
-                message: None,
-            }),
-        }
-    }
 }
 
 #[cfg(test)]

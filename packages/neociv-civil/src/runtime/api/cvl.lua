@@ -123,12 +123,6 @@ function cvl.op(action, args)
     return cvl
 end
 
-function cvl.dbp()
-    print(cvl.dump(cvl.state))
-    cvl.op("mod_camera_position", { x = 100, y = 100, z = 100 })
-    print(cvl.dump(cvl.state))
-end
-
 package.preload["cvl"] = function() return cvl end
 
 return cvl
