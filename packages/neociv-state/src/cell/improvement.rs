@@ -1,19 +1,10 @@
-use neociv_macros::{StateEnum, StateTable};
+use crate::macros::{state_enum, state_struct};
 
-use serde::{Deserialize, Serialize};
-use serde_diff::SerdeDiff;
+state_enum!(ImprovementCategory, Building, City, District);
 
-#[derive(Copy, Clone, Debug, Serialize, Deserialize, SerdeDiff, StateEnum)]
-pub enum ImprovementCategory {
-    Building,
-    City,
-    District,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize, SerdeDiff, StateTable)]
-pub struct Improvement {
-    //pub category: ImprovementCategory,
+state_struct!(Improvement) {
+    pub category: ImprovementCategory,
     pub integrity: f32,
     pub integrity_max: f32,
-    pub content: String,
-}
+    pub content: String
+};
