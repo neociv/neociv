@@ -163,23 +163,3 @@ pub fn state_enum_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStr
         unreachable!()
     }
 }
-
-#[proc_macro]
-pub fn state_struct(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let syn::DeriveInput { ident, data, .. } = syn::parse_macro_input!(input);
-    quote! {
-        #[derive(Copy, Clone, Debug, serde::Serialize, serde::Deserialize, serde_diff::SerdeDiff, neociv_macros::StateTable)]
-        pub struct #ident {
-        }
-    }.into()
-}
-
-#[proc_macro]
-pub fn state_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let syn::DeriveInput { ident, data, .. } = syn::parse_macro_input!(input);
-    quote! {
-        #[derive(Copy, Clone, Debug, serde::Serialize, serde::Deserialize, serde_diff::SerdeDiff, neociv_macros::StateEnum)]
-        pub enum #ident {
-        }
-    }.into()
-}

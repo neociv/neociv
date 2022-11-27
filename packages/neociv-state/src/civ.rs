@@ -4,7 +4,7 @@ use rlua::{Error as LuaError, FromLua, ToLua, Value as LuaValue};
 use serde::{Deserialize, Serialize};
 use serde_diff::SerdeDiff;
 
-use crate::alignments::Alignments;
+use crate::{alignments::Alignments, state_table};
 
 /// CivIds are namespaced strings delimited by "." and act as an identifier whenever a Civ needs to
 /// be referenced from another context. This should be the only means of identifying a Civ.
@@ -36,12 +36,13 @@ lazy_static! {
     pub static ref VALID_CIV_KEY: Regex = Regex::new(r"^[a-zA-Z0-9]+\.[a-zA-Z0-9]+(?:\.[a-zA-Z0-9])*\[\d+\]$").unwrap();
 }
 
-#[derive(Clone, Default, Debug, Serialize, Deserialize, SerdeDiff, StateTable)]
-pub struct Civ {
-    pub id: CivId,
-    pub title: String,
-    pub alignments: Alignments,
-    pub city_counter: u16,
+state_table! {
+    pub struct Civ {
+        pub id: CivId,
+        pub title: String,
+        pub alignments: Alignments,
+        pub city_counter: u16,
+    }
 }
 
 #[cfg(test)]

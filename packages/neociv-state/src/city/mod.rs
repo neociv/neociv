@@ -1,11 +1,7 @@
 use regex::*;
 
-use serde::{Deserialize, Serialize};
-use serde_diff::SerdeDiff;
-
-use neociv_macros::StateTable;
-
 use crate::cell::improvement::Improvement;
+use crate::state_table;
 
 pub type CityKey = String;
 
@@ -14,10 +10,11 @@ lazy_static! {
         Regex::new(r"^[a-zA-Z0-9]+\.[a-zA-Z0-9]+(?:\.[a-zA-Z0-9])*\[\d+\]<\d+>$").unwrap();
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, SerdeDiff, StateTable)]
-pub struct NeocivCity {
-    pub key: CityKey,
-    pub title: String,
-    pub capital: bool,
-    pub improvement: Improvement,
+state_table! {
+    pub struct NeocivCity {
+        pub key: CityKey,
+        pub title: String,
+        pub capital: bool,
+        pub improvement: Improvement,
+    }
 }

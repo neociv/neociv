@@ -9,6 +9,7 @@ edition = "2021"
 neociv-macros = { path = "../neociv-macros" }
 bevy_math = "0.8.1"
 bevy_ecs = "0.8.1"
+derive-alias = "0.1.0"
 strum = { version = "0.24.0", features = ["derive"] }
 num-integer = "0.1.44"
 regex = "1.5.5"

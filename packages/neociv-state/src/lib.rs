@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate lazy_static;
 
+pub mod macros;
 pub mod utils;
 pub mod alignments;
 pub mod mask;

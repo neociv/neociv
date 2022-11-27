@@ -1,21 +1,18 @@
-use serde::{Serialize, Deserialize};
-use serde_diff::SerdeDiff;
-
-use neociv_macros::StateTable;
+use crate::state_table;
 
 pub type UnitId = String;
 pub type UnitKey = String;
 
-#[derive(Clone, Debug, Serialize, Deserialize, SerdeDiff, StateTable)]
-pub struct StateUnit {
-    pub id: UnitId,
-    pub title: String,
+state_table! {
+    pub struct StateUnit {
+        pub id: UnitId,
+        pub title: String,
+    }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, SerdeDiff, StateTable)]
-pub struct StateUnitEntity {
-    pub id: UnitId,
-    pub key: UnitKey,
+state_table! {
+    pub struct StateUnitEntity {
+        pub id: UnitId,
+        pub key: UnitKey,
+    }
 }
-
-

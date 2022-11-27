@@ -1,4 +1,4 @@
-use neociv_macros::{state_enum, state_struct};
+use crate::{state_enum, state_table};
 
 state_enum! {
     pub enum ImprovementCategory {
@@ -8,7 +8,7 @@ state_enum! {
     }
 }
 
-state_struct! {
+state_table! {
     pub struct Improvement {
         category: ImprovementCategory,
         integrity: f32,

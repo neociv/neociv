@@ -1,22 +1,19 @@
-use std::default;
-
-use neociv_macros::StateEnum;
 use rlua::{Error as LuaError, FromLua, ToLua, Value as LuaValue};
 use serde::{Deserialize, Serialize};
-use serde_diff::SerdeDiff;
 
-use crate::{civ::CivKey, mask::CellMasks, utils::opt_str_to_lua};
+use crate::{state_enum_default, civ::CivKey, mask::CellMasks, utils::opt_str_to_lua};
 
 use self::improvement::Improvement;
 
 pub mod improvement;
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize, SerdeDiff, StateEnum)]
-pub enum Terrain {
-    DeepWater,
-    Water,
-    #[default]
-    Ground,
+state_enum_default! {
+    pub enum Terrain {
+        DeepWater,
+        Water,
+        #[default]
+        Ground,
+    }
 }
 
 /// Representation of a single Cell in the Grid.
