@@ -45,3 +45,21 @@ macro_rules! state_table {
         $i
     };
 }
+
+#[macro_export]
+macro_rules! state_table_default {
+    ($i:item) => {
+        #[derive(
+            Clone,
+            Debug,
+            Default,
+            serde::Serialize,
+            serde::Deserialize,
+            serde_diff::SerdeDiff,
+            neociv_macros::StateTable,
+        )]
+        $i
+    };
+}
+
+

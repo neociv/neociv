@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use crate::state_enum;
+use crate::state_table;
 
-state_enum! {
+state_table! {
     pub struct Alignment {
         pub id: String,
         pub left: String,
