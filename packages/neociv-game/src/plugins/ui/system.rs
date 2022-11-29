@@ -1,4 +1,4 @@
-use bevy::{prelude::*, reflect::List};
+use bevy::prelude::*;
 use bevy_egui::{egui, EguiContext};
 
 use neociv_civil::runtime::NeocivRuntime;
@@ -11,6 +11,7 @@ pub fn ui_system(
     mut egui_context: ResMut<EguiContext>,
     runtime: Res<NeocivRuntime>,
     mut ui_state: ResMut<NeocivUiState>,
+    keys: Res<Input<KeyCode>>,
 ) {
     // Create the debug window
     egui::Window::new(state.revision.to_string()).show(egui_context.ctx_mut(), |ui| {
@@ -69,4 +70,10 @@ pub fn ui_system(
             response.request_focus();
         }
     });
+
+    if !ui_state.focus.game {
+        if keys.pressed(KeyCode::W) {
+            runtime.eval_lua::<()>(r#"cvl.dispatch("camera.move.up")"#);
+        }
+    }
 }

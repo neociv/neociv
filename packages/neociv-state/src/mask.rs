@@ -1,7 +1,4 @@
-use serde::{Deserialize, Serialize};
-use bevy_ecs::component::Component;
-
-use neociv_macros::StateTable;
+use crate::state_table_default;
 
 /// Cell mask's define an 8-bit value with a bit for each edge condition.
 /// 
@@ -13,14 +10,15 @@ use neociv_macros::StateTable;
 ///                           \ /
 pub type CellMask = u8;
 
-#[derive(Clone, Debug, Serialize, Deserialize, Default, Component, StateTable)]
-pub struct CellMasks {
-    /// Whether or not the neighbour shares the same owner
-    pub owner: CellMask,
-    /// Whether or not the neighbour is the same terrain type
-    pub terrain: CellMask,
-    /// Whether or not the neighbour is water while the cell is ground
-    pub coast: CellMask,
-    /// Whether or not the neighbour has a road (or equivalent) on it
-    pub road: CellMask,
+state_table_default! {
+    pub struct CellMasks {
+        /// Whether or not the neighbour shares the same owner
+        pub owner: CellMask,
+        /// Whether or not the neighbour is the same terrain type
+        pub terrain: CellMask,
+        /// Whether or not the neighbour is water while the cell is ground
+        pub coast: CellMask,
+        /// Whether or not the neighbour has a road (or equivalent) on it
+        pub road: CellMask,
+    }
 }

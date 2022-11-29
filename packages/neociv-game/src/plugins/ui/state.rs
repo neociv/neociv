@@ -7,6 +7,12 @@ pub struct ReplState {
 }
 
 #[derive(Component, Default)]
+pub struct FocusState {
+    pub game: bool,
+}
+
+#[derive(Component, Default)]
 pub struct NeocivUiState {
+    pub focus: FocusState,
     pub repl: ReplState,
 }

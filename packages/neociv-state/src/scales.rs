@@ -2,6 +2,8 @@ use rlua::{Error as LuaError, FromLua, ToLua, Value as LuaValue};
 use serde::{Deserialize, Serialize};
 use serde_diff::SerdeDiff;
 
+use crate::state_table_default;
+
 #[derive(Clone, Debug, Default, Serialize, Deserialize, SerdeDiff)]
 pub enum PopulationScale {
     #[default]
@@ -72,33 +74,9 @@ impl<'lua> FromLua<'lua> for CurrencyScale {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, Default, SerdeDiff)]
-pub struct Scales {
-    pub population: PopulationScale,
-    pub currency: CurrencyScale,
-}
-
-impl<'lua> ToLua<'lua> for Scales {
-    fn to_lua(self, ctx: rlua::Context<'lua>) -> rlua::Result<LuaValue<'lua>> {
-        let scale_tbl = ctx.create_table()?;
-        scale_tbl.set("population", self.population)?;
-        scale_tbl.set("currency", self.currency)?;
-        Ok(LuaValue::Table(scale_tbl))
-    }
-}
-
-impl<'lua> FromLua<'lua> for Scales {
-    fn from_lua(lua_value: LuaValue<'lua>, _lua: rlua::Context<'lua>) -> rlua::Result<Self> {
-        match lua_value {
-            LuaValue::Table(tbl) => Ok(Scales {
-                population: tbl.get("population")?,
-                currency: tbl.get("currency")?,
-            }),
-            _ => Err(LuaError::FromLuaConversionError {
-                from: lua_value.type_name(),
-                to: "Scales",
-                message: None,
-            }),
-        }
+state_table_default! {
+    pub struct Scales {
+        pub population: PopulationScale,
+        pub currency: CurrencyScale,
     }
 }

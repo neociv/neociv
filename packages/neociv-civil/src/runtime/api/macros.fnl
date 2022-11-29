@@ -2,5 +2,12 @@
   `(fn []
      (cvl.dispatch ,(tostring action))))
 
-{: actbk!}
+(fn op! [op]
+  `(fn []
+      (cvl.op ,(tostring op))))
+
+{
+  : actbk!
+  : op!
+}
 
