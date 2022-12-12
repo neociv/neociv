@@ -1,3 +1,5 @@
+local inspect = require("inspect")
+
 cvl = cvl or {
     revision = -1,
     events = {},
@@ -105,21 +107,12 @@ function cvl.register(type, id, data)
     return cvl
 end
 
-function cvl.dump(o)
-    if type(o) == 'table' then
-        local s = '{ '
-        for k, v in pairs(o) do
-            if type(k) ~= 'number' then k = '"' .. k .. '"' end
-            s = s .. '[' .. k .. '] = ' .. cvl.dump(v) .. ','
-        end
-        return s .. '} '
-    else
-        return tostring(o)
-    end
+function cvl.inspect(o)
+    print(inspect(o))
 end
 
-function cvl.dump_state()
-    print(cvl.dump(cvl.state))
+function cvl.inspect_state()
+    cvl.inspect(cvl.state)
 end
 
 function cvl.op(action, args)

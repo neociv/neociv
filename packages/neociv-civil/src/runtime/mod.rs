@@ -15,7 +15,8 @@ pub mod engine;
 pub mod errors;
 pub mod repl;
 
-static FENNEL_FILE: &'static str = include_str!("./api/fennel.lua");
+static FENNEL_FILE: &'static str = include_str!("./api/vendor/fennel.lua");
+static INSPECT_FILE: &'static str = include_str!("./api/vendor/inspect.lua");
 static SEARCHERS_FILE: &'static str = include_str!("./api/searchers.lua");
 static MACROS_FILE: &'static str = include_str!("./api/macros.fnl");
 static CVL_FILE: &'static str = include_str!("./api/cvl.lua");
@@ -35,6 +36,7 @@ impl Default for NeocivRuntime {
                 state: NeocivState::default(),
             };
             let _result = runtime.lua.lock().unwrap().context(move |ctx| {
+                ctx.load(INSPECT_FILE).exec()?;
                 ctx.load(FENNEL_FILE).exec()?;
                 ctx.load(SEARCHERS_FILE).exec()?;
                 ctx.load(CVL_FILE).exec()?;

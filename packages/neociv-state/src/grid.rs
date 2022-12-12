@@ -1,44 +1,13 @@
 use num_integer::div_floor;
 
-use rlua::{Error as LuaError, FromLua, ToLua, Value as LuaValue};
-use serde::{Deserialize, Serialize};
+use crate::{cell::Cell, state_table_default};
 
-use crate::cell::Cell;
-
-/// Contains Cells in a 1D Vec that are addressable in 2D space according to the xsize / ysize.
-#[derive(Clone, Default, Debug, Serialize, Deserialize)]
-pub struct Grid {
-    pub xsize: u8,
-    pub ysize: u8,
-    pub cells: Vec<Cell>,
-}
-
-impl<'lua> ToLua<'lua> for Grid {
-    fn to_lua(self, ctx: rlua::Context<'lua>) -> rlua::Result<LuaValue<'lua>> {
-        let grid_tbl = ctx.create_table()?;
-        grid_tbl.set("xsize", self.xsize)?;
-        grid_tbl.set("ysize", self.ysize)?;
-
-        let cells = ctx.create_sequence_from(self.cells)?;
-        grid_tbl.set("cells", cells)?;
-        Ok(LuaValue::Table(grid_tbl))
-    }
-}
-
-impl<'lua> FromLua<'lua> for Grid {
-    fn from_lua(lua_value: LuaValue<'lua>, _lua: rlua::Context<'lua>) -> rlua::Result<Self> {
-        match lua_value {
-            LuaValue::Table(tbl) => Ok(Grid {
-                xsize: tbl.get("xsize")?,
-                ysize: tbl.get("ysize")?,
-                cells: tbl.get("cells")?,
-            }),
-            _ => Err(LuaError::FromLuaConversionError {
-                from: lua_value.type_name(),
-                to: "Grid",
-                message: None,
-            }),
-        }
+state_table_default! {
+    /// Contains Cells in a 1D Vec that are addressable in 2D space according to the xsize / ysize.
+    pub struct Grid {
+        pub xsize: u8,
+        pub ysize: u8,
+        pub cells: Vec<Cell>,
     }
 }
 
@@ -111,7 +80,7 @@ mod tests {
     // all behave correctly and indicies aren't overflowing.
     #[test]
     fn test_i_to_xy_large() {
-        let grid = crate::grid::Grid { 
+        let grid = crate::grid::Grid {
             xsize: 25,
             ysize: 11,
             ..Default::default()

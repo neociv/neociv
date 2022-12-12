@@ -26,3 +26,11 @@ cvl.on("example", handler)
 
 | Event | Data | Description |
 | ----- | ---- | ----------- |
+
+## Third Party Libraries
+
+The runtime API includes several compiled-in SDKs, some exposed via the `cvl` global and others available as importable modules for your own code. All of these modules are MIT licensed.
+
+[fennel](https://fennel-lang.org)
+
+[inspect.lua](https://github.com/kikito/inspect.lua)

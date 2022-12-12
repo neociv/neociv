@@ -1,11 +1,14 @@
+use bevy_ecs::{prelude::Component, system::Resource};
 use bevy_math::Vec3;
 use rlua::{Error as LuaError, FromLua, ToLua, Value as LuaValue};
 use serde::{Deserialize, Serialize};
+use serde_diff::SerdeDiff;
 
 use crate::utils::vec3_from_table;
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize, Component, Resource, SerdeDiff)]
 pub struct Camera {
+    #[serde_diff(skip)]
     pub position: Vec3,
 }
 
