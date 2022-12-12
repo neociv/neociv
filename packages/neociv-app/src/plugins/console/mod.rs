@@ -6,8 +6,13 @@ use crossbeam::channel::{bounded, Receiver};
 
 use neociv_civil::runtime::{repl::NeocivRepl, NeocivRuntime};
 
-fn repl_input(cvl: ResMut<NeocivRuntime>, channel: Res<Receiver<String>>) {
-    if let Ok(line) = channel.try_recv() {
+#[derive(Component, Resource)]
+pub struct REPLChannel {
+    receiver: Receiver<String>,
+}
+
+fn repl_input(cvl: ResMut<NeocivRuntime>, channel: Res<REPLChannel>) {
+    if let Ok(line) = channel.receiver.try_recv() {
         let result = cvl.lua_repl_line(&line);
         match result {
             Ok(s) => println!("{}", s),
@@ -31,7 +36,7 @@ fn spawn_io_thread(mut commands: Commands) {
         }
     });
     task.detach();
-    commands.insert_resource(rx);
+    commands.insert_resource(REPLChannel { receiver: rx });
 }
 
 pub struct ConsolePlugin;

@@ -9,28 +9,29 @@ pub mod plugins;
 pub fn init_desktop_app(config: NeocivConfig) -> App {
     let mut app = App::new();
 
+    // Black screen by default
+    app.insert_resource(ClearColor(Color::hex("000000").unwrap()));
+
     // Graphics options
     app.insert_resource(Msaa {
         samples: config.video.msaa_samples,
     });
 
-    // Basic window descriptor
-    app.insert_resource(WindowDescriptor {
-        width: config.window.resolution_width as f32,
-        height: config.window.resolution_height as f32,
-        mode: if config.window.fullscreen {
-            WindowMode::Fullscreen
-        } else {
-            WindowMode::Windowed
+    // Load the default plugins and setup the window
+    app.add_plugins(DefaultPlugins.set(WindowPlugin {
+        window: WindowDescriptor {
+            width: config.window.resolution_width as f32,
+            height: config.window.resolution_height as f32,
+            mode: if config.window.fullscreen {
+                WindowMode::Fullscreen
+            } else {
+                WindowMode::Windowed
+            },
+            present_mode: bevy::window::PresentMode::AutoVsync,
+            ..default()
         },
-        ..Default::default()
-    });
-
-    // Black screen by default
-    app.insert_resource(ClearColor(Color::hex("000000").unwrap()));
-
-    // Load the default plugins
-    app.add_plugins(DefaultPlugins);
+        ..default()
+    }));
 
     return app;
 }
