@@ -71,9 +71,20 @@ pub fn ui_system(
         }
     });
 
-    if !ui_state.focus.game {
+    ui_state.focus.game = egui_context.ctx_mut().memory().focus().is_none();
+
+    if ui_state.focus.game {
         if keys.pressed(KeyCode::W) {
             runtime.eval_lua::<()>(r#"cvl.dispatch("camera.move.up")"#);
+        }
+        if keys.pressed(KeyCode::S) {
+            runtime.eval_lua::<()>(r#"cvl.dispatch("camera.move.down")"#);
+        }
+        if keys.pressed(KeyCode::A) {
+            runtime.eval_lua::<()>(r#"cvl.dispatch("camera.move.left")"#);
+        }
+        if keys.pressed(KeyCode::D) {
+            runtime.eval_lua::<()>(r#"cvl.dispatch("camera.move.right")"#);
         }
     }
 }

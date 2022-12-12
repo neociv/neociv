@@ -1,7 +1,7 @@
 use bevy_math::Vec3;
 
 use crate::actions::meta::MetaAction;
-use crate::cell::Cell;
+use crate::cell::{Cell, Terrain};
 use crate::civ::{Civ, CivKey};
 use crate::errors::*;
 use crate::grid::{grid_i_to_xy, grid_xy_to_i};
@@ -126,7 +126,7 @@ pub fn set_grid_size(state: NeocivState, xsize: u8, ysize: u8) -> StateResult {
                 x: xy.0,
                 y: xy.1,
                 owner: None,
-                terrain: None,
+                terrain: Terrain::default(),
                 masks: CellMasks::default(),
                 improvement: None,
             });

@@ -118,6 +118,10 @@ function cvl.dump(o)
     end
 end
 
+function cvl.dump_state()
+    print(cvl.dump(cvl.state))
+end
+
 function cvl.op(action, args)
     cvl.inject_state(cvl._engine_do(action, args))
     return cvl

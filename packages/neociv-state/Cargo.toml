@@ -7,14 +7,14 @@ edition = "2021"
 
 [dependencies]
 neociv-macros = { path = "../neociv-macros" }
-bevy_math = "0.8.1"
-bevy_ecs = "0.8.1"
+bevy_math = "0.9.1"
+bevy_ecs = "0.9.1"
 derive-alias = "0.1.0"
-strum = { version = "0.24.0", features = ["derive"] }
-num-integer = "0.1.44"
-regex = "1.5.5"
+strum = { version = "0.24.1", features = ["derive"] }
+num-integer = "0.1.45"
+regex = "1.7.0"
 lazy_static = "1.4.0"
-serde = "1.0.143"
-serde_json = "1.0.83"
+serde = "1.0.150"
+serde_json = "1.0.89"
 serde-diff = "0.4.1"
-rlua = "0.19.1"
+rlua = "0.19.4"

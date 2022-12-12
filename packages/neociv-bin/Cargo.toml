@@ -4,8 +4,8 @@ version = "0.0.1"
 edition = "2021"
 
 [dependencies]
-bevy = { version = "0.8.1", features = ["bevy_render", "bevy_winit"] }
-clap = { version = "3.1.2", features = ["derive"] }
+bevy = { version = "0.9.1", features = ["bevy_render", "bevy_winit"] }
+clap = { version = "4.0.29", features = ["derive"] }
 neociv-app = { path = "../neociv-app" }
 neociv-config = { path = "../neociv-config" }
 neociv-state = { path = "../neociv-state" }

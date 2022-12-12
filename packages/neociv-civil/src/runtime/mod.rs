@@ -1,4 +1,5 @@
 use bevy_ecs::component::Component;
+use bevy_ecs::system::Resource;
 use neociv_state::state::NeocivState;
 use rlua::{
     Context, Error as LuaError, FromLuaMulti, Function as LuaFunction, Lua, Result as LuaResult,
@@ -20,7 +21,7 @@ static MACROS_FILE: &'static str = include_str!("./api/macros.fnl");
 static CVL_FILE: &'static str = include_str!("./api/cvl.lua");
 static EVENTS_FILE: &'static str = include_str!("./api/events.fnl");
 
-#[derive(Component)]
+#[derive(Component, Resource)]
 pub struct NeocivRuntime {
     lua: Arc<Mutex<Lua>>,
     pub state: NeocivState,

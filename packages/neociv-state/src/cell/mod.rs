@@ -26,7 +26,7 @@ pub struct Cell {
     /// Civ that owns this cell, optional.
     pub owner: Option<CivKey>,
     /// Terrain
-    pub terrain: Option<Terrain>,
+    pub terrain: Terrain,
     /// Masks
     pub masks: CellMasks,
     /// Improvement
@@ -40,6 +40,7 @@ impl<'lua> ToLua<'lua> for Cell {
         cell_tbl.set("y", self.y)?;
         cell_tbl.set("owner", opt_str_to_lua(self.owner, &ctx)?)?;
         cell_tbl.set("masks", self.masks)?;
+        cell_tbl.set("terrain", self.terrain)?;
         Ok(LuaValue::Table(cell_tbl))
     }
 }
