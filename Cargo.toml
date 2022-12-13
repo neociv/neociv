@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
-    "packages/neociv-app",
+    "packages/neociv-desktop",
     "packages/neociv-bin",
     "packages/neociv-civil",
     "packages/neociv-config",

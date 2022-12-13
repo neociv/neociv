@@ -43,12 +43,6 @@ pub fn ui_system(
 
         let response = ui.add(egui::TextEdit::singleline(&mut ui_state.repl.input));
 
-        /*
-        if response.changed() {
-            print!("## {:?}", ui_state.repl.input);
-        }
-        */
-
         if response.lost_focus() && ui.input().key_pressed(egui::Key::Enter) {
             // Clone and store the input value
             let input = ui_state.repl.input.clone();

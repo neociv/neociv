@@ -1,10 +1,10 @@
 //use neociv_state::state::NeocivState;
-use neociv_app::init_desktop_app;
+use neociv_desktop::init_desktop_app;
 use neociv_config::NeocivConfig;
 use neociv_game::NeocivGamePlugin;
 use neociv_state::state::NeocivState;
 
-use neociv_app::plugins::console::ConsolePlugin;
+use neociv_desktop::plugins::console::ConsolePlugin;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum AppState {

@@ -7,20 +7,11 @@ cvl = cvl or {
     state = nil
 }
 
--- Generate a chain table from a string or safely pass through a table
-local function chain(input)
-    if type(event) == "table" then
-        return input
-    else
-        return ""
-    end
-end
-
 local function strsplit(str, sep)
     sep = sep or "%s";
     local tbl = {};
     local i = 1;
-    for str in string.gmatch(str, "([^"..sep.."]+)") do
+    for str in string.gmatch(str, "([^" .. sep .. "]+)") do
         tbl[i] = str;
         i = i + 1;
     end
@@ -41,12 +32,12 @@ local function setter(tbl, path, val)
 
     -- TODO: Update the revision upon successful setting
     tbl.revision = tbl.revision + 1
-    
+
     return tbl
 end
 
 function cvl.inject_state(state)
-    if cvl.state == nil or state ~= nil and state.revision ~= cvl.revision  then
+    if cvl.state == nil or state ~= nil and state.revision ~= cvl.revision then
         cvl.state = state
         cvl.revision = cvl.state.revision
         cvl.dispatch("state.updated", cvl.state)
@@ -59,23 +50,38 @@ function cvl.push_state(state)
 end
 
 -- Listen for events
-function cvl.on(event, handler)
+function cvl.on(event, handler, opts)
+    -- Define options with sane defaults
+    opts = opts or {}
+    opts.count = opts.count or math.huge
+
     local events = type(event) == "table" and event or { event }
+
     for _, evt in ipairs(events) do
         if cvl.events[evt] == nil then
             cvl.events[evt] = {}
         end
-        table.insert(cvl.events[evt], handler)
+        table.insert(cvl.events[evt], { handler = handler, opts = opts })
     end
     return cvl
+end
+
+-- Listen for an event a single time
+function cvl.once(event, handler, opts)
+    opts = opts or {}
+    opts.count = 1
+    return cvl.on(event, handler, opts)
 end
 
 -- Dispatch an event to handlers
 function cvl.dispatch(event, data)
     if cvl.events[event] ~= nil then
-        for _, handler in pairs(cvl.events[event]) do
-            handler({ type = event, data = data })
+        for _, entry in pairs(cvl.events[event]) do
+            cvl.inspect(entry)
+            entry.handler({ type = event, data = data })
+            entry.opts.count = entry.opts.count - 1
         end
+        -- TODO: This should really be a reduce or filter all-in-one runner
     end
     return cvl
 end

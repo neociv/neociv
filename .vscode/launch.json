@@ -81,16 +81,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in library 'neociv-app'",
+            "name": "Debug unit tests in library 'neociv-desktop'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
                     "--lib",
-                    "--package=neociv-app"
+                    "--package=neociv-desktop"
                 ],
                 "filter": {
-                    "name": "neociv-app",
+                    "name": "neociv-desktop",
                     "kind": "lib"
                 }
             },

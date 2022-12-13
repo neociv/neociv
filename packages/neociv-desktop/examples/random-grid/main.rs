@@ -1,4 +1,4 @@
-extern crate neociv_app as app;
+extern crate neociv_desktop as app;
 extern crate neociv_config as config;
 extern crate neociv_game as game;
 extern crate neociv_state;

@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy::window::WindowMode;
+use bevy::window::{PresentMode, WindowMode};
 
 use neociv_config::NeocivConfig;
 
@@ -27,7 +27,11 @@ pub fn init_desktop_app(config: NeocivConfig) -> App {
             } else {
                 WindowMode::Windowed
             },
-            present_mode: bevy::window::PresentMode::AutoVsync,
+            present_mode: if config.video.vsync {
+                PresentMode::AutoVsync
+            } else {
+                PresentMode::AutoNoVsync
+            },
             ..default()
         },
         ..default()

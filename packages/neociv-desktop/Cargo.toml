@@ -1,5 +1,5 @@
 [package]
-name = "neociv-app"
+name = "neociv-desktop"
 version = "0.0.1"
 edition = "2021"
 
