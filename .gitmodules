@@ -1,0 +1,3 @@
+[submodule "neociv-contrib"]
+	path = neociv-contrib
+	url = https://github.com/neociv/neociv-contrib

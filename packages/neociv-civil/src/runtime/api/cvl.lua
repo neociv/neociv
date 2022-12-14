@@ -126,6 +126,10 @@ function cvl.op(action, args)
     return cvl
 end
 
+function cvl.mod(o, ...)
+    return o
+end
+
 package.preload["cvl"] = function() return cvl end
 
 return cvl
