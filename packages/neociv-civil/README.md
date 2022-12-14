@@ -26,28 +26,35 @@ cvl.on("example", handler)
 (cvl.on :example handler)
 ```
 
-Handler functions receive a table with the following structure:
+Handler functions receive two parameters, the first is any event data and the second is the event type. Event handlers can be written without making use of any parameters or just the data parameter (most common use case presumably).
 
-```typescript
-{
-    type: string;
-    data?: any;
-}
+```lua
+function handler(d,t)
+    return d
+end
 ```
 
-One of the more interesting usages of the handler functions though is that you can *modify* the data given to the next handler. The `data` entry in the event handler table is *mutable* and does not require returning. What value Neociv *actually* uses will be the result of these series of event handlers.
+```fennel
+(fn handler [d t] d)
+```
+
+One of the more interesting usages of the handler functions though is that you can *modify* the data given to the next handler. The `data` entry in the event handler table is *immutable* and thus must be returned. What value Neociv *actually* uses will be the result of these series of event handlers.
+
+Not returning or returning `nil` will behave identically to returning an unaltered data table.
+
+To make modifying an immutable table easier the `cvl.mod` function allows for cherrypicking values to modify while still returning the whole table. Table keys provided are actually paths so `"path.to.value"` is equivalent to addressing `path.to.value` directly.
 
 For example, let's create an event handler to increase all currency gains by 10%.
 
 ```lua
-cvl.on("currency.generated", function (evt)
-    evt.data.value = evt.data.value + (evt.data.value * 0.1)
+cvl.on("currency.generated", function (d)
+    return cvl.mod({ value = d.value + d.value * 0.1 })
 end)
 ```
 
 ```fennel
-(cvl.on :currency.generated (fn [evt]
-        (set evt.data.value (+ evt.data.value (* evt.data.value 0.1))))
+(cvl.on :currency.generated (fn [d]
+    (cvl.mod { :value (+ d.value (* d.value 0.1)) })))
 ```
 
 An additional options table can also be provided with the following schema as the final argument.

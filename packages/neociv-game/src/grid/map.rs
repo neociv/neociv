@@ -57,7 +57,7 @@ pub fn setup_grid_map(
                 mesh: meshes.add(hex_mesh(size)),
                 material: white_material.to_owned(),
                 transform: Transform::from_xyz(x, y, 0.0),
-                ..Default::default()
+                ..default()
             })
             .insert_bundle(PickableBundle::default());
     });

@@ -30,9 +30,6 @@ local function setter(tbl, path, val)
 
     value[final] = val
 
-    -- TODO: Update the revision upon successful setting
-    tbl.revision = tbl.revision + 1
-
     return tbl
 end
 
@@ -89,6 +86,7 @@ end
 -- Set a property in the state, will dispatch a new state
 function cvl.set(prop_path, value)
     local state = setter(cvl.state, prop_path, value)
+    state.revision = state.revision + 1
     cvl.inject_state(state)
     return cvl
 end
@@ -126,7 +124,10 @@ function cvl.op(action, args)
     return cvl
 end
 
-function cvl.mod(o, ...)
+function cvl.mod(o, m)
+    for k, v in pairs(m or {}) do
+        o = setter(o, k, v)
+    end
     return o
 end
 
