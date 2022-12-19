@@ -1,4 +1,5 @@
 use bevy::utils::HashMap;
+use neociv_state::currency::{CurrencyDesc, CurrencyId};
 
 // TODO: Obviously change these to the correct entry type for Bevy's sake
 
@@ -11,6 +12,7 @@ pub type NeocivSnd = ();
 /// Images, etc... all live here. All content from mods run through the... run... time will be stored here. The
 /// registry will then handle interfacing with Bevy.
 pub struct NeocivRegistry {
+    currency_map: HashMap<CurrencyId, CurrencyDesc>,
     mesh_map: HashMap<String, NeocivMesh>,
     mat_map: HashMap<String, NeocivMat>,
     img_map: HashMap<String, NeocivImg>,

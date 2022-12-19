@@ -1,0 +1,9 @@
+[config]
+default_to_workspace = false
+
+[env]
+NEOCIV_CONTENT_ROOT = "${CARGO_MAKE_WORKING_DIRECTORY}/content"
+
+[tasks.random-grid]
+command = "cargo"
+args = ["run", "--example", "random-grid"]
