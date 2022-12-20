@@ -34,5 +34,7 @@ fn main() {
     #[cfg(target_arch = "wasm32")]
     app.add_plugin(bevy_webgl2);
 
+    app.add_state(AppState::Game);
+
     app.run();
 }

@@ -1,5 +1,6 @@
 use std::env;
-use std::path;
+
+use bevy::prelude::Resource;
 
 #[derive(Clone, Copy, Debug)]
 pub struct VideoConfig {
@@ -54,7 +55,7 @@ impl Default for ContentConfig {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Resource)]
 pub struct NeocivConfig {
     pub video: VideoConfig,
     pub window: WindowConfig,

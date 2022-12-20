@@ -9,6 +9,8 @@ use bevy::math::Vec3;
 fn main() {
     let mut app = app::init_desktop_app(config::NeocivConfig::default());
 
+    app.add_plugin(app::plugins::loader::ContentLoaderPlugin);
+
     // Generate a random grid
     let mut state = engine::init();
 

@@ -1,26 +1,12 @@
-use bevy::utils::HashMap;
-use neociv_state::currency::{CurrencyDesc, CurrencyId};
+use bevy::prelude::Plugin;
 
-// TODO: Obviously change these to the correct entry type for Bevy's sake
+pub mod registry;
+pub mod startup;
 
-pub type NeocivMesh = ();
-pub type NeocivMat = ();
-pub type NeocivImg = ();
-pub type NeocivSnd = ();
+pub struct RegistryPlugin;
 
-/// The globally available map of all resources that can be referenced by id strings. Meshes, Materials, Sounds,
-/// Images, etc... all live here. All content from mods run through the... run... time will be stored here. The
-/// registry will then handle interfacing with Bevy.
-pub struct NeocivRegistry {
-    currency_map: HashMap<CurrencyId, CurrencyDesc>,
-    mesh_map: HashMap<String, NeocivMesh>,
-    mat_map: HashMap<String, NeocivMat>,
-    img_map: HashMap<String, NeocivImg>,
-    snd_map: HashMap<String, NeocivSnd>,
-}
-
-impl NeocivRegistry {
-    fn has(key: String) -> bool {
-        return false;
+impl Plugin for RegistryPlugin {
+    fn build(&self, app: &mut bevy::prelude::App) {
+        app.add_startup_system(startup::registry_startup);
     }
 }

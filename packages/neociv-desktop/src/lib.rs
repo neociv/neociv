@@ -37,5 +37,8 @@ pub fn init_desktop_app(config: NeocivConfig) -> App {
         ..default()
     }));
 
+    // Insert the config as a resource for other systems
+    app.insert_resource(config);
+
     return app;
 }

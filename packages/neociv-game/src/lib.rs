@@ -18,6 +18,9 @@ pub struct NeocivGamePlugin;
 
 impl Plugin for NeocivGamePlugin {
     fn build(&self, app: &mut App) {
+        // Add the registry plugin - this must exist first
+        app.add_plugin(plugins::registry::RegistryPlugin);
+
         // Add the runtime to the resources
         app.add_plugin(plugins::runtime::NeocivRuntimePlugin);
 
