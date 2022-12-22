@@ -131,6 +131,10 @@ function cvl.mod(o, m)
     return o
 end
 
+function cvl.define(type, id, o)
+    return cvl
+end
+
 package.preload["cvl"] = function() return cvl end
 
 return cvl

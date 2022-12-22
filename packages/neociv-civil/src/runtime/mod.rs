@@ -1,13 +1,16 @@
+use std::fs;
+use std::path::Path;
+use std::sync::{Arc, Mutex};
+
 use bevy_ecs::component::Component;
 use bevy_ecs::system::Resource;
-use neociv_state::state::NeocivState;
+use bevy_ecs::world::FromWorld;
 use rlua::{
     Context, Error as LuaError, FromLuaMulti, Function as LuaFunction, Lua, Result as LuaResult,
     String as LuaString, Table as LuaTable, Value as LuaValue,
 };
-use std::fs;
-use std::path::Path;
-use std::sync::{Arc, Mutex};
+
+use neociv_state::state::NeocivState;
 
 use self::{engine::engine_do, errors::NeocivRuntimeError};
 
@@ -22,7 +25,7 @@ static MACROS_FILE: &'static str = include_str!("./api/macros.fnl");
 static CVL_FILE: &'static str = include_str!("./api/cvl.lua");
 static EVENTS_FILE: &'static str = include_str!("./api/events.fnl");
 
-#[derive(Component, Resource)]
+#[derive(Clone, Debug, Component, Resource)]
 pub struct NeocivRuntime {
     lua: Arc<Mutex<Lua>>,
     pub state: NeocivState,

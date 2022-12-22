@@ -42,3 +42,7 @@ pub fn init_desktop_app(config: NeocivConfig) -> App {
 
     return app;
 }
+
+pub fn init_desktop_game(app: &App, config: NeocivConfig) -> &App {
+    return app;
+}

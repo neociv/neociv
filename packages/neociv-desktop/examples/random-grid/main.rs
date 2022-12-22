@@ -4,12 +4,12 @@ extern crate neociv_game as game;
 extern crate neociv_state;
 
 use neociv_state::engine;
-use bevy::math::Vec3;
+use bevy::{math::Vec3, ecs::schedule::ReportExecutionOrderAmbiguities};
 
 fn main() {
     let mut app = app::init_desktop_app(config::NeocivConfig::default());
 
-    app.add_plugin(app::plugins::loader::ContentLoaderPlugin);
+    app.insert_resource(ReportExecutionOrderAmbiguities);
 
     // Generate a random grid
     let mut state = engine::init();
@@ -25,6 +25,9 @@ fn main() {
 
     // Add the game plugin
     app.add_plugin(game::NeocivGamePlugin);
+
+    // Content loader plugin loads after the runtime startup
+    app.add_plugin(app::plugins::loader::ContentLoaderPlugin);
 
     app.add_plugin(app::plugins::console::ConsolePlugin);
 
