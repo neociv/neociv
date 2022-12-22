@@ -4,12 +4,12 @@ extern crate neociv_game as game;
 extern crate neociv_state;
 
 use neociv_state::engine;
-use bevy::{math::Vec3, ecs::schedule::ReportExecutionOrderAmbiguities};
+use bevy::math::Vec3;
 
 fn main() {
     let mut app = app::init_desktop_app(config::NeocivConfig::default());
 
-    app.insert_resource(ReportExecutionOrderAmbiguities);
+    //app.insert_resource(bevy::ecs::schedule::ReportExecutionOrderAmbiguities);
 
     // Generate a random grid
     let mut state = engine::init();
