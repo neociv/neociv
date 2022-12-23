@@ -28,8 +28,8 @@ pub fn loader_startup(
     for entry in glob(gpath.as_str()).expect("Failed to read glob pattern") {
         match entry {
             Ok(path) => load(path.display().to_string(), &registry, &runtime),
-            Err(e) => println!("{:?}", e),
-        }
+            Err(e) => panic!("{:?}", e),
+        };
     }
 
     commands.insert_resource(registry.clone());

@@ -2,11 +2,12 @@ use bevy::prelude::*;
 use bevy::window::{PresentMode, WindowMode};
 
 use neociv_config::NeocivConfig;
+use neociv_state::state::NeocivState;
 
 pub mod plugins;
 
 /// Initialise and setup a basic app window
-pub fn init_desktop_app(config: NeocivConfig) -> App {
+pub fn init_desktop_app(config: NeocivConfig, state: Option<NeocivState>) -> App {
     let mut app = App::new();
 
     // Black screen by default

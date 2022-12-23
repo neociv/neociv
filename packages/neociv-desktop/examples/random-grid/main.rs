@@ -7,9 +7,10 @@ use neociv_state::engine;
 use bevy::math::Vec3;
 
 fn main() {
-    let mut app = app::init_desktop_app(config::NeocivConfig::default());
+    let mut app = app::init_desktop_app(config::NeocivConfig::default(), None);
 
-    //app.insert_resource(bevy::ecs::schedule::ReportExecutionOrderAmbiguities);
+    #[cfg(debug_assertions)]
+    app.insert_resource(bevy::ecs::schedule::ReportExecutionOrderAmbiguities);
 
     // Generate a random grid
     let mut state = engine::init();
