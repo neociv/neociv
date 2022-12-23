@@ -17,10 +17,7 @@ pub enum AppState {
 use bevy_webgl2;
 
 fn main() {
-    let mut app = init_desktop_app(NeocivConfig::default());
-
-    // Search for config and saves
-    app.add_state(AppState::Init);
+    let mut app = init_desktop_app(NeocivConfig::default(), None);
 
     // NB: This is just a blank default until we figure out proper loading
     app.insert_resource(NeocivState::default());

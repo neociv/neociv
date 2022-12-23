@@ -1,4 +1,7 @@
-use bevy::prelude::*;
+use bevy::{
+    input::mouse::{MouseScrollUnit, MouseWheel},
+    prelude::*,
+};
 use bevy_egui::{egui, EguiContext};
 
 use neociv_civil::runtime::NeocivRuntime;
@@ -12,6 +15,7 @@ pub fn ui_system(
     runtime: Res<NeocivRuntime>,
     mut ui_state: ResMut<NeocivUiState>,
     keys: Res<Input<KeyCode>>,
+    mut scroll_evr: EventReader<MouseWheel>,
 ) {
     // Create the debug window
     egui::Window::new(state.revision.to_string()).show(egui_context.ctx_mut(), |ui| {
@@ -79,6 +83,13 @@ pub fn ui_system(
         }
         if keys.pressed(KeyCode::D) {
             runtime.eval_lua::<()>(r#"cvl.dispatch("camera.move.right")"#);
+        }
+        for ev in scroll_evr.iter() {
+            if ev.y > 0.0 {
+                runtime.eval_lua::<()>(r#"cvl.dispatch("camera.zoom.in")"#);
+            } else if ev.y < 0.0 {
+                runtime.eval_lua::<()>(r#"cvl.dispatch("camera.zoom.out")"#);
+            }
         }
     }
 }
