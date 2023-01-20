@@ -1,6 +1,7 @@
 use bevy::prelude::{App, Plugin, StageLabel, SystemLabel};
 use bevy_mod_picking::{DebugCursorPickingPlugin, DebugEventsPickingPlugin, DefaultPickingPlugins};
 
+pub mod entities;
 pub mod grid;
 pub mod plugins;
 pub mod utils;
@@ -37,20 +38,20 @@ impl Plugin for NeocivGamePlugin {
         // Grid plugin
         app.add_plugin(plugins::grid::NeocivGridPlugin);
 
+        // Camera
+        app.add_plugin(plugins::camera::NeocivCameraPlugin);
+
         // Setup the UI
         app.add_plugin(plugins::ui::NeocivUiPlugin);
 
         // Picking
+        /*
         app.add_plugins(DefaultPickingPlugins)
             .add_plugin(DebugCursorPickingPlugin)
             .add_plugin(DebugEventsPickingPlugin);
+        */
 
         // Normal
-        app.add_startup_system(grid::camera::setup_grid_camera)
-            .add_startup_system(grid::map::setup_grid_map)
-            .add_startup_system(grid::light::setup_grid_lights);
-
-        // Systems
-        app.add_system(grid::camera::grid_camera_system);
+        app.add_startup_system(grid::light::setup_grid_lights);
     }
 }

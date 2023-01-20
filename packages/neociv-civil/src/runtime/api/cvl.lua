@@ -135,6 +135,10 @@ function cvl.define(type, id, o)
     return cvl
 end
 
+function cvl.load_media()
+    return cvl
+end
+
 package.preload["cvl"] = function() return cvl end
 
 return cvl

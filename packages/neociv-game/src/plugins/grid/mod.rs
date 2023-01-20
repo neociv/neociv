@@ -5,6 +5,7 @@ use crate::GameStartupStage;
 pub mod utils;
 pub mod bundles;
 pub mod startup;
+pub mod system;
 
 pub struct NeocivGridPlugin;
 

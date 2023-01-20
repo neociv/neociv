@@ -3,6 +3,8 @@ use bevy::utils::HashMap;
 
 use neociv_state::currency::{CurrencyDesc, CurrencyId};
 
+use crate::entities::materials::cell::CellMaterialEntity;
+
 // TODO: Obviously change these to the correct entry type for Bevy's sake
 
 pub type NeocivMesh = ();
@@ -20,6 +22,8 @@ pub struct NeocivRegistry {
     pub mat_map: HashMap<String, NeocivMat>,
     pub img_map: HashMap<String, NeocivImg>,
     pub snd_map: HashMap<String, NeocivSnd>,
+
+    pub cell_materials: HashMap<String, CellMaterialEntity>,
 }
 
 impl NeocivRegistry {

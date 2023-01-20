@@ -4,7 +4,6 @@ use std::sync::{Arc, Mutex};
 
 use bevy_ecs::component::Component;
 use bevy_ecs::system::Resource;
-use bevy_ecs::world::FromWorld;
 use rlua::{
     Context, Error as LuaError, FromLuaMulti, Function as LuaFunction, Lua, Result as LuaResult,
     String as LuaString, Table as LuaTable, Value as LuaValue,
