@@ -7,8 +7,13 @@ edition = "2021"
 
 [dependencies]
 neociv-state = { path = "../neociv-state" }
+neociv-macros = { path = "../neociv-macros" }
 bevy_math = "0.9.1"
 bevy_ecs = "0.9.1"
 rlua = "0.19.4"
 indoc = "1.0.7"
 rustyline = "10.0.0"
+paste = "1.0.11"
+serde = "1.0.150"
+serde_json = "1.0.89"
+serde-diff = "0.4.1"

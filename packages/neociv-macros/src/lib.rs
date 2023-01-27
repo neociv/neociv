@@ -95,7 +95,6 @@ pub fn state_enum_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStr
             })
             .collect();
 
-
         let from_lua_body: Vec<proc_macro2::TokenStream> = fields
             .iter()
             .map(|f| {

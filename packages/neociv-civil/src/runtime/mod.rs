@@ -13,12 +13,17 @@ use neociv_state::state::NeocivState;
 
 use self::{engine::engine_do, errors::NeocivRuntimeError};
 
+pub mod utils;
 pub mod engine;
 pub mod errors;
 pub mod repl;
 
 static FENNEL_FILE: &'static str = include_str!("./api/vendor/fennel.lua");
 static INSPECT_FILE: &'static str = include_str!("./api/vendor/inspect.lua");
+static LUNAJSON_DECODER_FILE: &'static str = include_str!("./api/vendor/lunajson-decoder.lua");
+static LUNAJSON_ENCODER_FILE: &'static str = include_str!("./api/vendor/lunajson-encoder.lua");
+static LUNAJSON_SAX_FILE: &'static str = include_str!("./api/vendor/lunajson-sax.lua");
+static LUNAJSON_INIT_FILE: &'static str = include_str!("./api/vendor/lunajson.lua");
 static SEARCHERS_FILE: &'static str = include_str!("./api/searchers.lua");
 static MACROS_FILE: &'static str = include_str!("./api/macros.fnl");
 static CVL_FILE: &'static str = include_str!("./api/cvl.lua");
@@ -39,6 +44,10 @@ impl Default for NeocivRuntime {
             };
             let _result = runtime.lua.lock().unwrap().context(move |ctx| {
                 ctx.load(INSPECT_FILE).exec()?;
+                ctx.load(LUNAJSON_DECODER_FILE).exec()?;
+                ctx.load(LUNAJSON_ENCODER_FILE).exec()?;
+                ctx.load(LUNAJSON_SAX_FILE).exec()?;
+                ctx.load(LUNAJSON_INIT_FILE).exec()?;
                 ctx.load(FENNEL_FILE).exec()?;
                 ctx.load(SEARCHERS_FILE).exec()?;
                 ctx.load(CVL_FILE).exec()?;
@@ -68,8 +77,11 @@ impl Default for NeocivRuntime {
                         _ => panic!("Oh no!"),
                     },
                 )?;
+
                 let cvl_tbl: LuaTable = ctx.globals().get("cvl")?;
-                return cvl_tbl.set("_engine_do", do_fn);
+                let native_table: LuaTable = cvl_tbl.get("native")?;
+
+                return native_table.set("engine_do", do_fn);
             });
 
             // Setup basic events

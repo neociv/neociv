@@ -4,6 +4,7 @@ extern crate lazy_static;
 pub mod macros;
 pub mod utils;
 pub mod alignments;
+pub mod rivalries;
 pub mod currency;
 pub mod mask;
 pub mod cell;

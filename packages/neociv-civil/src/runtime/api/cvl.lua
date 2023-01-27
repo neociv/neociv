@@ -4,7 +4,11 @@ cvl = cvl or {
     revision = -1,
     events = {},
     config = {},
-    state = nil
+    state = nil,
+    -- Native function
+    native = {},
+    -- Entities to load
+    entity_queue = {},
 }
 
 local function strsplit(str, sep)
@@ -120,7 +124,7 @@ function cvl.inspect_state()
 end
 
 function cvl.op(action, args)
-    cvl.inject_state(cvl._engine_do(action, args))
+    cvl.inject_state(cvl.native.engine_do(action, args))
     return cvl
 end
 
@@ -135,8 +139,21 @@ function cvl.define(type, id, o)
     return cvl
 end
 
-function cvl.load_media()
+-- Load an entity or series of entities into the entity queue from a json file
+function cvl.load_entity_file(file)
+    for _, entity in cvl.native.load_entity_file(file) do
+        cvl.load_entity(entity)
+    end
     return cvl
+end
+
+-- Preload an entity into the entity queue
+function cvl.load_entity(entity)
+    cvl.entity_queue[entity.id] = entity
+    return cvl
+end
+
+function cvl.load_content_file(file)
 end
 
 package.preload["cvl"] = function() return cvl end

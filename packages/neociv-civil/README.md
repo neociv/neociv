@@ -112,3 +112,4 @@ Actions are operations that are performed on the state that can be made from Lua
 The runtime API includes several compiled-in Lua modules, some exposed / used via the `cvl` global but all are importable into your own code.
 
 [inspect.lua](https://github.com/kikito/inspect.lua)
+[lunajson](https://github.com/grafi-tt/lunajson)
