@@ -14,15 +14,15 @@ macro_rules! neociv_desc {
             pub struct [<Neociv $kind Desc>] {
                 id: String,
                 props: [<Neociv $kind DescProps>],
-                content: crate::desc::NeocivDescContent,
+                resources: crate::desc::NeocivDescResources,
             }
 
             impl [<Neociv $kind Desc>] {
-                pub fn new(id: String, props: [<Neociv $kind DescProps>], content: crate::desc::NeocivDescContent) -> Self {
+                pub fn new(id: String, props: [<Neociv $kind DescProps>], resources: crate::desc::NeocivDescResources) -> Self {
                     Self {
                         id,
                         props,
-                        content,
+                        resources,
                     }
                 }
             }
@@ -40,8 +40,8 @@ macro_rules! neociv_desc {
                     self.props.to_owned()
                 }
 
-                fn content(&self) -> crate::desc::NeocivDescContent {
-                    self.content.to_owned()
+                fn resources(&self) -> crate::desc::NeocivDescResources {
+                    self.resources.to_owned()
                 }
             }
         }
@@ -59,7 +59,7 @@ pub enum NeocivDescKind {
  * Define the actual media / resources content of an entity.
  */
 #[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize, serde_diff::SerdeDiff)]
-pub struct NeocivDescContent {
+pub struct NeocivDescResources {
     mesh: String,
     materials: Vec<String>,
 }
@@ -68,5 +68,5 @@ pub trait NeocivDesc<T> {
     fn id(&self) -> String;
     fn kind(&self) -> NeocivDescKind;
     fn props(&self) -> T;
-    fn content(&self) -> NeocivDescContent;
+    fn resources(&self) -> NeocivDescResources;
 }

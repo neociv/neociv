@@ -1,4 +1,5 @@
 local inspect = require("inspect")
+local json = require("lunajson")
 
 cvl = cvl or {
     revision = -1,
@@ -153,7 +154,16 @@ function cvl.load_entity(entity)
     return cvl
 end
 
-function cvl.load_content_file(file)
+function cvl.load_content_file(filename)
+    local result = cvl.native.load_content_file(filename)
+    print(cvl.inspect(result))
+    return cvl
+end
+
+function cvl.abs_resource(base_path, file_path)
+    -- Starts with @
+    -- Starts with .
+    -- Starts with alpha-numeric
 end
 
 package.preload["cvl"] = function() return cvl end

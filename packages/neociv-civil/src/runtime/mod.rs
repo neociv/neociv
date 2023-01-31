@@ -13,10 +13,10 @@ use neociv_state::state::NeocivState;
 
 use self::{engine::engine_do, errors::NeocivRuntimeError};
 
-pub mod utils;
 pub mod engine;
 pub mod errors;
 pub mod repl;
+pub mod utils;
 
 static FENNEL_FILE: &'static str = include_str!("./api/vendor/fennel.lua");
 static INSPECT_FILE: &'static str = include_str!("./api/vendor/inspect.lua");
@@ -78,10 +78,91 @@ impl Default for NeocivRuntime {
                     },
                 )?;
 
+                let load_content_file: LuaFunction =
+                    ctx.create_function(|fn_ctx, filename: String| {
+                        // Confirm the file exists
+                        let cf_path = Path::new(filename.as_str());
+
+                        if cf_path.exists() && !cf_path.is_dir() {
+                            // Get path to parent directory of content file and then ensure it is absolute
+                            let base_path = cf_path
+                                .parent()
+                                .expect("Unable to get parent path to content file")
+                                .canonicalize()
+                                .expect("Unable to get absolute path to content file directory")
+                                .as_path()
+                                .to_owned();
+
+                            // Read the file into JSON
+                            let json_src = fs::read_to_string(cf_path).unwrap();
+
+                            // Get reference to lunajson
+                            let fn_require: LuaFunction = fn_ctx.globals().get("require")?;
+                            let lunajson_decode: LuaFunction =
+                                fn_require.call::<_, LuaTable>("lunajson")?.get("decode")?;
+
+                            // Turn into a lua table
+                            let mut content_tbl: LuaTable =
+                                lunajson_decode.call::<_, LuaTable>(json_src)?;
+
+                            // Turn into an array if not already one
+                            if content_tbl.len()? == 0 {
+                                let arr_table = fn_ctx.create_table()?;
+                                arr_table.set(0, content_tbl)?;
+                                content_tbl = arr_table;
+                            }
+
+                            // Iterate over each entry in the table by index - going by "pairs" doesn't work
+                            // so well as it moves the table making it cumbersome to return
+                            for i in 1..content_tbl.len()? + 1 {
+                                let content: LuaTable = content_tbl.get(i)?;
+                                let resources: LuaTable = content.get("resources")?;
+                                let new_resources = fn_ctx.create_table()?;
+
+                                // Iterate over all the entries in the resource table and create absolute paths
+                                // to each one, except for the materials which are organised by namespace
+                                for rpair in resources.pairs::<LuaString, LuaValue>() {
+                                    let pair = rpair?;
+                                    let key = pair.0;
+                                    if key.eq(&String::from("materials")) {
+                                        new_resources.set::<_, LuaValue>(key, pair.1)?;
+                                    } else {
+                                        // Coerce the Lua String containing the resource path into a Rust String
+                                        let resource_str = fn_ctx
+                                            .coerce_string(pair.1)
+                                            .unwrap()
+                                            .expect("Unable to coerce resource value");
+
+                                        // Create a new Path buffer from the provided resource String
+                                        let resource_path =
+                                            Path::new(resource_str.to_str().unwrap());
+
+                                        // Join that to the absolute path of the directory
+                                        // containing the content file
+                                        let new_path = fn_ctx.create_string(
+                                            base_path.join(resource_path).to_str().unwrap(),
+                                        )?;
+                                        // Set this value in the new resources table
+                                        new_resources.set::<_, LuaString>(key, new_path)?;
+                                    }
+                                }
+
+                                content.set::<_, LuaTable>("resources", new_resources)?;
+                            }
+
+                            return LuaResult::Ok(content_tbl);
+                        } else {
+                            panic!("Failed to find content file '{}'", filename);
+                        }
+                    })?;
+
                 let cvl_tbl: LuaTable = ctx.globals().get("cvl")?;
                 let native_table: LuaTable = cvl_tbl.get("native")?;
 
-                return native_table.set("engine_do", do_fn);
+                native_table.set("engine_do", do_fn)?;
+                native_table.set("load_content_file", load_content_file)?;
+
+                return LuaResult::Ok(());
             });
 
             // Setup basic events
