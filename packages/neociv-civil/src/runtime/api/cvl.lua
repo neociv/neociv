@@ -1,15 +1,14 @@
 local inspect = require("inspect")
-local json = require("lunajson")
 
 cvl = cvl or {
     revision = -1,
     events = {},
     config = {},
     state = nil,
-    -- Native function
+    -- Native functions
     native = {},
-    -- Entities to load
-    entity_queue = {},
+    -- Content to load
+    content_queue = {},
 }
 
 local function strsplit(str, sep)
@@ -140,30 +139,24 @@ function cvl.define(type, id, o)
     return cvl
 end
 
--- Load an entity or series of entities into the entity queue from a json file
-function cvl.load_entity_file(file)
-    for _, entity in cvl.native.load_entity_file(file) do
-        cvl.load_entity(entity)
+-- Preload an entity into the entity queue
+function cvl.load_content(content)
+    if cvl.content_queue[content.id] == nil then
+        cvl.content_queue[content.id] = content
+    else
+        print("Content with id '" .. content.id .. "' already exists")
     end
     return cvl
 end
 
--- Preload an entity into the entity queue
-function cvl.load_entity(entity)
-    cvl.entity_queue[entity.id] = entity
-    return cvl
-end
-
 function cvl.load_content_file(filename)
-    local result = cvl.native.load_content_file(filename)
-    print(cvl.inspect(result))
+    local str = debug.getinfo(2, "S").source:sub(2)
+    local p = str:match("(.*[/\\])") or "./"
+    local result = cvl.native.load_content_file(p .. filename)
+    for _, content in ipairs(result) do
+        cvl.load_content(content);
+    end
     return cvl
-end
-
-function cvl.abs_resource(base_path, file_path)
-    -- Starts with @
-    -- Starts with .
-    -- Starts with alpha-numeric
 end
 
 package.preload["cvl"] = function() return cvl end

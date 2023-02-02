@@ -3,6 +3,7 @@ use std::path::Path;
 use std::sync::{Arc, Mutex};
 
 use bevy_ecs::component::Component;
+use bevy_ecs::schedule::RunCriteriaLabel;
 use bevy_ecs::system::Resource;
 use rlua::{
     Context, Error as LuaError, FromLuaMulti, Function as LuaFunction, Lua, Result as LuaResult,
@@ -12,6 +13,7 @@ use rlua::{
 use neociv_state::state::NeocivState;
 
 use self::{engine::engine_do, errors::NeocivRuntimeError};
+use crate::content::manifest::NeocivManifest;
 
 pub mod engine;
 pub mod errors;
@@ -20,6 +22,7 @@ pub mod utils;
 
 static FENNEL_FILE: &'static str = include_str!("./api/vendor/fennel.lua");
 static INSPECT_FILE: &'static str = include_str!("./api/vendor/inspect.lua");
+static LODASH_FILE: &'static str = include_str!("./api/vendor/lodash.lua");
 static LUNAJSON_DECODER_FILE: &'static str = include_str!("./api/vendor/lunajson-decoder.lua");
 static LUNAJSON_ENCODER_FILE: &'static str = include_str!("./api/vendor/lunajson-encoder.lua");
 static LUNAJSON_SAX_FILE: &'static str = include_str!("./api/vendor/lunajson-sax.lua");
@@ -44,6 +47,7 @@ impl Default for NeocivRuntime {
             };
             let _result = runtime.lua.lock().unwrap().context(move |ctx| {
                 ctx.load(INSPECT_FILE).exec()?;
+                ctx.load(LODASH_FILE).exec()?;
                 ctx.load(LUNAJSON_DECODER_FILE).exec()?;
                 ctx.load(LUNAJSON_ENCODER_FILE).exec()?;
                 ctx.load(LUNAJSON_SAX_FILE).exec()?;
@@ -93,6 +97,14 @@ impl Default for NeocivRuntime {
                                 .as_path()
                                 .to_owned();
 
+                            // Get the path to the manifest
+                            let manifest = match NeocivManifest::from_child_path_str(
+                                base_path.to_str().unwrap(),
+                            ) {
+                                Some(m) => m,
+                                None => panic!("Unable find manifest"),
+                            };
+
                             // Read the file into JSON
                             let json_src = fs::read_to_string(cf_path).unwrap();
 
@@ -116,6 +128,17 @@ impl Default for NeocivRuntime {
                             // so well as it moves the table making it cumbersome to return
                             for i in 1..content_tbl.len()? + 1 {
                                 let content: LuaTable = content_tbl.get(i)?;
+
+                                // Replace "@" in the ID with the manfiest ID
+                                let content_id = content.get::<_, LuaString>("id")?;
+                                if content_id.to_str().unwrap().starts_with("@") {
+                                    let new_id = content_id
+                                        .to_str()
+                                        .unwrap()
+                                        .replace("@", manifest.id.as_str());
+                                    content.set("id", new_id)?;
+                                }
+
                                 let resources: LuaTable = content.get("resources")?;
                                 let new_resources = fn_ctx.create_table()?;
 
@@ -125,7 +148,17 @@ impl Default for NeocivRuntime {
                                     let pair = rpair?;
                                     let key = pair.0;
                                     if key.eq(&String::from("materials")) {
-                                        new_resources.set::<_, LuaValue>(key, pair.1)?;
+                                        let materials: LuaTable =
+                                            fn_ctx.unpack::<LuaTable>(pair.1)?;
+                                        for n in 1..materials.len()? + 1 {
+                                            let material_str = materials.get::<_, LuaString>(n)?;
+                                            let m_id = material_str
+                                                .to_str()
+                                                .unwrap()
+                                                .replace("@", manifest.id.as_str());
+                                            materials.set(n, m_id)?;
+                                        }
+                                        new_resources.set::<_, LuaTable>(key, materials)?;
                                     } else {
                                         // Coerce the Lua String containing the resource path into a Rust String
                                         let resource_str = fn_ctx
