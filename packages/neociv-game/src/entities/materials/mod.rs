@@ -5,6 +5,7 @@ pub mod cell;
 pub struct ShaderResource {
    frag: Handle<Shader>,
 }
+
 /*
 impl FromResources for ShaderResource {
     fn from_resources(resources: &Resources) -> Self {

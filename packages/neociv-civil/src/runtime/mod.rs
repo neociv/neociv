@@ -4,6 +4,7 @@ use std::sync::{Arc, Mutex};
 
 use bevy_ecs::component::Component;
 use bevy_ecs::schedule::RunCriteriaLabel;
+use bevy_ecs::system::adapter::new;
 use bevy_ecs::system::Resource;
 use rlua::{
     Context, Error as LuaError, FromLuaMulti, Function as LuaFunction, Lua, Result as LuaResult,
@@ -14,6 +15,7 @@ use neociv_state::state::NeocivState;
 
 use self::{engine::engine_do, errors::NeocivRuntimeError};
 use crate::content::manifest::NeocivManifest;
+use crate::desc::NeocivDesc;
 
 pub mod engine;
 pub mod errors;
@@ -328,6 +330,59 @@ impl NeocivRuntime {
             }
             Err(ex) => Err(ex),
         };
+    }
+
+    /**
+     * Inspects the content queue and generates a load order for it such that all dependencies
+     * are satisfied.
+     */
+    pub fn get_load_order(&self) -> LuaResult<Vec<String>> {
+        return self.lua.lock().unwrap().context(move |ctx| {
+            let cvl = ctx.globals().get::<_, LuaTable>("cvl")?;
+            let cvl_content_queue: LuaTable = cvl.get("content_queue")?;
+            let mut queue: Vec<String> = vec![];
+            let mut content_queue: Vec<String> = vec![];
+            // There's not much complexity here - just pull out the materials and put them first
+            for pair in cvl_content_queue.clone().pairs::<LuaString, LuaTable>() {
+                let (key, entry) = match pair {
+                    Ok(p) => p,
+                    Err(_) => panic!("Failed to get content pair for ordering"),
+                };
+
+                let kind: String = match ctx.coerce_string(entry.get("kind")?)? {
+                    Some(s) => String::from(s.to_str().unwrap()),
+                    None => panic!("Unable to get kind of content"),
+                };
+
+                if kind.contains("material") {
+                    queue.push(String::from(key.to_str().unwrap()));
+                } else {
+                    content_queue.push(String::from(key.to_str().unwrap()));
+                }
+            }
+
+            // Append the content queue to the end, all materials are now guaranteed to load first
+            // content_queue has been moved and is no longer usable after this
+            queue.extend(content_queue);
+
+            return Ok(queue);
+        });
+    }
+
+    pub fn load_content(&self, loader: fn(LuaTable) -> LuaResult<()>) -> LuaResult<()> {
+        let order = self.get_load_order().unwrap();
+
+        return self.lua.lock().unwrap().context(move |ctx| {
+            let cvl = ctx.globals().get::<_, LuaTable>("cvl")?;
+            let content_queue = cvl.get::<_, LuaTable>("content_queue")?;
+            for id in order {
+                match content_queue.get::<_, LuaTable>(id.as_str()) {
+                    Ok(c) => loader(c)?,
+                    Err(_) => panic!("Unable to load content with id {:?}", id.as_str()),
+                }
+            }
+            Ok(())
+        });
     }
 }
 

@@ -19,4 +19,5 @@ pub mod scales;
 pub mod unit;
 pub mod actions;
 pub mod tree;
+pub mod db;
 pub mod state;

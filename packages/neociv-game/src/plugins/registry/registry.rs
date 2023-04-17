@@ -1,6 +1,7 @@
 use bevy::ecs::system::Resource;
 use bevy::utils::HashMap;
 
+use neociv_civil::desc::NeocivDesc;
 use neociv_state::currency::{CurrencyDesc, CurrencyId};
 
 use crate::entities::materials::cell::CellMaterialEntity;
@@ -27,7 +28,11 @@ pub struct NeocivRegistry {
 }
 
 impl NeocivRegistry {
-    fn has(key: String) -> bool {
+    pub fn has(&self, key: String) -> bool {
         return false;
+    }
+
+    pub fn load(&self, ) -> Result<(), ()> {
+        Ok(())
     }
 }

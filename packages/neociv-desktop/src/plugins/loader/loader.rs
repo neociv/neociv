@@ -1,9 +1,10 @@
 use std::path::Path;
 
+use bevy::prelude::AssetServer;
 use neociv_civil::runtime::NeocivRuntime;
 use neociv_game::plugins::registry::registry::NeocivRegistry;
 
-pub fn load(manifest_path: String, reg: &NeocivRegistry, runtime: &NeocivRuntime) {
+pub fn load(manifest_path: String, reg: &NeocivRegistry, runtime: &NeocivRuntime, asset_server: &AssetServer) {
     // Get the base directory of the manifest and locate package/init.(lua|fnl|cvl) to run
     let base_dir = Path::new(manifest_path.as_str()).parent().unwrap();
     let pkg_dir = base_dir.join("package");
