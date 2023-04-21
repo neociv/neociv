@@ -1,12 +1,8 @@
 use neociv_state::db;
 
 #[test]
-fn connect() {
-    assert!(db::connect_db(":memory:").is_ok());
-}
-
-#[test]
-fn init() {
-    let conn = &mut db::connect_db(":memory:").unwrap();
-    assert!(db::migrate_db(conn).is_ok());
+fn load_and_close() {
+    let conn = db::load(":memory:");
+    assert!(conn.is_ok());
+    assert!(db::close(conn.unwrap()).is_ok());
 }

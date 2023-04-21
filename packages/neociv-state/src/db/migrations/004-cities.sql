@@ -1,4 +1,4 @@
-CREATE TABLE
+CREATE TABLE IF NOT EXISTS
     cities (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         owner_id REFERENCES civs (id),

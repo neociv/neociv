@@ -1,10 +1,10 @@
-CREATE TABLE
+CREATE TABLE IF NOT EXISTS
     grid (
         xsize INT8 NOT NULL DEFAULT 0,
         ysize INT8 NOT NULL DEFAULT 0
     );
 
-CREATE TABLE
+CREATE TABLE IF NOT EXISTS
     cells (
         -- x,y cartesian coords on the grid
         x INT8 NOT NULL,

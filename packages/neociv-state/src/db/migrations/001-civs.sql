@@ -1,4 +1,4 @@
-CREATE TABLE
+CREATE TABLE IF NOT EXISTS
     civs (
         id VARCHAR NOT NULL,
         idx INT8 NOT NULL,
