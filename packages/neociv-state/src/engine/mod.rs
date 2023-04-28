@@ -9,6 +9,7 @@ use crate::mask::CellMasks;
 use crate::state::NeocivState;
 
 pub mod query;
+pub mod engine;
 
 /// Any modification to the state produces a result that either contains the successfully updated
 /// state *or* fails with a specific StateError.

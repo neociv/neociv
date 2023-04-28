@@ -1,10 +1,24 @@
-use rusqlite::{params, Connection};
+use std::time::Duration;
+
+use rusqlite::{backup, config::DbConfig, params, Connection};
 use rusqlite_migration::{Migrations, M};
 
 #[derive(Debug)]
 pub enum DBError {
     ConnectionError(rusqlite::Error),
     MigrationError(rusqlite_migration::Error),
+}
+
+impl From<rusqlite::Error> for DBError {
+    fn from(value: rusqlite::Error) -> Self {
+        Self::ConnectionError(value)
+    }
+}
+
+impl From<rusqlite_migration::Error> for DBError {
+    fn from(value: rusqlite_migration::Error) -> Self {
+        Self::MigrationError(value)
+    }
 }
 
 pub fn connect_db(path: &str) -> Result<Connection, rusqlite::Error> {
@@ -31,25 +45,47 @@ pub fn migrate_db(conn: &mut Connection) -> Result<&mut Connection, rusqlite_mig
     }
 }
 
+pub fn save_db(
+    src: &Connection,
+    dest: &str,
+    progress: Option<fn(backup::Progress)>,
+) -> Result<(), rusqlite::Error> {
+    let mut dest = connect_db(dest)?;
+    let backup = backup::Backup::new(src, &mut dest)?;
+    backup.run_to_completion(5, Duration::from_millis(250), progress)
+}
+
+pub fn copy_db(
+    src: &Connection,
+    dest: &mut Connection,
+    progress: Option<fn(backup::Progress)>,
+) -> Result<(), rusqlite::Error> {
+    erase_db(dest)?;
+    backup::Backup::new(src, dest)?.run_to_completion(5, Duration::from_millis(250), progress)
+}
+
+pub fn erase_db(conn: &mut Connection) -> Result<(), rusqlite::Error> {
+    conn.set_db_config(DbConfig::SQLITE_DBCONFIG_RESET_DATABASE, true)?;
+    //conn.execute("PRAGMA writable_schema = 1", [])?;
+    //conn.execute("DELETE FROM sqlite_master", [])?;
+    //conn.execute("PRAGMA writable_schema = 0", [])?;
+    conn.execute("VACUUM", [])?;
+    //conn.execute("PRAGMA integrity_check", [])?;
+    conn.set_db_config(DbConfig::SQLITE_DBCONFIG_RESET_DATABASE, false)?;
+    Ok(())
+}
+
 /// This is the actual interface to loading as it will get the connection, perform the migration, and
 /// only then will it hand back the connection.
 pub fn load(path: &str) -> Result<Connection, DBError> {
     // Attempt to create the connection
-    let conn = connect_db(path);
+    let mut conn = connect_db(path)?;
 
-    // Confirm the connection is good
-    if conn.is_ok() {
-        // Run the migrations on the connection - create a mutable Connection reference
-        let mut mconn = conn.unwrap();
-
-        // If the migrations are okay *then* return the database connection
-        return match migrate_db(&mut mconn) {
-            Ok(_) => Ok(mconn),
-            Err(e) => Err(DBError::MigrationError(e)),
-        };
-    } else {
-        return Err(DBError::ConnectionError(conn.unwrap_err()));
-    }
+    // If the migrations are okay *then* return the database connection
+    return match migrate_db(&mut conn) {
+        Ok(_) => Ok(conn),
+        Err(e) => Err(DBError::MigrationError(e)),
+    };
 }
 
 /// High-level close that makes sure that the state is nicely cleaned up if need be.
