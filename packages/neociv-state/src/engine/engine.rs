@@ -1,6 +1,9 @@
 use rusqlite::{backup, Connection};
 
-use crate::{db, state::NeocivState};
+use crate::{
+    db::{self, connect_db},
+    state::NeocivState,
+};
 
 pub struct Engine {
     pub db: Connection,
@@ -33,8 +36,23 @@ impl Engine {
 
     /// Load the state from a database file and inject it into ":memory:" - this will attempt to perform a migration
     /// on the loaded data.
-    pub fn load_state(&mut self, path: &str, progress: Option<fn(backup::Progress)>) -> Result<(), db::DBError> {
+    pub fn load_state(
+        &mut self,
+        path: &str,
+        progress: Option<fn(backup::Progress)>,
+    ) -> Result<(), db::DBError> {
+        // Destroy the current in-memory db
+        db::erase_db(&mut self.db)?;
+
+        // Copy the DB over
         db::copy_db(&db::connect_db(path)?, &mut self.db, progress)?;
+
+        // Migrate the in-memory DB to the latest schema
+        db::migrate_db(&mut self.db)?;
+
+        // Reset the state
+        //self.refresh_props("*")?;
+
         Ok(())
     }
 
@@ -44,7 +62,7 @@ impl Engine {
     }
 
     /// Refreshes a particular property via triggering a transaction in the database to get new information
-    pub fn refresh_props(&self, target: &str) -> Result<(), ()> {
+    pub fn refresh_props(&mut self, target: &str) -> Result<(), ()> {
         Ok(())
     }
 }

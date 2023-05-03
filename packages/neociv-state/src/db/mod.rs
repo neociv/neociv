@@ -21,6 +21,12 @@ impl From<rusqlite_migration::Error> for DBError {
     }
 }
 
+impl From<(Connection, rusqlite::Error)> for DBError {
+    fn from(value: (Connection, rusqlite::Error)) -> Self {
+        Self::ConnectionError(value.1)
+    }
+}
+
 pub fn connect_db(path: &str) -> Result<Connection, rusqlite::Error> {
     match path {
         ":memory:" => Connection::open_in_memory(),
@@ -64,13 +70,10 @@ pub fn copy_db(
     backup::Backup::new(src, dest)?.run_to_completion(5, Duration::from_millis(250), progress)
 }
 
+// Erase a database completely but keep the connection open
 pub fn erase_db(conn: &mut Connection) -> Result<(), rusqlite::Error> {
     conn.set_db_config(DbConfig::SQLITE_DBCONFIG_RESET_DATABASE, true)?;
-    //conn.execute("PRAGMA writable_schema = 1", [])?;
-    //conn.execute("DELETE FROM sqlite_master", [])?;
-    //conn.execute("PRAGMA writable_schema = 0", [])?;
     conn.execute("VACUUM", [])?;
-    //conn.execute("PRAGMA integrity_check", [])?;
     conn.set_db_config(DbConfig::SQLITE_DBCONFIG_RESET_DATABASE, false)?;
     Ok(())
 }
