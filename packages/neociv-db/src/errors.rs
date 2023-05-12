@@ -4,6 +4,8 @@ use rusqlite_migration::Error as RusqliteMigrationError;
 #[derive(Debug)]
 pub enum Error {
     Unknown,
+    PrepareSaveError,
+    UnknownStatementError,
     SaveError(RusqliteError),
     SqliteError(RusqliteError),
     MigrationError(RusqliteMigrationError),
