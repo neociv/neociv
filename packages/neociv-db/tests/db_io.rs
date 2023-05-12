@@ -1,17 +1,17 @@
-use neociv_state::db;
+use neociv_db::utils;
 
 #[test]
 fn copy() {
-    let src = db::connect_db(":memory:").unwrap();
-    let mut dest = db::connect_db(":memory:").unwrap();
-    assert!(db::copy_db(&src, &mut dest, None).is_ok());
-    assert!(db::close(src).is_ok());
-    assert!(db::close(dest).is_ok());
+    let src = utils::connect(":memory:").unwrap();
+    let mut dest = utils::connect(":memory:").unwrap();
+    assert!(utils::copy(&src, &mut dest, None).is_ok());
+    assert!(utils::close(src).is_ok());
+    assert!(utils::close(dest).is_ok());
 }
 
 #[test]
 fn erase() {
-    let conn = &mut db::connect_db(":memory:").unwrap();
+    let conn = &mut utils::connect(":memory:").unwrap();
     conn.execute("CREATE TABLE example (id VARCHAR PRIMARY KEY)", [])
         .unwrap();
 
@@ -27,7 +27,7 @@ fn erase() {
     assert!(!conn.is_busy());
 
     // Erase the entire database
-    let check_erase = db::erase_db(conn);
+    let check_erase = utils::erase(conn);
 
     assert!(check_erase.is_ok());
     assert!(!conn.is_busy());
@@ -45,15 +45,15 @@ fn erase() {
 }
 
 #[test]
-fn copy_confirm_overwrite() {
-    let src = db::connect_db(":memory:").unwrap();
+fn overwrite() {
+    let src = utils::connect(":memory:").unwrap();
 
     // Create a table in the source that we assume will be in the destination
     assert!(src
         .execute("CREATE TABLE src_example ( id VARCHAR PRIMARY_KEY )", [])
         .is_ok());
 
-    let dest = &mut db::connect_db(":memory:").unwrap();
+    let dest = &mut utils::connect(":memory:").unwrap();
 
     // Create a table in the destination that we assume will be overwritten
     assert!(dest
@@ -61,10 +61,10 @@ fn copy_confirm_overwrite() {
         .is_ok());
 
     // Perform the copy / overwrite
-    assert!(db::copy_db(&src, dest, None).is_ok());
+    assert!(utils::copy(&src, dest, None).is_ok());
 
     // Close the source
-    assert!(db::close(src).is_ok());
+    assert!(utils::close(src).is_ok());
 
     // Confirm that the new table in the destination exists
     let check_copied: Result<i32, rusqlite::Error> = dest.query_row(
