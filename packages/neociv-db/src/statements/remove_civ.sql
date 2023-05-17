@@ -1,0 +1,1 @@
+DELETE FROM civs WHERE id = ?1

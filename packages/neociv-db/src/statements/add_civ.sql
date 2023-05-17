@@ -1,0 +1,1 @@
+INSERT IF NOT EXISTS INTO civs (civ_id, id, idx, title, active) VALUES (?1, ?2, ?3, ?4, ?5)

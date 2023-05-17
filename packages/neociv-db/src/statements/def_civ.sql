@@ -1,0 +1,1 @@
+INSERT IF NOT EXISTS INTO civ_defs () VALUES ()

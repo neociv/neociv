@@ -1,0 +1,3 @@
+{
+  "rust-analyzer.linkedProjects": ["./packages/neociv-db/Cargo.toml"]
+}
