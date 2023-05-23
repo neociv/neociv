@@ -59,7 +59,7 @@ pub fn migrate(conn: &mut Connection) -> types::MigrationResult {
     ])
     .to_latest(conn)
     {
-        Ok(_) => Ok(()),
+        Ok(_) => Ok(conn),
         Err(e) => Err(errors::Error::MigrationError(e)),
     }
 }

@@ -1,4 +1,4 @@
-use std::{borrow::Borrow, collections::HashMap};
+use std::{borrow::BorrowMut, cell::RefCell, collections::HashMap};
 
 use rusqlite::{Connection, Statement, ToSql};
 
@@ -7,39 +7,56 @@ pub mod macros;
 pub mod types;
 pub mod utils;
 
+use crate::errors::Error as DBError;
+
 pub struct NeocivDB<'db> {
     connection: Connection,
     preps: HashMap<String, Statement<'db>>,
 }
 
 impl<'db> NeocivDB<'db> {
-    fn new(path: &str) -> NeocivDB<'db> {
+    pub fn new(path: &str) -> Result<NeocivDB<'db>, DBError> {
         let s = Self {
-            connection: utils::connect(path).unwrap(),
+            connection: utils::connect(path)?,
             preps: HashMap::<String, Statement<'db>>::default(),
         };
-        let x = &mut s;
-        x.migrate().unwrap();
-        x.setup_stmts().unwrap();
-        return s;
+
+        {
+            // Create a container to cleanly for each setup function
+            let rcdb = RefCell::<&NeocivDB>::new(&s);
+
+            // Migrate the database to the latest version - this should occur even if already
+            // migrated to ensure complicity with schema.
+            rcdb.borrow_mut().migrate()?;
+
+            // Setup statements
+            rcdb.borrow_mut().setup_stmts()?;
+        }
+
+        return Ok(s);
     }
 
-    fn migrate(&mut self) -> types::MigrationResult {
-        utils::migrate(&mut self.connection)
+    fn migrate(&mut self) -> Result<(), DBError> {
+        utils::migrate(&mut self.connection)?;
+        Ok(())
     }
 
-    fn close(self) -> types::CloseResult {
-        utils::close(self.connection)
+    /*
+    fn close(&mut self) -> types::CloseResult {
+        self.preps.clear();
+        utils::close(self.connection.into())
     }
 
     fn erase(&mut self) -> types::EraseResult {
         self.preps.clear();
-        utils::erase(&mut self.connection)
+        let conn = &mut self.connection;
+        utils::erase(conn)
     }
 
-    fn save(&self, path: &str) -> types::SaveResult {
+    pub fn save(&self, path: &str) -> types::SaveResult {
         utils::save(&self.connection, path)
     }
+    */
 
     /*
     fn prep_stmt(&'db mut self, id: String, sql: &str) -> types::PrepareResult<'db> {
@@ -52,7 +69,8 @@ impl<'db> NeocivDB<'db> {
     }
     */
 
-    fn exec_stmt(&mut self, id: &str, params: &[&dyn ToSql]) -> types::ExecResult {
+    /// Execute a prepared statement that is *not* expected to return a result beyond success / fail
+    pub fn exec_stmt(&mut self, id: &str, params: &[&dyn ToSql]) -> types::ExecResult {
         if self.preps.contains_key(id) {
             match self.preps.get_mut(id).unwrap().execute(params) {
                 Ok(s) => Ok(s),
@@ -63,10 +81,15 @@ impl<'db> NeocivDB<'db> {
         }
     }
 
-    fn setup_stmts(&'db mut self) -> types::PrepareResult<'db> {
+    fn setup_stmts(&'db mut self) -> Result<(), DBError> {
+        let preps = &mut self.preps;
+
+        // Clear out the prepared statements
+        preps.clear();
+
         macro_rules! stmt {
             ($id: literal) => {
-                self.preps
+                preps
                     .insert(
                         $id.to_string(),
                         self.connection.prepare(include_str!(concat!(
@@ -85,11 +108,13 @@ impl<'db> NeocivDB<'db> {
     }
 }
 
-impl<'db> Default for NeocivDB<'db> {
-    fn default() -> NeocivDB<'db> {
+/*
+impl<'db> Default for &mut NeocivDB<'db> {
+    fn default() -> &'db mut NeocivDB<'db> {
         NeocivDB::new(":memory:")
     }
 }
+*/
 
 /*
 impl<'db> From<&str> for &'db NeocivDB<'db> {

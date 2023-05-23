@@ -23,7 +23,7 @@ impl<'engine> Default for NeocivEngine<'engine> {
         Self {
             state: NeocivState::default(),
             runtime: NeocivRuntime::default(),
-            db: NeocivDB::default(),
+            db: NeocivDB::new(":memory:").unwrap(),
         }
     }
 }
