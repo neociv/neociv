@@ -2,13 +2,12 @@ use neociv_civil::runtime::NeocivRuntime;
 use neociv_db::NeocivDB;
 use neociv_state::state::NeocivState;
 
-pub struct NeocivEngine<'engine> {
+pub struct NeocivEngine {
     state: NeocivState,
     runtime: NeocivRuntime,
-    db: NeocivDB<'engine>,
 }
 
-impl<'engine> NeocivEngine<'engine> {
+impl NeocivEngine {
     /*
     fn run_action<'action>(&mut self, action: impl EngineAction<'action>) {
         // TODO: Create a prepared statement
@@ -18,12 +17,11 @@ impl<'engine> NeocivEngine<'engine> {
     */
 }
 
-impl<'engine> Default for NeocivEngine<'engine> {
+impl Default for NeocivEngine {
     fn default() -> Self {
         Self {
             state: NeocivState::default(),
             runtime: NeocivRuntime::default(),
-            db: NeocivDB::new(":memory:").unwrap(),
         }
     }
 }

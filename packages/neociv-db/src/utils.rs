@@ -1,17 +1,19 @@
+use std::collections::HashMap;
 use std::time::Duration;
 
+use rusqlite::Statement;
 use rusqlite::{backup::Backup, config::DbConfig, Connection};
 use rusqlite_migration::{Migrations, M};
 
-use crate::errors;
+use crate::errors::Error as DBError;
 use crate::types;
 
 /// Opens a connection to a database, supports both file paths and ":memory:" along
 /// with query params.
-pub fn connect(path: &str) -> types::ConnectionResult {
+pub fn connect<'db>(path: &'db str) -> Result<Connection, DBError> {
     match path {
-        ":memory:" => Connection::open_in_memory(),
-        _ => Connection::open(path),
+        ":memory:" => Ok(Connection::open_in_memory().unwrap()),
+        _ => Ok(Connection::open(path).unwrap()),
     }
 }
 
@@ -20,7 +22,7 @@ pub fn connect(path: &str) -> types::ConnectionResult {
 pub fn save(src: &Connection, path: &str) -> types::SaveResult {
     match src.execute("VACUUM INTO ?1", [path]) {
         Ok(_) => Ok(()),
-        Err(e) => Err(errors::Error::SaveError(e)),
+        Err(e) => Err(DBError::SaveError(e)),
     }
 }
 
@@ -60,7 +62,7 @@ pub fn migrate(conn: &mut Connection) -> types::MigrationResult {
     .to_latest(conn)
     {
         Ok(_) => Ok(conn),
-        Err(e) => Err(errors::Error::MigrationError(e)),
+        Err(e) => Err(DBError::MigrationError(e)),
     }
 }
 
@@ -83,4 +85,25 @@ pub fn overwrite(
 /// and other checks to make sure the database is in a good state.
 pub fn close(conn: Connection) -> types::CloseResult {
     conn.close()
+}
+
+/// Takes a given connection and returns a map of all prepared statements.
+pub fn preps<'a>(conn: &'a Connection) -> Result<HashMap<String, Statement<'a>>, DBError> {
+    let mut stmts = HashMap::<String, Statement<'a>>::new();
+
+    macro_rules! stmt {
+        ($id:literal) => {
+            stmts
+                .insert(
+                    $id.to_string(),
+                    conn.prepare(include_str!(concat!("./statements/", $id, ".sql"))).unwrap(),
+                )
+                .unwrap()
+        };
+    }
+
+    stmt!("add_civ");
+    stmt!("remove_civ");
+
+    Ok(stmts)
 }
