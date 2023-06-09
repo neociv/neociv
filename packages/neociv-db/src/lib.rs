@@ -1,4 +1,4 @@
-use rusqlite::{Connection, ToSql};
+use rusqlite::{Connection, Params, Row, ToSql};
 
 pub mod errors;
 pub mod macros;
@@ -45,6 +45,16 @@ impl NeocivDB {
         utils::save(&self.connection, path)
     }
 
+    /// Perform a one-time query quickly across rows
+    #[inline]
+    pub fn query_row<T, P, F>(&self, query: &str, params: P, f: F) -> Result<T, rusqlite::Error>
+    where
+        P: Params,
+        F: FnOnce(&Row<'_>) -> Result<T, rusqlite::Error>,
+    {
+        self.connection.query_row(query, params, f)
+    }
+
     /// Execute a prepared statement that is *not* expected to return a result beyond success / fail
     pub fn exec_stmt(&mut self, id: &str, params: &[&dyn ToSql]) -> types::ExecResult {
         if self.statements.contains_key(id) {
@@ -56,9 +66,26 @@ impl NeocivDB {
                 Err(e) => Err(errors::Error::SqliteError(e)),
             }
         } else {
-            Err(errors::Error::UnknownStatementError)
+            Err(DBError::UnknownStatementError)
         }
     }
+
+    /*
+    /// Execute a prepared query and get the result
+    pub fn exec_query<T>(&mut self, id: &str, params: &[&dyn ToSql]) -> Result<T, DBError> {
+        if self.statements.contains_key(id) {
+            match self
+                .connection
+                .execute(self.statements.get_mut(id).unwrap(), params)
+            {
+                Ok(s) => Ok(s),
+                Err(e) => Err(errors::Error::SqliteError(e)),
+            }
+        } else {
+            Err(DBError::UnknownStatementError)
+        }
+    }
+    */
 }
 
 impl Default for NeocivDB {
