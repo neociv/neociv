@@ -60,7 +60,10 @@ pub fn migrate(conn: &mut Connection) -> types::MigrationResult {
     .to_latest(conn)
     {
         Ok(_) => Ok(conn),
-        Err(e) => Err(DBError::MigrationError(e)),
+        Err(e) => {
+            panic!("{:?}", e);
+            Err(DBError::MigrationError(e))
+        }
     }
 }
 
@@ -94,11 +97,12 @@ pub fn prep(conn: &Connection) -> Result<types::PrepMap, DBError> {
             let stmt = include_str!(concat!("./statements/", $id, ".sql"));
             match conn.prepare_cached(stmt) {
                 Ok(_) => Ok(stmts.insert($id.to_string(), stmt.to_string())),
-                Err(_) => Err(DBError::PrepareSaveError),
+                Err(e) => Err(DBError::PrepareSaveError(e)),
             }
         }?};
     }
 
+    stmt!("def_civ");
     stmt!("add_civ");
     stmt!("remove_civ");
 

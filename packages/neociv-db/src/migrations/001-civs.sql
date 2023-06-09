@@ -3,9 +3,11 @@ CREATE TABLE IF NOT EXISTS civ_def (
     title TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS civs (
-    civ_id REFERENCES civ_def(id),
     -- Made up of the civ_def id and the index keeping count of the civs
     id VARCHAR NOT NULL PRIMARY KEY,
+    -- Definition key id
+    civ_id REFERENCES civ_def(id),
+    -- Count of the number of times this civ is present
     idx INT8 NOT NULL,
     -- Whether or not the civ can be considered active in terms of gameplay
     active TINYINT NOT NULL DEFAULT FALSE,
@@ -15,5 +17,7 @@ CREATE TABLE IF NOT EXISTS civs (
     -- addressed either in serial (eg. select all instances of a civ) or directly (ie. by
     -- including the index counter). It is the job of the engine to structure these queries from
     -- a string such as "org.neociv.contrib.civs.examples[0]" into the appropriate SQL values.
-    CONSTRAINT ckey UNIQUE (civ_id, idx)
+    CONSTRAINT ckey UNIQUE (civ_id, idx),
+    -- If a civ definition is removed then also remove all entries
+    CONSTRAINT fk_civ_id FOREIGN KEY (civ_id) REFERENCES civ_def(id) ON DELETE CASCADE
 );

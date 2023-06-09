@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS currency_defs (
 );
 CREATE TABLE IF NOT EXISTS currencies (
     civ_id REFERENCES civs (id),
-    civ_idx REFERENCES civs (idx),
     currency_def REFERENCES currency_defs (id),
-    CONSTRAINT currency_key PRIMARY KEY (civ_id, civ_idx, currency_def)
+    CONSTRAINT currency_key PRIMARY KEY (civ_id, currency_def),
+    CONSTRAINT fk_civ_id FOREIGN KEY (civ_id) REFERENCES civs(id) ON DELETE CASCADE
 );

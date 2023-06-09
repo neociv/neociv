@@ -1,1 +1,2 @@
-DELETE FROM civs WHERE id = ?1
+DELETE FROM civs
+WHERE id = ?1;

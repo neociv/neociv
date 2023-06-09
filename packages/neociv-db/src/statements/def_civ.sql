@@ -1,1 +1,1 @@
-INSERT IF NOT EXISTS INTO civ_defs () VALUES ()
+INSERT INTO civ_def (id, title) VALUES (?1, ?2);
