@@ -1,9 +1,9 @@
-use rusqlite::{backup, Connection, Error as RusqliteError, Statement};
+use rusqlite::{backup, Connection, Error as RusqliteError};
 use std::collections::HashMap;
 
 use crate::errors::Error as DBError;
 
-pub type PrepMap<'a> = HashMap<String, Statement<'a>>;
+pub type PrepMap = HashMap<String, String>;
 pub type Progress = Option<fn(backup::Progress)>;
 pub type ConnectionResult = Result<Connection, RusqliteError>;
 pub type CloseResult = Result<(), (Connection, RusqliteError)>;

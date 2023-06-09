@@ -1,52 +1,57 @@
-use rusqlite::{Connection, Statement, ToSql};
-use rusqlite_migration::{Migrations, M};
+use rusqlite::{Connection, ToSql};
 
-use std::collections::HashMap;
-
-pub mod connection;
 pub mod errors;
 pub mod macros;
 pub mod types;
 pub mod utils;
 
-use crate::connection::NeocivDBConnection;
+use crate::errors::Error as DBError;
 
 #[derive(Debug)]
-pub struct NeocivDB {}
+pub struct NeocivDB {
+    connection: Connection,
+    statements: types::PrepMap,
+}
 
 impl NeocivDB {
     /// Create a new NeocivDB instance with a fully migrated database and full suite of prepared
     /// statements.
-    pub fn new<'db>() -> Connection {
+    pub fn new(path: &str) -> Result<Self, DBError> {
         // Create the blank in-memory connection
-        let mut connection = Connection::open_in_memory().unwrap();
+        let mut connection = utils::connect(":memory:")?;
 
-        // Migrate the connection's database
-        {
-            let c = &mut connection;
-            utils::migrate(c).unwrap();
+        // If a path is provided then read & load that into the in-memory db before closing it.
+        if !path.eq(":memory:") {
+            let src = utils::connect(path)?;
+            utils::overwrite(&src, &mut connection, None)?;
+            utils::close(src)?;
         }
 
-        {
-            let c = &mut connection;
-            Self::prep(c);
-        }
+        // Migrate the database regardless of if the optionally loaded database has already been
+        // migrated.
+        utils::migrate(&mut connection)?;
 
-        connection
+        // Create and store the cached statements.
+        let statements = utils::prep(&connection)?;
+
+        Ok(Self {
+            connection,
+            statements,
+        })
     }
 
-    pub fn prep<'db>(conn: &'db Connection) -> types::PrepMap<'db> {
-        utils::preps(conn).unwrap()
+    /// Save the in-memory database
+    pub fn save(&self, path: &str) -> types::SaveResult {
+        utils::save(&self.connection, path)
     }
 
     /// Execute a prepared statement that is *not* expected to return a result beyond success / fail
-    pub fn exec_stmt(
-        preps: &mut types::PrepMap<'static>,
-        id: &str,
-        params: &[&dyn ToSql],
-    ) -> types::ExecResult {
-        if preps.contains_key(id) {
-            match preps.get_mut(id).unwrap().execute(params) {
+    pub fn exec_stmt(&mut self, id: &str, params: &[&dyn ToSql]) -> types::ExecResult {
+        if self.statements.contains_key(id) {
+            match self
+                .connection
+                .execute(self.statements.get_mut(id).unwrap(), params)
+            {
                 Ok(s) => Ok(s),
                 Err(e) => Err(errors::Error::SqliteError(e)),
             }
@@ -56,18 +61,14 @@ impl NeocivDB {
     }
 }
 
-/*
-impl<'db> Default for &mut NeocivDB<'db> {
-    fn default() -> &'db mut NeocivDB<'db> {
-        NeocivDB::new(":memory:")
+impl Default for NeocivDB {
+    fn default() -> NeocivDB {
+        NeocivDB::new(":memory:").unwrap()
     }
 }
-*/
 
-/*
-impl<'db> From<&str> for &'db NeocivDB<'db> {
-    fn from(value: &str) -> &'db NeocivDB<'db> {
-        NeocivDB::new(value)
+impl From<&str> for NeocivDB {
+    fn from(value: &str) -> NeocivDB {
+        NeocivDB::new(value).unwrap()
     }
 }
-*/

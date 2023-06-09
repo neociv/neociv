@@ -5,6 +5,7 @@ use neociv_state::state::NeocivState;
 pub struct NeocivEngine {
     state: NeocivState,
     runtime: NeocivRuntime,
+    db: NeocivDB,
 }
 
 impl NeocivEngine {
@@ -22,6 +23,7 @@ impl Default for NeocivEngine {
         Self {
             state: NeocivState::default(),
             runtime: NeocivRuntime::default(),
+            db: NeocivDB::default(),
         }
     }
 }

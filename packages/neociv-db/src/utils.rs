@@ -1,7 +1,5 @@
-use std::collections::HashMap;
 use std::time::Duration;
 
-use rusqlite::Statement;
 use rusqlite::{backup::Backup, config::DbConfig, Connection};
 use rusqlite_migration::{Migrations, M};
 
@@ -10,7 +8,7 @@ use crate::types;
 
 /// Opens a connection to a database, supports both file paths and ":memory:" along
 /// with query params.
-pub fn connect<'db>(path: &'db str) -> Result<Connection, DBError> {
+pub fn connect(path: &str) -> Result<Connection, DBError> {
     match path {
         ":memory:" => Ok(Connection::open_in_memory().unwrap()),
         _ => Ok(Connection::open(path).unwrap()),
@@ -88,18 +86,17 @@ pub fn close(conn: Connection) -> types::CloseResult {
 }
 
 /// Takes a given connection and returns a map of all prepared statements.
-pub fn preps<'a>(conn: &'a Connection) -> Result<HashMap<String, Statement<'a>>, DBError> {
-    let mut stmts = HashMap::<String, Statement<'a>>::new();
+pub fn prep(conn: &Connection) -> Result<types::PrepMap, DBError> {
+    let mut stmts = types::PrepMap::new();
 
     macro_rules! stmt {
-        ($id:literal) => {
-            stmts
-                .insert(
-                    $id.to_string(),
-                    conn.prepare(include_str!(concat!("./statements/", $id, ".sql"))).unwrap(),
-                )
-                .unwrap()
-        };
+        ($id:literal) => {{
+            let stmt = include_str!(concat!("./statements/", $id, ".sql"));
+            match conn.prepare_cached(stmt) {
+                Ok(_) => Ok(stmts.insert($id.to_string(), stmt.to_string())),
+                Err(_) => Err(DBError::PrepareSaveError),
+            }
+        }?};
     }
 
     stmt!("add_civ");
