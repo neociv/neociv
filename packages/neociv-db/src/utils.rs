@@ -50,12 +50,13 @@ pub fn erase(conn: &mut Connection) -> types::EraseResult {
 pub fn migrate(conn: &mut Connection) -> types::MigrationResult {
     match Migrations::new(vec![
         M::up(include_str!("./migrations/000-setup.sql")),
-        M::up(include_str!("./migrations/001-civs.sql")),
-        M::up(include_str!("./migrations/002-grid.sql")),
-        M::up(include_str!("./migrations/003-units.sql")),
-        M::up(include_str!("./migrations/004-cities.sql")),
-        M::up(include_str!("./migrations/005-currencies.sql")),
-        M::up(include_str!("./migrations/006-trees.sql")),
+        M::up(include_str!("./migrations/001-meta.sql")),
+        M::up(include_str!("./migrations/002-civs.sql")),
+        M::up(include_str!("./migrations/003-grid.sql")),
+        M::up(include_str!("./migrations/004-units.sql")),
+        M::up(include_str!("./migrations/005-cities.sql")),
+        M::up(include_str!("./migrations/006-currencies.sql")),
+        M::up(include_str!("./migrations/007-trees.sql")),
     ])
     .to_latest(conn)
     {

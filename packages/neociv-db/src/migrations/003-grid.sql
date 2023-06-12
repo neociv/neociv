@@ -1,7 +1,3 @@
-CREATE TABLE IF NOT EXISTS grid (
-    xsize INT8 NOT NULL DEFAULT 0,
-    ysize INT8 NOT NULL DEFAULT 0
-);
 CREATE TABLE IF NOT EXISTS cells (
     -- x,y cartesian coords on the grid
     x INT8 NOT NULL,
@@ -30,3 +26,19 @@ CREATE TABLE IF NOT EXISTS cells (
     CONSTRAINT fk_owner_id FOREIGN KEY (owner_id) REFERENCES civs(id) ON DELETE
     SET NULL
 );
+
+CREATE TRIGGER IF NOT EXISTS fill_cells
+AFTER
+UPDATE ON meta
+	WHEN New.prop IS "grid.xsize" OR New.prop IS "grid.ysize" BEGIN
+		
+	-- Clear out the cells
+	DELETE FROM cells;
+
+	-- Recursively generate the grid coordinates
+	INSERT INTO cells WITH RECURSIVE
+		xaxis(x) AS (VALUES(0) UNION ALL SELECT x+1 FROM xaxis WHERE x<255 LIMIT 256),
+		yaxis(y) AS (VALUES(0) UNION ALL SELECT y+1 FROM yaxis WHERE y<255 LIMIT 256)
+	SELECT x,y FROM yaxis JOIN xaxis WHERE xaxis.x < (SELECT value FROM meta WHERE prop = "grid.xsize") AND yaxis.y < (SELECT value FROM meta WHERE prop = "grid.ysize");
+
+END;
