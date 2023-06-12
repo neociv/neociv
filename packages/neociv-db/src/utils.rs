@@ -61,10 +61,7 @@ pub fn migrate(conn: &mut Connection) -> types::MigrationResult {
     .to_latest(conn)
     {
         Ok(_) => Ok(conn),
-        Err(e) => {
-            panic!("{:?}", e);
-            Err(DBError::MigrationError(e))
-        }
+        Err(e) => Err(DBError::MigrationError(e)),
     }
 }
 
@@ -106,6 +103,7 @@ pub fn prep(conn: &Connection) -> Result<types::PrepMap, DBError> {
     stmt!("def_civ");
     stmt!("add_civ");
     stmt!("remove_civ");
+    stmt!("set_grid");
 
     Ok(stmts)
 }
