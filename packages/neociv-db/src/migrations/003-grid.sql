@@ -36,7 +36,7 @@ UPDATE ON meta
 	DELETE FROM cells;
 
 	-- Recursively generate the grid coordinates
-	INSERT INTO cells WITH RECURSIVE
+	INSERT INTO cells (x,y) WITH RECURSIVE
 		xaxis(x) AS (VALUES(0) UNION ALL SELECT x+1 FROM xaxis WHERE x<255 LIMIT 256),
 		yaxis(y) AS (VALUES(0) UNION ALL SELECT y+1 FROM yaxis WHERE y<255 LIMIT 256)
 	SELECT x,y FROM yaxis JOIN xaxis WHERE xaxis.x < (SELECT value FROM meta WHERE prop = "grid.xsize") AND yaxis.y < (SELECT value FROM meta WHERE prop = "grid.ysize");
