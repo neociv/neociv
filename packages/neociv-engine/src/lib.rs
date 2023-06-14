@@ -28,10 +28,11 @@ impl Default for NeocivEngine {
     }
 }
 
-/*
 impl From<&str> for NeocivEngine {
     fn from(path: &str) -> Self {
-        Self {}
+        Self {
+            db: path.into(),
+            ..Default::default()
+        }
     }
 }
-*/

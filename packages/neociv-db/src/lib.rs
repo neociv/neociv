@@ -1,4 +1,4 @@
-use rusqlite::{Connection, Params, Row, ToSql};
+use rusqlite::{hooks::Action, Connection, Params, Row, ToSql};
 
 pub mod errors;
 pub mod macros;
@@ -55,19 +55,63 @@ impl NeocivDB {
         self.connection.query_row(query, params, f)
     }
 
-    /// Execute a prepared statement that is *not* expected to return a result beyond success / fail
+    /// Execute a prepared statement that is *not* expected to return a result beyond success / fail. All statements are couched
+    /// in a transaction and *will* rollback if failed.
     pub fn exec_stmt(&mut self, id: &str, params: &[&dyn ToSql]) -> types::ExecResult {
         if self.statements.contains_key(id) {
-            match self
-                .connection
-                .execute(self.statements.get_mut(id).unwrap(), params)
-            {
-                Ok(s) => Ok(s),
-                Err(e) => Err(errors::Error::SqliteError(e)),
+            let transaction = self.connection.transaction().unwrap();
+
+            match transaction.execute(self.statements.get_mut(id).unwrap(), params) {
+                Ok(s) => {
+                    transaction.commit().unwrap();
+                    Ok(s)
+                }
+                Err(e) => {
+                    transaction.rollback().unwrap();
+                    Err(errors::Error::SqliteError(e))
+                }
             }
         } else {
             Err(DBError::UnknownStatementError)
         }
+    }
+
+    /// Returns the result of a 'count' query. Does *not* require the _entire_ query so the
+    /// following are identical as the selection will be added if not present.
+    ///
+    /// - `SELECT COUNT(*) FROM tbl WHERE prop = ?1`
+    /// - `tbl WHERE prop = ?1`
+    pub fn count<P>(&mut self, sql: &str, params: P) -> i32
+    where
+        P: Params,
+    {
+        let query: String = if sql.to_ascii_uppercase().starts_with("SELECT") {
+            sql.to_string()
+        } else {
+            format!("SELECT COUNT(*) FROM {}", sql)
+        };
+
+        return self
+            .query_row(query.as_str(), params, |r| r.get(0))
+            .unwrap_or(0);
+    }
+
+    /// Add a commit hook for whenever a transaction finishes
+    pub fn hook_commit<F>(&mut self, hook: F) -> &mut Self
+    where
+        F: FnMut() -> bool + Send + 'static,
+    {
+        self.connection.commit_hook(Some(hook));
+        return self;
+    }
+
+    /// Add an update hook for whenever a row (et al) is updated.
+    pub fn hook_update<F>(&mut self, hook: F) -> &mut Self
+    where
+        F: FnMut(Action, &str, &str, i64) + Send + 'static,
+    {
+        self.connection.update_hook(Some(hook));
+        return self;
     }
 
     /*

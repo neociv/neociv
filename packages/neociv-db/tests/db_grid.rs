@@ -9,11 +9,5 @@ pub fn large_grid() {
 
     // Create the definition
     assert!(exec_stmt!(db, "set_grid", xsize, ysize).is_ok());
-
-    let res: Result<i32, rusqlite::Error> =
-        db.query_row("SELECT COUNT(*) FROM cells", [], |row| row.get(0));
-
-    assert!(res.is_ok());
-    assert_eq!(res.unwrap(), xsize * ysize);
+    assert_eq!(db.count("cells", []), xsize * ysize);
 }
-

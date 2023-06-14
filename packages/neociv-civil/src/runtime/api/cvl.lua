@@ -37,6 +37,17 @@ local function setter(tbl, path, val)
     return tbl
 end
 
+-- Perform a query on the database, either receiving back the rows asked for *or* simply not failing.
+function cvl.query(q, handler)
+    local rows = cvl.native.query(q)
+    if handler ~= nil then
+        return handler(rows)
+    else
+        -- TODO: This is a bit silly though yeah?
+        return rows
+    end
+end
+
 function cvl.inject_state(state)
     if cvl.state == nil or state ~= nil and state.revision ~= cvl.revision then
         cvl.state = state

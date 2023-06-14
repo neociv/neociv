@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS cells (
     coast_mask INT8 NOT NULL DEFAULT 0,
     river_mask INT8 NOT NULL DEFAULT 0,
     road_mask INT8 NOT NULL DEFAULT 0,
+    wall_mask INT8 NOT NULL DEFAULT 0,
     -- Base terrain type
     terrain TEXT NOT NULL CHECK (
         terrain IN ('ground', 'water', 'deepwater', 'mountain')
