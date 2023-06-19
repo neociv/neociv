@@ -1,5 +1,8 @@
+use std::time::Duration;
+
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use neociv_db::{NeocivDB, exec_stmt};
+
+use neociv_db::{exec_stmt, NeocivDB};
 
 fn set_grid(xsize: u8, ysize: u8) -> () {
     exec_stmt!(NeocivDB::default(), "set_grid", xsize, ysize).unwrap();
@@ -47,5 +50,12 @@ fn criterion_benchmark(c: &mut Criterion) {
     });
 }
 
-criterion_group!(benches, criterion_benchmark);
-criterion_main!(benches);
+criterion_group!(
+    name = grid;
+    config = Criterion::default()
+        .sample_size(100)
+        .measurement_time(Duration::from_secs(10))
+        .warm_up_time(Duration::from_secs(3));
+    targets = criterion_benchmark
+);
+criterion_main!(grid);
