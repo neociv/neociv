@@ -2,6 +2,8 @@ use neociv_civil::runtime::NeocivRuntime;
 use neociv_db::NeocivDB;
 use neociv_state::state::NeocivState;
 
+pub mod state;
+
 pub struct NeocivEngine {
     state: NeocivState,
     runtime: NeocivRuntime,
