@@ -4,6 +4,7 @@ use strum::Display;
 #[derive(Display, Debug, PartialEq)]
 pub enum StateErrorCode {
     UnknownEngineAction,
+    UnknownStateProp,
     DuplicateCivId,
     InvalidCivId,
     UnknownCivId,
@@ -52,9 +53,21 @@ macro_rules! err_unknown_engine_action {
             "Unknown Neociv Engine Action \"{}\"",
             $action
         )
-    }
+    };
 }
 pub(crate) use err_unknown_engine_action;
+
+#[macro_export]
+macro_rules! err_unknown_state_prop {
+    ($action: expr) => {
+        state_error!(
+            StateErrorCode::UnknownStateProp,
+            "Unknown Neociv State Prop \"{}\"",
+            $action
+        )
+    };
+}
+pub(crate) use err_unknown_state_prop;
 
 #[macro_export]
 macro_rules! err_dup_civ_id {
