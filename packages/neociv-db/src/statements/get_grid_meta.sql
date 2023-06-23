@@ -1,0 +1,1 @@
+SELECT * FROM meta WHERE prop = "grid.xsize" OR prop = "grid.ysize";
