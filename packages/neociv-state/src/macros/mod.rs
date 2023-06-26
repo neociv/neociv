@@ -69,5 +69,3 @@ macro_rules! state_table_default {
         $i
     };
 }
-
-

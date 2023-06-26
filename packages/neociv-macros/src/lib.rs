@@ -158,19 +158,17 @@ pub fn state_enum_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStr
                 }
             }
 
-            impl rusqlite::types::FromSql for #ident {
-                fn column_result(value: rusqlite::types::ValueRef) -> rusqlite::types::FromSqlResult<Self> {
-                    String::column_result(value)
-                    .and_then(|s| s.parse())
-                    .map_err(|err| rusqlite::types::FromSqlError::Other(Box::new(err)))
-                }
-            }
-
-            // TODO: Option<#ident>
-
             impl rusqlite::types::ToSql for #ident {
                 fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput> {
                     Ok(self.to_string().into())
+                }
+            }
+
+            impl rusqlite::types::FromSql for #ident {
+                fn column_result(value: rusqlite::types::ValueRef) -> rusqlite::types::FromSqlResult<Self> {
+                    value.as_str()?
+                    .parse()
+                    .map_err(|e| rusqlite::types::FromSqlError::Other(Box::new(e)))
                 }
             }
         }.into()
