@@ -4,6 +4,15 @@ default_to_workspace = false
 [env]
 NEOCIV_CONTENT_ROOT = "${CARGO_MAKE_WORKING_DIRECTORY}/content"
 
+[tasks.bench]
+command = "cargo"
+args = ["bench"]
+
+[tasks.test-coverage]
+install_crate = "tarpaulin"
+command = "cargo"
+args = ["tarpaulin", "-o", "html", "--output-dir", "target/tarpaulin"]
+
 [tasks.example-random-grid]
 command = "cargo"
 args = ["run", "--example", "random-grid"]

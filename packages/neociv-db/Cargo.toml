@@ -5,7 +5,6 @@ edition = "2021"
 
 [dependencies]
 neociv-macros = { path = "../neociv-macros" }
-neociv-civil = { path = "../neociv-civil" }
 neociv-state = { path = "../neociv-state" }
 bevy_math = "0.9.1"
 bevy_ecs = "0.9.1"

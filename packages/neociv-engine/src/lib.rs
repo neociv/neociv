@@ -1,10 +1,27 @@
 use neociv_civil::runtime::NeocivRuntime;
 use neociv_db::NeocivDB;
-use neociv_state::{errors::StateError, state::NeocivState};
+use neociv_state::state::NeocivState;
 
 pub mod state;
 
 use crate::state::*;
+
+pub enum NeocivEngineError {
+    StateError(neociv_state::errors::StateError),
+    RuntimeError(rlua::Error),
+}
+
+impl From<neociv_state::errors::StateError> for NeocivEngineError {
+    fn from(value: neociv_state::errors::StateError) -> Self {
+        NeocivEngineError::StateError(value)
+    }
+}
+
+impl From<rlua::Error> for NeocivEngineError {
+    fn from(value: rlua::Error) -> Self {
+        NeocivEngineError::RuntimeError(value)
+    }
+}
 
 pub struct NeocivEngine {
     state: NeocivState,
@@ -32,18 +49,21 @@ impl From<&str> for NeocivEngine {
 }
 
 impl NeocivEngine {
-    pub fn update_state(&mut self) -> Result<&Self, StateError> {
+    pub fn update_state(&mut self) -> Result<&Self, NeocivEngineError> {
         self.state = update_state(&self.state, &self.db)?;
+        self.runtime.inject_state(&self.state)?;
         Ok(self)
     }
 
-    pub fn update_state_prop(&mut self, prop: &str) -> Result<&Self, StateError> {
+    pub fn update_state_prop(&mut self, prop: &str) -> Result<&Self, NeocivEngineError> {
         self.state = update_state_prop(prop, &self.state, &self.db)?;
+        self.runtime.inject_state(&self.state)?;
         Ok(self)
     }
 
-    pub fn update_state_props(&mut self, props: Vec<&str>) -> Result<&Self, StateError> {
+    pub fn update_state_props(&mut self, props: Vec<&str>) -> Result<&Self, NeocivEngineError> {
         self.state = update_state_props(props, &self.state, &self.db)?;
+        self.runtime.inject_state(&self.state)?;
         Ok(self)
     }
 }

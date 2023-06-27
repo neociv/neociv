@@ -11,6 +11,7 @@ use rlua::{
     String as LuaString, Table as LuaTable, Value as LuaValue,
 };
 
+use neociv_db::NeocivDB;
 use neociv_state::state::NeocivState;
 
 use self::{engine::engine_do, errors::NeocivRuntimeError};
@@ -38,6 +39,7 @@ static EVENTS_FILE: &'static str = include_str!("./api/events.fnl");
 pub struct NeocivRuntime {
     lua: Arc<Mutex<Lua>>,
     pub state: NeocivState,
+    pub db: Option<Arc<Mutex<NeocivDB>>>,
 }
 
 impl Default for NeocivRuntime {
@@ -46,6 +48,7 @@ impl Default for NeocivRuntime {
             let runtime = NeocivRuntime {
                 lua: Arc::new(Mutex::new(Lua::new_with_debug())),
                 state: NeocivState::default(),
+                db: None,
             };
             let _result = runtime.lua.lock().unwrap().context(move |ctx| {
                 ctx.load(INSPECT_FILE).exec()?;
@@ -229,6 +232,16 @@ impl NeocivRuntime {
         } else {
             let json_str = fs::read_to_string(file).unwrap();
             return Ok(NeocivRuntime::default());
+        }
+    }
+
+    /// Connect a database client
+    pub fn connect_db(&mut self, db: NeocivDB) -> Result<&Self, ()> {
+        if self.db.is_some() {
+            panic!("Already connected")
+        } else {
+            self.db = Some(Arc::new(Mutex::new(db)));
+            Ok(self)
         }
     }
 
