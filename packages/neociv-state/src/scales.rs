@@ -1,4 +1,4 @@
-use rlua::{Error as LuaError, FromLua, ToLua, Value as LuaValue};
+use rlua::{FromLua, ToLua, Value as LuaValue};
 use serde::{Deserialize, Serialize};
 use serde_diff::SerdeDiff;
 

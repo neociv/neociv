@@ -1,3 +1,4 @@
+use neociv_state::state::NeocivState;
 use rlua::{
     Error as LuaError, MultiValue as LuaMultiValue, Result as LuaResult, Value as LuaValue,
 };
@@ -10,7 +11,7 @@ pub trait NeocivRepl {
     fn lua_repl_line(&self, line: &str) -> LuaResult<String>;
 }
 
-impl NeocivRepl for NeocivRuntime {
+impl<C> NeocivRepl for NeocivRuntime<C> where C: Fn(String, LuaValue) -> NeocivState {
     fn lua_repl_line(&self, line: &str) -> LuaResult<String> {
         return self.lua.lock().unwrap().context(move |ctx| {
             let result = ctx.load(line).eval::<LuaMultiValue>();

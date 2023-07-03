@@ -3,8 +3,6 @@ use std::path::Path;
 use std::sync::{Arc, Mutex};
 
 use bevy_ecs::component::Component;
-use bevy_ecs::schedule::RunCriteriaLabel;
-use bevy_ecs::system::adapter::new;
 use bevy_ecs::system::Resource;
 use rlua::{
     Context, Error as LuaError, FromLuaMulti, Function as LuaFunction, Lua, Result as LuaResult,
@@ -15,13 +13,14 @@ use neociv_db::NeocivDB;
 use neociv_state::state::NeocivState;
 
 use self::{engine::engine_do, errors::NeocivRuntimeError};
-use crate::content::manifest::NeocivManifest;
-use crate::desc::NeocivDesc;
 
 pub mod engine;
 pub mod errors;
+pub mod func;
 pub mod repl;
 pub mod utils;
+
+pub type RuntimeEngineCallback = dyn Fn(&str, LuaValue) -> NeocivState + Send;
 
 static FENNEL_FILE: &'static str = include_str!("./api/vendor/fennel.lua");
 static INSPECT_FILE: &'static str = include_str!("./api/vendor/inspect.lua");
@@ -35,20 +34,23 @@ static MACROS_FILE: &'static str = include_str!("./api/macros.fnl");
 static CVL_FILE: &'static str = include_str!("./api/cvl.lua");
 static EVENTS_FILE: &'static str = include_str!("./api/events.fnl");
 
-#[derive(Clone, Debug, Component, Resource)]
-pub struct NeocivRuntime {
+#[derive(Clone, Component, Resource)]
+pub struct NeocivRuntime<C>
+where
+    C: Fn(String, LuaValue) -> NeocivState,
+{
     lua: Arc<Mutex<Lua>>,
-    pub state: NeocivState,
     pub db: Option<Arc<Mutex<NeocivDB>>>,
+    pub engine_callback: Option<Arc<Mutex<C>>>,
 }
 
-impl Default for NeocivRuntime {
+impl<C> Default for NeocivRuntime<C> where C: Fn(String, LuaValue) -> NeocivState {
     fn default() -> Self {
         unsafe {
             let runtime = NeocivRuntime {
                 lua: Arc::new(Mutex::new(Lua::new_with_debug())),
-                state: NeocivState::default(),
                 db: None,
+                engine_callback: None,
             };
             let _result = runtime.lua.lock().unwrap().context(move |ctx| {
                 ctx.load(INSPECT_FILE).exec()?;
@@ -73,6 +75,7 @@ impl Default for NeocivRuntime {
                 fennel_module.set("path", path_result)?;
                 fennel_module.set("macro-path", macro_path_result)?;
 
+                // Inject a default state into the runtime
                 ctx.set_named_registry_value("state", NeocivState::default())?;
 
                 // Perform engine operations
@@ -82,123 +85,16 @@ impl Default for NeocivRuntime {
                         action.as_str(),
                         args,
                     ) {
-                        Ok(s) => NeocivRuntime::inject_state_into_context(&fn_ctx, &s),
+                        Ok(s) => NeocivRuntime::<C>::inject_state_into_context(&fn_ctx, &s),
                         _ => panic!("Oh no!"),
                     },
                 )?;
-
-                let load_content_file: LuaFunction =
-                    ctx.create_function(|fn_ctx, filename: String| {
-                        // Confirm the file exists
-                        let cf_path = Path::new(filename.as_str());
-
-                        if cf_path.exists() && !cf_path.is_dir() {
-                            // Get path to parent directory of content file and then ensure it is absolute
-                            let base_path = cf_path
-                                .parent()
-                                .expect("Unable to get parent path to content file")
-                                .canonicalize()
-                                .expect("Unable to get absolute path to content file directory")
-                                .as_path()
-                                .to_owned();
-
-                            // Get the path to the manifest
-                            let manifest = match NeocivManifest::from_child_path_str(
-                                base_path.to_str().unwrap(),
-                            ) {
-                                Some(m) => m,
-                                None => panic!("Unable find manifest"),
-                            };
-
-                            // Read the file into JSON
-                            let json_src = fs::read_to_string(cf_path).unwrap();
-
-                            // Get reference to lunajson
-                            let fn_require: LuaFunction = fn_ctx.globals().get("require")?;
-                            let lunajson_decode: LuaFunction =
-                                fn_require.call::<_, LuaTable>("lunajson")?.get("decode")?;
-
-                            // Turn into a lua table
-                            let mut content_tbl: LuaTable =
-                                lunajson_decode.call::<_, LuaTable>(json_src)?;
-
-                            // Turn into an array if not already one
-                            if content_tbl.len()? == 0 {
-                                let arr_table = fn_ctx.create_table()?;
-                                arr_table.set(0, content_tbl)?;
-                                content_tbl = arr_table;
-                            }
-
-                            // Iterate over each entry in the table by index - going by "pairs" doesn't work
-                            // so well as it moves the table making it cumbersome to return
-                            for i in 1..content_tbl.len()? + 1 {
-                                let content: LuaTable = content_tbl.get(i)?;
-
-                                // Replace "@" in the ID with the manfiest ID
-                                let content_id = content.get::<_, LuaString>("id")?;
-                                if content_id.to_str().unwrap().starts_with("@") {
-                                    let new_id = content_id
-                                        .to_str()
-                                        .unwrap()
-                                        .replace("@", manifest.id.as_str());
-                                    content.set("id", new_id)?;
-                                }
-
-                                let resources: LuaTable = content.get("resources")?;
-                                let new_resources = fn_ctx.create_table()?;
-
-                                // Iterate over all the entries in the resource table and create absolute paths
-                                // to each one, except for the materials which are organised by namespace
-                                for rpair in resources.pairs::<LuaString, LuaValue>() {
-                                    let pair = rpair?;
-                                    let key = pair.0;
-                                    if key.eq(&String::from("materials")) {
-                                        let materials: LuaTable =
-                                            fn_ctx.unpack::<LuaTable>(pair.1)?;
-                                        for n in 1..materials.len()? + 1 {
-                                            let material_str = materials.get::<_, LuaString>(n)?;
-                                            let m_id = material_str
-                                                .to_str()
-                                                .unwrap()
-                                                .replace("@", manifest.id.as_str());
-                                            materials.set(n, m_id)?;
-                                        }
-                                        new_resources.set::<_, LuaTable>(key, materials)?;
-                                    } else {
-                                        // Coerce the Lua String containing the resource path into a Rust String
-                                        let resource_str = fn_ctx
-                                            .coerce_string(pair.1)
-                                            .unwrap()
-                                            .expect("Unable to coerce resource value");
-
-                                        // Create a new Path buffer from the provided resource String
-                                        let resource_path =
-                                            Path::new(resource_str.to_str().unwrap());
-
-                                        // Join that to the absolute path of the directory
-                                        // containing the content file
-                                        let new_path = fn_ctx.create_string(
-                                            base_path.join(resource_path).to_str().unwrap(),
-                                        )?;
-                                        // Set this value in the new resources table
-                                        new_resources.set::<_, LuaString>(key, new_path)?;
-                                    }
-                                }
-
-                                content.set::<_, LuaTable>("resources", new_resources)?;
-                            }
-
-                            return LuaResult::Ok(content_tbl);
-                        } else {
-                            panic!("Failed to find content file '{}'", filename);
-                        }
-                    })?;
 
                 let cvl_tbl: LuaTable = ctx.globals().get("cvl")?;
                 let native_table: LuaTable = cvl_tbl.get("native")?;
 
                 native_table.set("engine_do", do_fn)?;
-                native_table.set("load_content_file", load_content_file)?;
+                native_table.set("load_content_file", func::load_content_file(ctx)?)?;
 
                 return LuaResult::Ok(());
             });
@@ -214,7 +110,7 @@ impl Default for NeocivRuntime {
     }
 }
 
-impl NeocivRuntime {
+impl<C> NeocivRuntime<C> where C: Fn(String, LuaValue) -> NeocivState {
     /// Create a runtime from a provided state object
     pub fn from(state: NeocivState) -> Result<Self, NeocivRuntimeError> {
         let mut base = NeocivRuntime::default();
@@ -241,6 +137,19 @@ impl NeocivRuntime {
             panic!("Already connected")
         } else {
             self.db = Some(Arc::new(Mutex::new(db)));
+            Ok(self)
+        }
+    }
+
+    /// Connect the engine callback
+    pub fn connect_engine_callback(
+        &mut self,
+        callback: C,
+    ) -> Result<&Self, ()> {
+        if self.engine_callback.is_some() {
+            panic!("Already connected callback")
+        } else {
+            self.engine_callback = Some(Arc::new(Mutex::new(callback)));
             Ok(self)
         }
     }
@@ -328,21 +237,9 @@ impl NeocivRuntime {
         self.lua
             .lock()
             .unwrap()
-            .context(move |ctx| NeocivRuntime::inject_state_into_context(&ctx, state))?;
+            .context(move |ctx| NeocivRuntime::<C>::inject_state_into_context(&ctx, state))?;
 
-        self.state = state.clone();
         return Ok(self);
-    }
-
-    pub fn update(&mut self) -> Result<&Self, LuaError> {
-        let lua_state = self.get_state();
-        return match lua_state {
-            Ok(s) => {
-                self.state = s;
-                return Ok(self);
-            }
-            Err(ex) => Err(ex),
-        };
     }
 
     /**
@@ -431,7 +328,7 @@ fn test_state_in_lua() {
     // TODO: Write this with engine actions
     state.revision += 1;
     assert!(cvl.inject_state(&state).is_ok());
-    assert!(cvl.update().is_ok());
+    //assert!(cvl.update().is_ok());
 
     let active_civ_result =
         cvl.eval_lua::<bool>("assert(type(cvl.get('active_civ_key')) == 'string')");
