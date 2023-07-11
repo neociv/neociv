@@ -1,7 +1,7 @@
 use neociv_civil::runtime::NeocivRuntime;
 use neociv_db::NeocivDB;
 use neociv_state::state::NeocivState;
-use rlua::{Value as LuaValue};
+use rlua::Value as LuaValue;
 
 pub mod state;
 
@@ -24,13 +24,13 @@ impl From<rlua::Error> for NeocivEngineError {
     }
 }
 
-pub struct NeocivEngine<C> where C: Fn(String, LuaValue) -> NeocivState {
+pub struct NeocivEngine {
     state: NeocivState,
-    runtime: NeocivRuntime<C>,
+    runtime: NeocivRuntime,
     db: NeocivDB,
 }
 
-impl<C> Default for NeocivEngine<C> where C: Fn(String, LuaValue) -> NeocivState {
+impl Default for NeocivEngine {
     fn default() -> Self {
         Self {
             state: NeocivState::default(),
@@ -40,7 +40,7 @@ impl<C> Default for NeocivEngine<C> where C: Fn(String, LuaValue) -> NeocivState
     }
 }
 
-impl<C> From<&str> for NeocivEngine<C> where C: Fn(String, LuaValue) -> NeocivState {
+impl From<&str> for NeocivEngine {
     fn from(path: &str) -> Self {
         Self {
             db: path.into(),
@@ -49,7 +49,7 @@ impl<C> From<&str> for NeocivEngine<C> where C: Fn(String, LuaValue) -> NeocivSt
     }
 }
 
-impl<C> NeocivEngine<C> where C: Fn(String, LuaValue) -> NeocivState {
+impl NeocivEngine {
     pub fn update_state(&mut self) -> Result<&Self, NeocivEngineError> {
         self.update_state_prop("*")
     }

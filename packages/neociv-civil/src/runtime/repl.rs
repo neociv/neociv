@@ -11,7 +11,7 @@ pub trait NeocivRepl {
     fn lua_repl_line(&self, line: &str) -> LuaResult<String>;
 }
 
-impl<C> NeocivRepl for NeocivRuntime<C> where C: Fn(String, LuaValue) -> NeocivState {
+impl NeocivRepl for NeocivRuntime {
     fn lua_repl_line(&self, line: &str) -> LuaResult<String> {
         return self.lua.lock().unwrap().context(move |ctx| {
             let result = ctx.load(line).eval::<LuaMultiValue>();

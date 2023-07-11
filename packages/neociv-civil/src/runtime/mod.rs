@@ -20,7 +20,7 @@ pub mod func;
 pub mod repl;
 pub mod utils;
 
-pub type RuntimeEngineCallback = dyn Fn(&str, LuaValue) -> NeocivState + Send;
+pub type RuntimeEngineCallback = fn(&str, LuaValue) -> NeocivState;
 
 static FENNEL_FILE: &'static str = include_str!("./api/vendor/fennel.lua");
 static INSPECT_FILE: &'static str = include_str!("./api/vendor/inspect.lua");
@@ -35,16 +35,13 @@ static CVL_FILE: &'static str = include_str!("./api/cvl.lua");
 static EVENTS_FILE: &'static str = include_str!("./api/events.fnl");
 
 #[derive(Clone, Component, Resource)]
-pub struct NeocivRuntime<C>
-where
-    C: Fn(String, LuaValue) -> NeocivState,
-{
+pub struct NeocivRuntime {
     lua: Arc<Mutex<Lua>>,
     pub db: Option<Arc<Mutex<NeocivDB>>>,
-    pub engine_callback: Option<Arc<Mutex<C>>>,
+    pub engine_callback: Option<Arc<Mutex<RuntimeEngineCallback>>>,
 }
 
-impl<C> Default for NeocivRuntime<C> where C: Fn(String, LuaValue) -> NeocivState {
+impl Default for NeocivRuntime {
     fn default() -> Self {
         unsafe {
             let runtime = NeocivRuntime {
@@ -85,7 +82,7 @@ impl<C> Default for NeocivRuntime<C> where C: Fn(String, LuaValue) -> NeocivStat
                         action.as_str(),
                         args,
                     ) {
-                        Ok(s) => NeocivRuntime::<C>::inject_state_into_context(&fn_ctx, &s),
+                        Ok(s) => NeocivRuntime::inject_state_into_context(&fn_ctx, &s),
                         _ => panic!("Oh no!"),
                     },
                 )?;
@@ -110,7 +107,7 @@ impl<C> Default for NeocivRuntime<C> where C: Fn(String, LuaValue) -> NeocivStat
     }
 }
 
-impl<C> NeocivRuntime<C> where C: Fn(String, LuaValue) -> NeocivState {
+impl NeocivRuntime {
     /// Create a runtime from a provided state object
     pub fn from(state: NeocivState) -> Result<Self, NeocivRuntimeError> {
         let mut base = NeocivRuntime::default();
@@ -144,7 +141,7 @@ impl<C> NeocivRuntime<C> where C: Fn(String, LuaValue) -> NeocivState {
     /// Connect the engine callback
     pub fn connect_engine_callback(
         &mut self,
-        callback: C,
+        callback: RuntimeEngineCallback,
     ) -> Result<&Self, ()> {
         if self.engine_callback.is_some() {
             panic!("Already connected callback")
@@ -237,7 +234,7 @@ impl<C> NeocivRuntime<C> where C: Fn(String, LuaValue) -> NeocivState {
         self.lua
             .lock()
             .unwrap()
-            .context(move |ctx| NeocivRuntime::<C>::inject_state_into_context(&ctx, state))?;
+            .context(move |ctx| NeocivRuntime::inject_state_into_context(&ctx, state))?;
 
         return Ok(self);
     }
