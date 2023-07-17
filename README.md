@@ -14,6 +14,6 @@ Will quickly run all tests
 
 Will run benchmarks
 
-`cargo make test-coverage`
+`cargo make coverage`
 
-Will run tests with coverage, reports are in *target/tarpaulin*
+Will run tests with coverage reporting. This uses [tarpaulin](https://github.com/xd009642/tarpaulin) by default to generate both json and html reports. 

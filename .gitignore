@@ -13,4 +13,5 @@ Cargo.lock
 *.profraw
 perf.data
 flamegraph.svg
+cobertura.xml
 
