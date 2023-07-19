@@ -1,0 +1,23 @@
+{
+  "package": {
+    "productName": "neociv-launcher"
+  },
+  "build": {
+    "beforeBuildCommand": "npm run build",
+    "beforeDevCommand": "npm run dev",
+    "devPath": "./frontend/dist",
+    "distDir": "./frontend/dist",
+    "withGlobalTauri": true
+  },
+  "tauri": {
+    "windows": [
+      {
+        "title": "Neociv Launcher",
+        "fullscreen": false,
+        "resizable": true,
+        "width": 800,
+        "height": 600
+      }
+    ]
+  }
+}

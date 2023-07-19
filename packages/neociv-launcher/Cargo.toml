@@ -1,0 +1,15 @@
+[package]
+name = "neociv-launcher"
+version = "0.0.1"
+edition = "2021"
+build = "src/build.rs"
+
+[dependencies]
+tauri = { version = "1.4.1", features = [] }
+
+[build-dependencies]
+tauri-build = { version = "1.4.0", features = [] }
+
+[features]
+default = [ "custom-protocol" ]
+custom-protocol = [ "tauri/custom-protocol" ]

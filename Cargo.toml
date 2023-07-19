@@ -9,6 +9,7 @@ members = [
     "packages/neociv-macros",
     "packages/neociv-state",
     "packages/neociv-db",
-    "packages/neociv-engine"
+    "packages/neociv-engine",
+    "packages/neociv-launcher"
 ]
 

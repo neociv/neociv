@@ -5,6 +5,19 @@ default_to_workspace = false
 NEOCIV_CONTENT_ROOT = "${CARGO_MAKE_WORKING_DIRECTORY}/content"
 CARGO_MAKE_COVERAGE_PROVIDER = "tarpaulin"
 
+[tasks.pre-build]
+run_task = [ { name = "neociv-launcher-install" } ] 
+
+[tasks.neociv-launcher-install]
+cwd = "${CARGO_MAKE_WORKING_DIRECTORY}/packages/neociv-launcher"
+command = "npm"
+args = ["install"]
+
+[tasks.neociv-launcher-build]
+cwd = "${CARGO_MAKE_WORKING_DIRECTORY}/packages/neociv-launcher"
+command = "cargo"
+args = ["tauri", "build"]
+
 [tasks.coverage-tarpaulin]
 clear = true
 command = "cargo"
