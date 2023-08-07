@@ -1,7 +1,7 @@
 #[macro_export]
 macro_rules! db_stmt {
     ($db:ident, $id:expr, $sql:expr) => {
-       $db.prep_stmt($id, $sql) 
+        $db.prep_stmt($id, $sql)
     };
 }
 pub(crate) use db_stmt;

@@ -1,6 +1,6 @@
 //use neociv_state::state::NeocivState;
-use neociv_desktop::init_desktop_app;
 use neociv_config::NeocivConfig;
+use neociv_desktop::init_desktop_app;
 use neociv_game::NeocivGamePlugin;
 use neociv_state::state::NeocivState;
 

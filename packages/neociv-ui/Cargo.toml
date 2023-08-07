@@ -1,0 +1,8 @@
+[package]
+name = "neociv-ui"
+version = "0.0.1"
+edition = "2021"
+
+[dependencies]
+egui_node_graph = "0.4.0"
+fluent = "0.16.0"

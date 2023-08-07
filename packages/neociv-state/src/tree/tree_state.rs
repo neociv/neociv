@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 
-use crate::{tree::tree_def::{TreeId, TreeNodeCost, TreeNodeId}, state_table};
+use crate::{
+    state_table,
+    tree::tree_def::{TreeId, TreeNodeCost, TreeNodeId},
+};
 
 state_table! {
     pub struct TreeStateNode {

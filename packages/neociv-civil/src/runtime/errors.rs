@@ -1,5 +1,5 @@
 use neociv_state::errors::StateError;
-use rlua::{Error as LuaError};
+use rlua::Error as LuaError;
 use std::error::Error;
 use std::fmt::Display;
 
@@ -21,7 +21,7 @@ impl Display for NeocivRuntimeError {
 
 impl From<LuaError> for NeocivRuntimeError {
     fn from(err: LuaError) -> Self {
-       NeocivRuntimeError::LuaError(err) 
+        NeocivRuntimeError::LuaError(err)
     }
 }
 

@@ -12,4 +12,3 @@ state_table! {
 }
 
 pub type Rivalries = HashMap<String, Rivalry>;
-

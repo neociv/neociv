@@ -32,7 +32,7 @@ impl NeocivRegistry {
         return false;
     }
 
-    pub fn load(&self, ) -> Result<(), ()> {
+    pub fn load(&self) -> Result<(), ()> {
         Ok(())
     }
 }

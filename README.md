@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-All tasks are run via [cargo-make](https://sagiegurari.github.io/cargo-make/) as there are several custom steps that cannot be done using just cargo. This ensures that all tasks are performed in the correct order.
+Several tasks are run with [cargo-make](https://sagiegurari.github.io/cargo-make/) as there are several custom steps that cannot be done using just cargo. This ensures that all tasks are performed in the correct order.
 
 `cargo install --force cargo-make`
 
@@ -10,11 +10,7 @@ Before building it will be necessary to confirm you have all the required depend
 
 ## Building
 
-Once all dependencies are satisfied you can run the following:
-
-`cargo make`
-
-This will install all cargo & npm dependencies, build each package, and run the tests.
+`cargo build` or `cargo make build` will both work to install dependencies and build all packages.
 
 ## Examples
 

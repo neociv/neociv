@@ -10,6 +10,8 @@ members = [
     "packages/neociv-state",
     "packages/neociv-db",
     "packages/neociv-engine",
-    "packages/neociv-launcher"
+    "packages/neociv-launcher",
+    "packages/neociv-tree",
+    "packages/neociv-ui"
 ]
 

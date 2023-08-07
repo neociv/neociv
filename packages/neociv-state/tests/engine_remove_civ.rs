@@ -13,9 +13,9 @@ fn remove_civ() {
             ..Default::default()
         },
     ) {
-            Ok(state) => state,
-            Err(ex) => panic!("{:?}", ex),
-        };
+        Ok(state) => state,
+        Err(ex) => panic!("{:?}", ex),
+    };
     assert_eq!(state.civ_order.len(), 1);
     assert_eq!(state.civs.len(), 1);
     assert_eq!(state.revision, 1);

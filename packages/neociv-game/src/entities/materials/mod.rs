@@ -3,7 +3,7 @@ use bevy::prelude::{Handle, Shader};
 pub mod cell;
 
 pub struct ShaderResource {
-   frag: Handle<Shader>,
+    frag: Handle<Shader>,
 }
 
 /*

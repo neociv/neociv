@@ -1,6 +1,6 @@
 use bevy::prelude::Commands;
 
-use crate::plugins::registry::{registry::NeocivRegistry, self};
+use crate::plugins::registry::{self, registry::NeocivRegistry};
 
 // Init with a blank / default registry if it does not already exist
 pub fn registry_startup(mut commands: Commands) {

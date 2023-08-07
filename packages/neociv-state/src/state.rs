@@ -1,6 +1,6 @@
 use bevy_ecs::prelude::Component;
 use bevy_ecs::system::Resource;
-use rlua::{Nil as LuaNil, ToLua, Value as LuaValue, Error as LuaError, FromLua};
+use rlua::{Error as LuaError, FromLua, Nil as LuaNil, ToLua, Value as LuaValue};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -60,7 +60,7 @@ impl<'lua> ToLua<'lua> for NeocivState {
 impl<'lua> FromLua<'lua> for NeocivState {
     fn from_lua(lua_value: LuaValue<'lua>, _lua: rlua::Context<'lua>) -> rlua::Result<Self> {
         match lua_value {
-            LuaValue::Table(tbl) => Ok(NeocivState { 
+            LuaValue::Table(tbl) => Ok(NeocivState {
                 revision: tbl.get("revision")?,
                 turn: tbl.get("turn")?,
                 active_civ_key: tbl.get("active_civ_key")?,
@@ -70,7 +70,11 @@ impl<'lua> FromLua<'lua> for NeocivState {
                 camera: tbl.get("camera")?,
                 scales: tbl.get("scales")?,
             }),
-            _ => Err(LuaError::FromLuaConversionError { from: lua_value.type_name(), to: "NeocivState", message: None })
+            _ => Err(LuaError::FromLuaConversionError {
+                from: lua_value.type_name(),
+                to: "NeocivState",
+                message: None,
+            }),
         }
     }
 }
