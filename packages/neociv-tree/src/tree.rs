@@ -59,7 +59,22 @@ impl NeocivTree {
         }
     }
 
+    pub fn remove_node(&mut self, id: String) -> Result<&mut Self, String> {
+        panic!("Unimplemented");
+        // TODO: Remove deps *but* if one end of the dep exists put it back into the unlinked_deps cache
+        Ok(self)
+    }
+
     fn link_deps(&mut self, id: String) -> Result<&mut Self, String> {
+        panic!("Unimplemented");
+        // TODO: Link deps that exist
+        // TODO: Search the unlinked_deps cache for any matching deps, link and remove them
+        // TODO: Cache unlinkable deps into unlinked_deps
+        Ok(self)
+    }
+
+    fn unlink_deps(&mut self, id: String) -> Result<&mut Self, String> {
+        panic!("Unimplemented");
         Ok(self)
     }
 }
