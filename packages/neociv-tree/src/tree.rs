@@ -1,4 +1,4 @@
-use std::{borrow::Cow, collections::HashMap};
+use std::collections::HashMap;
 
 use petgraph::graph::DiGraph;
 
@@ -29,7 +29,21 @@ impl NeocivTree {
         if self.contains(id) {
             Ok(self.map.get(id).unwrap())
         } else {
-            Err(format!("Unable to find node '{}' in tree '{}'", id, self.id))
+            Err(format!(
+                "Unable to find node '{}' in tree '{}'",
+                id, self.id
+            ))
+        }
+    }
+
+    pub fn get_mut(&mut self, id: &String) -> Result<&mut Node, String> {
+        if self.contains(id) {
+            Ok(self.map.get_mut(id).unwrap())
+        } else {
+            Err(format!(
+                "Unable to find node '{}' in tree '{}'",
+                id, self.id
+            ))
         }
     }
 
@@ -55,6 +69,7 @@ impl NeocivTree {
             col: final_col,
             row: final_row,
             deps: final_deps,
+            linked_deps: Vec::new(),
             index: None,
         })
     }
@@ -77,8 +92,11 @@ impl NeocivTree {
                     ..node.clone()
                 },
             );
-            // Link the dependencies
-            self.link_deps(&node.id)
+            // Link the dependencies and get the self reference back as mutable
+            self.link_node_deps(&node.id)?;
+
+            // If all is well return self
+            Ok(self)
         }
     }
 
@@ -88,12 +106,46 @@ impl NeocivTree {
         Ok(self)
     }
 
-    fn link_deps(&mut self, id: &String) -> Result<&mut Self, String> {
-        panic!("Unimplemented");
-        // TODO: Link deps that exist
-        // TODO: Search the unlinked_deps cache for any matching deps, link and remove them
-        // TODO: Cache unlinkable deps into unlinked_deps
+    fn link_node_deps(&mut self, id: &String) -> Result<&mut Self, String> {
+        // Create the list of deps as tuples
+        let deps: Vec<(String, String)> = {
+            // Get a reference to the node
+            let node = self.get(&id)?;
+            // Generate the list of dependency tuples
+            node.deps
+                .clone()
+                .into_iter()
+                .map(|d| (node.id.clone(), d.clone()))
+                .collect()
+        };
+
+        // Push the new deps to the *end* of the list of this tree's unlinked deps
+        self.append_deps(deps);
+
+        // Link any and all unlinked deps
+        self.link_unlinked_deps();
+
         Ok(self)
+    }
+
+    fn append_deps(&mut self, deps: Vec<(String, String)>) {
+        self.unlinked_deps.extend(deps)
+    }
+
+    /// Iterate over and link any unlinked deps
+    fn link_unlinked_deps(&mut self) {
+        let mut idx = 0 as usize;
+        while idx < self.unlinked_deps.len() {
+            if self.contains(&self.unlinked_deps[idx].0)
+                && self.contains(&self.unlinked_deps[idx].1)
+            {
+                // TODO: Link edges in graph
+                // TODO: Assign the directional edge indicies to the Node entries
+                self.unlinked_deps.remove(idx);
+                continue;
+            }
+            idx += 1;
+        }
     }
 
     fn unlink_deps(&mut self, id: &String) -> Result<&mut Self, String> {

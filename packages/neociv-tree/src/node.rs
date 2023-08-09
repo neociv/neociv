@@ -1,4 +1,4 @@
-use petgraph::graph::NodeIndex;
+use petgraph::{adj::EdgeIndex, graph::NodeIndex};
 
 #[derive(Clone, Debug)]
 pub struct Node {
@@ -9,6 +9,7 @@ pub struct Node {
     pub col: u16,
     pub row: u8,
     pub deps: Vec<String>,
+    pub linked_deps: Vec<EdgeIndex>,
 }
 
 impl Node {
