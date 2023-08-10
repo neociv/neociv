@@ -9,6 +9,7 @@ pub struct NeocivTree {
     graph: DiGraph<String, bool>,
     map: HashMap<String, Node>,
     unlinked_deps: Vec<(String, String)>,
+    pool: u32,
 }
 
 impl NeocivTree {
@@ -18,6 +19,7 @@ impl NeocivTree {
             graph: DiGraph::new(),
             map: HashMap::new(),
             unlinked_deps: Vec::new(),
+            pool: 0,
         }
     }
 
@@ -58,13 +60,13 @@ impl NeocivTree {
     ) -> Result<&mut Self, String> {
         // Some values need to be pulled out and finalised as they potentially reflect on each other
         let final_deps = deps.unwrap_or(Vec::new());
-        let final_col = col.unwrap_or_else(|| self.furthest_dep_col(&final_deps));
-        let final_row = row.unwrap_or_else(|| self.default_sibling_row(final_col));
+        let final_col = col.unwrap_or_else(|| self.default_column(&final_deps));
+        let final_row = row.unwrap_or_else(|| self.default_row(final_col));
 
         // Add the node with sane defaults
         self.add_node(Node {
             id,
-            cost: cost.unwrap_or(1),
+            cost: cost.unwrap_or(0),
             total: total.unwrap_or(0),
             col: final_col,
             row: final_row,
@@ -134,17 +136,26 @@ impl NeocivTree {
 
     /// Iterate over and link any unlinked deps
     fn link_unlinked_deps(&mut self) {
-        let mut idx = 0 as usize;
-        while idx < self.unlinked_deps.len() {
-            if self.contains(&self.unlinked_deps[idx].0)
-                && self.contains(&self.unlinked_deps[idx].1)
-            {
-                // TODO: Link edges in graph
-                // TODO: Assign the directional edge indicies to the Node entries
-                self.unlinked_deps.remove(idx);
-                continue;
+        // This is *slightly* more performant than using retain but more importantly, for my sanity,
+        // doesn't have the borrow conflicts. Every removal does cause a shift - which is why we start from
+        // the end as it is most likely that the most recently inserted node will use this function and thus
+        // less shifts will occur.
+        if self.unlinked_deps.len() >= 1 {
+            // We are starting from the back index
+            let mut idx = self.unlinked_deps.len() - 1;
+
+            while idx >= 0 as usize {
+                if self.contains(&self.unlinked_deps[idx].0)
+                    && self.contains(&self.unlinked_deps[idx].1)
+                {
+                    // TODO: Link edges in graph
+                    // TODO: Assign the directional edge indicies to the Node entries
+                    self.unlinked_deps.remove(idx);
+                    continue;
+                } else {
+                    idx -= 1;
+                }
             }
-            idx += 1;
         }
     }
 
@@ -153,13 +164,41 @@ impl NeocivTree {
         Ok(self)
     }
 
+    /// Find the dependency in the list that has the furthest column.
     fn furthest_dep_col(&self, deps: &Vec<String>) -> u16 {
-        panic!("Unimplemented");
-        0
+        deps.iter()
+            .fold(None, |p, c| match self.get(c) {
+                Ok(n) => {
+                    if p.is_some_and(|x| x < n.col) {
+                        Some(n.col)
+                    } else {
+                        p
+                    }
+                }
+                Err(_) => p,
+            })
+            .unwrap_or(0)
     }
 
-    fn default_sibling_row(&self, col: u16) -> u8 {
-        panic!("Unimplemented");
-        0
+    /// Find the default column to place a node in based on its furthest dependency plus one.
+    fn default_column(&self, deps: &Vec<String>) -> u16 {
+        match self.furthest_dep_col(deps) {
+            0 => 0,
+            v => v + 1,
+        }
+    }
+
+    /// Find the column siblings and then determine the deepest non-conflicting row value.
+    fn default_row(&self, col: u16) -> u8 {
+        self.map
+            .values()
+            .fold(None, |p, c| {
+                if c.col == col && p.is_some_and(|x| x < c.row) {
+                    Some(c.row)
+                } else {
+                    p
+                }
+            })
+            .unwrap_or(0)
     }
 }
