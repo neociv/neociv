@@ -10,6 +10,7 @@ pub struct Node {
     pub row: u8,
     pub deps: Vec<String>,
     pub linked_deps: Vec<EdgeIndex>,
+    pub linked_dependants: Vec<EdgeIndex>,
 }
 
 impl Node {

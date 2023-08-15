@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{cell::RefCell, collections::HashMap};
 
 use petgraph::graph::DiGraph;
 
@@ -10,6 +10,7 @@ pub struct NeocivTree {
     map: HashMap<String, Node>,
     unlinked_deps: Vec<(String, String)>,
     pool: u32,
+    target: Option<String>,
 }
 
 impl NeocivTree {
@@ -20,11 +21,16 @@ impl NeocivTree {
             map: HashMap::new(),
             unlinked_deps: Vec::new(),
             pool: 0,
+            target: None,
         }
     }
 
     pub fn contains(&self, id: &String) -> bool {
         self.map.contains_key(id)
+    }
+
+    pub fn contains_pair(&self, a: &String, b: &String) -> bool {
+        self.contains(a) && self.contains(b)
     }
 
     pub fn get(&self, id: &String) -> Result<&Node, String> {
@@ -49,6 +55,12 @@ impl NeocivTree {
         }
     }
 
+    /*
+    pub fn modify_node<F>(&mut self, id: &String, func: F) where F {
+
+    }
+    */
+
     pub fn add(
         &mut self,
         id: String,
@@ -72,6 +84,7 @@ impl NeocivTree {
             row: final_row,
             deps: final_deps,
             linked_deps: Vec::new(),
+            linked_dependants: Vec::new(),
             index: None,
         })
     }
@@ -80,9 +93,10 @@ impl NeocivTree {
         if self.contains(&node.id) {
             Err(format!(
                 "Node '{}' already exists in tree '{}'",
-                node.id.as_str(),
-                self.id.as_str()
+                node.id, self.id
             ))
+        } else if node.deps.len() > 0 && self.furthest_dep_col(&node.deps) >= node.col {
+            Err(format!("Node '{}' cannot be inserted into tree '{}', its column is less than or equal to a dependency", node.id, self.id))
         } else {
             // Insert into the graph and thus get the index of the node
             let node_index = self.graph.add_node(node.id.clone());
@@ -122,20 +136,21 @@ impl NeocivTree {
         };
 
         // Push the new deps to the *end* of the list of this tree's unlinked deps
-        self.append_deps(deps);
+        self.append_deps(deps)?;
 
         // Link any and all unlinked deps
-        self.link_unlinked_deps();
+        self.link_unlinked_deps()?;
 
         Ok(self)
     }
 
-    fn append_deps(&mut self, deps: Vec<(String, String)>) {
-        self.unlinked_deps.extend(deps)
+    fn append_deps(&mut self, deps: Vec<(String, String)>) -> Result<&mut Self, String> {
+        self.unlinked_deps.extend(deps);
+        Ok(self)
     }
 
     /// Iterate over and link any unlinked deps
-    fn link_unlinked_deps(&mut self) {
+    fn link_unlinked_deps(&mut self) -> Result<&mut Self, String> {
         // This is *slightly* more performant than using retain but more importantly, for my sanity,
         // doesn't have the borrow conflicts. Every removal does cause a shift - which is why we start from
         // the end as it is most likely that the most recently inserted node will use this function and thus
@@ -145,17 +160,39 @@ impl NeocivTree {
             let mut idx = self.unlinked_deps.len() - 1;
 
             while idx >= 0 as usize {
-                if self.contains(&self.unlinked_deps[idx].0)
-                    && self.contains(&self.unlinked_deps[idx].1)
-                {
-                    // TODO: Link edges in graph
-                    // TODO: Assign the directional edge indicies to the Node entries
+                let dp = &self.unlinked_deps[idx].clone();
+
+                // If both nodes are contained
+                if self.contains_pair(&dp.0, &dp.1) {
+                    self.link_dep(&dp.0, &dp.1)?;
                     self.unlinked_deps.remove(idx);
                     continue;
+                } else if idx == 0 {
+                    break;
                 } else {
                     idx -= 1;
                 }
             }
+        }
+        Ok(self)
+    }
+
+    fn link_dep(&mut self, target: &String, dep: &String) -> Result<&mut Self, String> {
+        if self.contains_pair(target, dep) {
+            let node_target = self.get_mut(&target)?.index.unwrap();
+            let node_dep = self.get_mut(&dep)?.index.unwrap();
+
+            // Create the edge from the dependency to the target
+            let dep_index =
+                self.graph
+                    .add_edge(node_target, node_dep, self.get(dep)?.is_complete());
+
+            Ok(self)
+        } else {
+            Err(format!(
+                "Cannot create dependency between '{}' and '{}' in tree '{}', one of the nodes does not exist",
+                target, dep, self.id
+            ))
         }
     }
 
