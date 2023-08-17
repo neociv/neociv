@@ -122,6 +122,27 @@ impl NeocivTree {
         Ok(self)
     }
 
+    pub fn set_target(&mut self, id: Option<&String>) -> Result<&mut Self, String> {
+        panic!("Unimplemented");
+        Ok(self)
+    }
+
+    /// Applies the progression amount to the tree and the current target (if any).
+    pub fn apply(&mut self, amount: u32) -> Result<&mut Self, String> {
+        // Set the pool value
+        self.pool += {
+            if self.target.is_none() {
+                amount
+            } else if self.target.as_ref().is_some_and(|id| self.contains(&id)) {
+                0
+            } else {
+                0
+            }
+        };
+        // TODO: Draw from the pool to apply to the target nodes
+        Ok(self)
+    }
+
     fn link_node_deps(&mut self, id: &String) -> Result<&mut Self, String> {
         // Create the list of deps as tuples
         let deps: Vec<(String, String)> = {
